@@ -1,0 +1,469 @@
+\section{Spectral method for the solution of the cell problem}
+\label{sec:spectral_method_for_the_solution_of_the_cell_problem}
+
+From the properties of the modified Hermite polynomials that we saw in the
+previous section, the solution of the cell problem can be expanded in the following way
+$$\phi(x,y) \,=\, \sum_{|\alpha|>0} \left \langle f, \hermite H_\alpha \right
+\rangle_\rho \, \hermite H_\alpha.$$  
+The series can be truncated, and the approximate solution obtained will be a
+polynomial of finite degree. Clearly, assuming that we only keep the terms up
+to degree $d$, this solution will be equal to $\pi^d \phi (x,\cdot)$, the
+$L^2(\real^n, \rho)$ projection of $\phi$ on the space of polynomials of degree
+lower or equal to $d$. By proposition \ref{proposition: approx Hermite} The
+accuracy of the approximation will depend on the smoothness and decay
+properties of $\phi(x,\,\cdot\,)$, which can be related to the smoothness of
+$f(x,\,\cdot\,)$ via the following lemma.
+
+\begin{lemma}[Regularity of the solution]
+    Assume that $g \in \wsobolev{s}{\real^n}{\rho}$,
+    with $s\in \nat$. Then there exists a unique solution of the problem
+    $$
+    \left\{ 
+        \begin{aligned}
+            &\op L_0 \, u = g   \\
+            &u \in \wsobolev{1}{\real^n}{\rho}  
+        \end{aligned} 
+    \right .
+    \quad \text{subject to the condition} \quad \int_{\real^n} u \, \dd \rho = 0.
+    $$
+    In addition, $u \in H^{s+2}(\real^n, \rho)$ and the following estimate holds
+    $$
+        \norm{u}_{\wsobolev {s+2} {\real^n} {\rho}} \,\leq\, C \, \norm{g}_{\wsobolev{s}{\real^n}{\rho}}.
+    $$
+    % , and if $g \in  \smooth{\real^n}$,
+    % then $u \in \smooth{\real^n}$ also. 
+    \label{lemma: regularity of the solution of the cell problem}
+\end{lemma}
+\iflong \begin{proof}
+    Let us define the space 
+    $$
+        \Space H \,=\,\left\{u\,:\, u\,{\in}\,H^1(\real^n,\rho)\,\text{ and }\,\langle
+            u,\,1\rangle_{\rho}\,=\, 0\right\}. 
+    $$
+    This is a Hilbert space for the inner product:
+    $$
+        \langle u,\,v\rangle_{\Space H} \,=\, \langle {\nabla}u,\, {\nabla}v\rangle_{\rho}.  
+    $$
+    The fact that this indeed defines an inner product follows from the
+    Poincar\'e inequality in weighted Sobolev spaces (see
+    \citep{arnold2007interpolation,beckner1989generalized}), which states that
+    for any function $u\,\in\,\wsobolev{1}{\real^n}{\rho}$,
+    $$
+        \int_{\real^n} (u\,-\,\bar u)^2 \, \dd \rho\, \leq \,C\,\int_{\real^n} |\nabla
+        u|^2 \,\dd \rho \quad \text{with}\quad \bar u \,=\, \int_{\real^n} u\,\dd \rho.
+    $$
+    A function $u\in \Space H$ is solution of the problem in the
+    distributional sense if and only if
+    $$
+        a(u,v) = \frac{1}{2} \int_{\real^n}  \Sigma : \nabla u \nabla v \,
+        \dd \rho \,=\, \int_{\real^n} g \,v\,\dd \rho \quad \forall v \in C^\infty_c(\real^n).
+    $$
+    By density of $\test{\real^n}$ in $\Space H$, this has to hold for any $v \in
+    \Space H$. It can then be checked that the hypotheses of the Lax-Milgram
+    theorem are met, which guarantees the existence and unicity of a solution 
+    $u \in \Space H$. Using Poincar\'e inequality and the coercivity of
+    $a(\cdot,\cdot)$, we have also that
+    $$
+        \norm{u}_{\wsobolev{1}{\real^n}{\rho}}^2 \,\leq\, C  \norm{u}_{\Space
+            H}^2 \,\leq\, C\,a(u,u) \,=\, C\, \ip{g}{u}_{\rho} \,\leq\, C
+        \norm{g}_{\wlp{2}{\real^n}{\rho}}
+        \norm{u}_{\wsobolev{1}{\real^n}{\rho}}, 
+    $$
+    from which a stability estimate can be deduced. In particular, this
+    justifies why the solution of the cell problem can be obtained using its
+    expansion (\red{Insert reference here}).
+
+    To prove that $u\in \wsobolev{s+2}{\real^n}{\rho}$, we will show that 
+    $$
+        u_n \,=\, \sum_{|\alpha| \leq n} \frac{1}{\mu_\alpha} \ip{g}{\hermite
+            H_\alpha}_\rho\, \hermite H_\alpha
+    $$
+    is converges in $\wsobolev{s+2}{\real^n}{\rho}$.
+    We can assume wlog that $\rho = g_{D_\infty}$, since this case can be
+    recovered by rotation.  The sequence $D^\beta u_n$ is clearly convergent in
+    $\wlp{2}{\real^n}{\rho}$ when $|\beta| \,\leq\, s$, because $D^\beta u \in
+    \wlp{2}{\real^n}{\rho}$. Now assume that $\beta=\gamma + \delta$, with
+    $|\gamma| = s$ and $|\delta| = 1$ or 2. Then by \cref{proposition: coeff
+        Hermite multidimensional} and \cref{eq: recursion Hermite derivative},
+    $$
+        D^\beta u_n =D^\delta \left(\sum_{|\alpha|\leq n-s}\frac{1}{\mu_{\gamma+ \alpha}}\ip{D^\gamma g}{\hermite H_\alpha}\hermite  H_\alpha \right) \,=\, \sum_{|\alpha|\leq n-s}\frac{1}{\mu_{\gamma+ \alpha}}\ip{D^\gamma g}{\hermite H_\alpha}\hermite  D^\delta H_\alpha. 
+    $$
+    Using the fact that $\wlp{2}{\real^n}{ \rho}$ is a Hilbert space, it
+    suffices to show that: 
+    $$
+        \sum_{\alpha\geq 0}\norm{\frac{D^\delta \hermite H_\alpha}{\mu_{\gamma+
+                    \alpha}}}_{\rho}^2 \ip{D^\gamma g}{\hermite
+            H_\alpha}_{\rho}^2 < \infty.   
+    $$
+    which follows by bounding the first term, and from the fact that $D^\gamma
+    g \in \wsobolev{s}{\real^n}{\rho}$ by assumption. Note that, since the
+    first term can be bounded by a constant independent of $\alpha$, the
+    stability estimate follows
+    $$
+        \norm{u}_{\wsobolev{s+2}{\real^n}{\rho}} \,\leq\, C \norm{g}_{\wsobolev{s}{\real^n}{\rho}},
+    $$
+    which concludes the proof.
+\end{proof} \fi
+Using the approximate solution of the cell problem, we can calculate the
+effective drift and diffusion coefficients of the simplified equation, using
+\begin{equation}
+    \begin{gathered}
+        F^d (x) = \int_{\real^n} \left(\grad_x \phi_d\,\cdot\,f\,+\,\grad_y \phi_d \cdot h\right) \,\dd \rho \\[0.5cm]
+        A(x) A^T(x) = \frac{1}{2}\left(A_0 + A_0^T\right) \quad \text{with}\quad A_0^d (x) = 2 \int_{\real^n}  f \otimes \phi_d \dd \rho
+    \end{gathered}
+    \label{eq: coefficients of approximate equation}
+\end{equation}
+Note that the matrix $A$ is not uniquely defined, which makes it impossible to
+establish strong approximation properties of the numerical scheme under
+investigation. To quantify the error that results from these approximate
+formulae, we will make some regularity and boundedness assumptions.
+\begin{assumption}
+    The functions of the problem, seen as $x-$dependent functions taking values
+    in a functional space, satisfy the following regularity assumption:
+    \begin{itemize}
+       \item  $f \in \cont{1}{\real^m; H^s(\real^n,\rho)} \cap \cont{\infty}{\real^m; \wlp{2}{\real^n}{\rho}}$.
+       \item $h \in \cont{\infty}{\real^m; \wsobolev{1}{\real^n}{\rho}}$.
+    \end{itemize}
+    \label{assumption: regularity of the functions of the problem}
+\end{assumption}
+ These hypotheses imply the smoothness of the coefficients of the simplified
+ equations, and they can be used to obtain error estimates. This is shown in
+ the next two lemmas. 
+\begin{lemma}
+    Under \cref{assumption: regularity of the functions of the problem}, the
+    exact and approximate coefficients of the simplified equation, defined by 
+    \cref{eq: coefficients of approximate equation} are smooth functions of $x$.
+    \begin{proof}
+        We only prove the statement for the drift term. We start by showing
+        that $\phi(x) \in \cont {\infty} {\real^m; \wsobolev{2}{\real^n}{\rho}}$.
+        For a function $u(x,y)$ defined on $\real^m \times \real^n$, note
+        $\Delta^h_j u(x)\,=\, (u(x+h\, e_j) - u(x))/h$, where the dependence on
+        $y$ is omitted for notational economy. By assumption, $\Delta^h_j
+        f(x)$ converges in $\wsobolev{s}{\real^n}{\rho}$ as $h \to 0$ for all
+        $x \in \real^m$. On the other hand, $\Delta^h_j \phi$ satisfies:
+        $$ 
+            \op L_0 \, \Delta^h_j \phi(x) \,=\, \Delta^h_j f(x) \quad \text{with the centering condition}.
+        $$
+        By continuity of the solution operator, $\Delta^h_j \phi$ converges in
+        $\wsobolev{s+2}{\real^n}{\rho} $, and its limit $\partial_{x_j} \phi$ satisfies:
+        $$ \op L_0 \, (\partial_{x_j} \phi) \,=\, \partial_{x_j} f \quad
+        \text{with the centering condition}.$$ Repeating this argument leads to
+        the desired conclusion. We have
+        \begin{align*}
+            F_i(x) &\,=\, \sum^{m}_{j=1}  \int_{\real^n} \left(\partial_{x_j}\phi_i
+                \, f_j\,+\, \phi_i\, \partial_{y_j}^* h_j\right) \,\dd \rho(y) \\
+            &\,=\, \sum^{m}_{j=1}
+            \left(\ip{\partial_{x_j}\phi_i(x)}{f_j(x)}_{\rho}
+                \,+\,\ip{\phi_i(x)}{\partial_{y_j}^*h_j(x)}_{\rho}\right) 
+        \end{align*}
+        Since the operator $\partial_{y_j}^*$ is continuous from
+        $\wsobolev{1}{\real^n}{\rho}$ to $\wlp{2}{\real^n}{\rho}$, all the
+        terms that appear in inner products belong to $\cont{\infty}{\real^m;
+            \wlp{2}{\real^n}{\rho}}$, from which the conclusion is clear. 
+
+        A similar reasoning can be applied for the simplified equation. The only difference 
+        is that we have to show the additional fact that $\pi_d \phi \in \cont{\infty}{\real^m;
+            \wlp{2}{\real^m}{\rho}}$. It follows from $\pi_d \Delta^h_j \phi =
+        \Delta^h_j \pi_d \phi$ that $\pi_d (\partial_{x_j}\phi) =
+        \partial_{x_j} (\pi_d \phi)$, by passing to the limit $h \to 0$ in
+        $\wlp{2}{\real^n}{\rho}$, and so $\partial_{x_j} (\pi_d \phi) \in \cont{0}{\real^m;
+            \wsobolev{2}{\real^n}{\rho}}$. This can be applied to derivatives
+        of higher orders to give the conclusion. 
+    \end{proof}
+\end{lemma}
+The next lemma quantifies the precision of the approximation of the coefficients of the simplified equation. It is based on the polynomial approximation in the space $\wlp{2}{\real^n}{\rho}$, developed in \cref{sec:spectral_method_for_the_solution_of_the_cell_problem}. 
+\begin{lemma}
+Assuming that the functions of the problem satisfy \cref{assumption: regularity
+    of the functions of the problem}, 
+\begin{gather*}
+    |F(x) \,-\, \hat F(x)| \, \vee \, |A(x) \,-\, \hat A(x)| \, \leq \,  B(R) \,(d+1)^{-s/2},
+\end{gather*}
+for all $|x| \leq R$.
+\label{lemma: Approximation coefficients}
+\begin{proof}
+    From the expressions of $F$ and $F_d$, and from Cauchy-Schwarz inequality, we have:
+    $$ \sum^{m}_{j=1} \int_{\real^n}  \left((\partial_{x_j}\hat \phi_i \,-\, \partial_{x_j}\phi)\, f_j\right) \dd \rho \,\leq\, \norm{f}_{\wlp{2}{\real^n}{ \rho} }\sum^{m}_{j=1}  \norm{\partial_{x_j}\hat \phi \,-\, \partial_{x_j}\phi}_{\wlp{2}{\real^n}{ \rho}}. \, $$
+    We saw in the proof of the previous lemma that $\partial_{x_i} \phi_i(x)
+    \in \wsobolev{s+2}{\real^n}{\rho}$ and $\partial_{x_i} (\pi_d \phi) \,=\,
+    \pi_d (\partial_{x_i}\phi)$. Consequently, the error estimate
+    \cref{proposition: approx Hermite} implies
+    $$
+        \norm{\partial_{x_j}\phi- \partial_{x_j}\hat \phi}_{\wlp{2}{\real^n}{\rho} } \,\leq\, C(n,s) \, (d+1)^{-s/2} \norm{\partial_{x_j}\phi}_{\wsobolev{s+2}{\real^n}{\rho}}.
+    $$
+    The other term that appears in the drift coefficient of the simplified
+    equation can be estimated using a similar argument:
+    \begin{align*}
+        \sum^{n}_{j=1} \int_{\real^n} h_j(x,y) \, \partial_{y_j} \left(\phi_i(x,y)-\hat\phi_i(x,y)\right) \dd \rho(y) \,&=\,\sum^{n}_{j=1} \int_{\real^n} \partial^*_{y_j} h_j(x,y) \, (\phi_i(x,y)-\hat \phi_i(x,y)) \dd \rho(y) \,\\ &\leq\,C \norm{h(x)}_{\wsobolev{1}{\real^n}{\rho}} \norm{\phi_i(x) - \hat \phi_i(x)}_{\wlp{2}{\real^n}{ \rho}}.
+    \end{align*}
+    It thus follows that
+    \begin{multline*}
+        |F(x) - \hat F(x)| \,\leq\, C \,(d+1)^{-s/2}\left(\norm{f(x)}_{\wlp{2}{\real^n}{\rho}} \,+\, \norm{h(x)}_{\wsobolev{1}{\real^n}{\rho}} \right) \\ \left(\norm{\grad_x f(x)}_{\wsobolev{s+2}{\real^n}{\rho}} \,+\,\norm{f(x)}_{\wsobolev{s+2}{\real^n}{\rho}}\right).
+    \end{multline*}
+    By assumption, the terms between brackets are bounded on compact sets,
+    which concludes the proof for the case of the drift coefficent A similar
+    reasoning, applied to the diffusion term, gives
+    $$
+        |A_0(x) - \hat A_0(x)| \,\leq\, C \, (d+1)^{-s/2}\norm{f(x)}_{\wlp{2}{\real^n}{\rho}} \norm{f(x)}_{\wsobolev{s+2}{\real^n}{\rho}}.
+    $$
+    
+\end{proof}
+\end{lemma}
+\begin{remark}
+   If the assumptions are strengthened to  
+   \begin{itemize}
+       \item $f \in \contb{1}{\real^m;\wsobolev{s}{\real^n}{\rho}} \cap \cont{\infty}{\real^m; \wlp{2}{\real^n}{\rho}}$,
+       \item $h \in \contb{\infty}{\real^m; \wsobolev{1}{\real^n}{\rho}}$,
+   \end{itemize}
+   the convergence is uniform on the whole domain.
+\end{remark}
+We now have enough tools to prove the weak convergence of the scheme when the
+degree of polynomial approximation tends to $+\infty$. The next theorem
+quantifies the distance between the solution of the simplified equation, and
+the approximate solution obtained by our numerical scheme. Three sources of error are the following:
+\begin{itemize}
+    \item The time discretization. 
+    \item The truncation error on the coefficients.
+    \item Approximate numerical integration.
+\end{itemize}
+\begin{theorem}
+    Under assumptions \red{to be defined}, the numercial scheme converges weakly.
+\end{theorem}
+\begin{proof}
+    The proof is based on the backward Kolmogorov equation
+    \cite{kloeden1992numerical} and \cite{weinan2005analysis}. It is well known
+    that for any function $g \in \test{\real^n}$, the evolution of the
+    expectation $\expect \left[g(X(T)| X(s) = x)\right] \,=: \, u(t,x)$ is governed by the equation:
+    \begin{equation*}
+        \pard{u}{t} \,+\,\op L\,u  \,=\,0,  \quad \text{with the final condition} \quad u(x,0) =
+        g(x). 
+    \end{equation*}
+    where $\op L$ is the generator of the Markov process $X$, defined by:
+    \begin{equation*}
+            \op L \,=\,F(x) \dotx \grad_x \,+\,\frac{1}{2} A(x)\,:\,\grad_x \grad_x.
+    \end{equation*}
+    The error can be written in terms of the solution of this equation.
+    \begin{equation}
+        \begin{aligned}
+            \Delta \,=\, \abs{ \expect\, \hat X_{n_T}\,-\,\expect\, X_T } &\,=\, \abs{ \expect u(T,\hat X_{n_T}) \,-\,u(0,x_0) } \\
+            &\,=\, \abs{ \sum_{n=1}^{n_T-1}\expect \left( u(t_{n+1}, \hat X_{n+1}) \,-\, u(t_n, \hat X_n) \right)}.
+        \end{aligned}
+        \label{eq: weak estimate 1}
+    \end{equation}
+    Now, we note $X_t^{s,x}$ the process defined by:
+    \begin{equation*}
+        X_t^{s,x} \,=\, x \,+\, \int_s^t F(X_r^{s,x}) \dd r \,+\, \int_s^t A(X_r^{s,x})  \dd W_r.
+    \end{equation*}
+    Using Ito's formula for $Z_t \,=\, u(t,X_t^{s,x})$, and the fact that $u$
+    is solution of the backward Kolmogorov equation
+    \begin{equation*}
+        \expect Z_t - \expect Z_s \,=\, \int_s^t \left\{\pardl{u}{t}(r, X_r^{s,x}) \,+\, \op Lu(r, X_r^{s,x}) \right\} \dd r \,=\, 0,
+    \end{equation*}
+    from which we conclude that $\expect \left[u(t_{n+1},
+        X_{t_{n+1}}^{s,x})\right] = \expect \left[u(t_n,
+        X_{t_n}^{s,x})\right]$. Using this in \cref{eq: weak estimate 1}, we have
+    \begin{equation*}
+        \begin{aligned}
+            \Delta &\,=\, \abs{ \sum_{n=1}^{n_T-1}\expect \left( u(t_{n+1}, \hat
+                X_{n+1}) \,-\, u(t_n, \hat X_n) \right)
+            \,-\,\expect\left(u(t_{n+1}, X^{t_{n},\hat X_n}_{t_{n+1}})
+                \,-\,u(t_n,X^{t_n,\hat X_n}_{t_n})\right) } \\
+        & \,=\, \abs{ \sum_{n=1}^{n_T-1} \expect \left( u(t_{n+1}, \hat
+                X_{n+1}) \,-\, u(t_{n+1}, X^{t_{n},\hat X_n}_{t_{n+1}}) \right) }.
+        \end{aligned}
+    \end{equation*}
+    On the other hand, using previous estimates,
+    \begin{equation*}
+        \hat X_{n+1} \,-\, X^{t_n,\hat X^n}_{t_{n+1}} \,=\,  
+    \end{equation*}
+    
+
+
+\end{proof}
+
+
+
+\begin{assumption}
+    For every $x \in \real^d$, we have $f(x,\cdot)\in H^n(\real^N, \rho)^d$, $\nabla_x f(x,\cdot) \in H^n(\real^N, \rho)^(d\times d)$, and $h(x,\cdot) \in L^2(\real^N, \rho)^N$. In addition, these functions satisfy the 
+    boundedness property that for all $R>0$, there exists $B_R$ such that
+    $$
+    \|h(x,\cdot)\|_{\rho}\,{\vee}\,
+    \|f(x,\cdot)\|_{{\rho},n}\,{\vee}\,\|\nabla_x f(x,\cdot)\|_{{\rho},n}
+    \,{\leq}\, B_R \quad \text{for all} \quad |x| \,{\leq}\,R.
+    $$
+\end{assumption}
+\begin{assumption}
+    The exact drift and diffusion coefficients satisfy the following
+    Lipschitz condition:
+    $$ 
+    \left|F(a)-F(b)\right|^2\,{\vee}\,\left|A(a)-A(b)\right|^2\, {\leq} \,C_R\, |a-b|^2
+    $$
+    for any $a,b$ such that $a,b\, {\leq} \,R$.
+    \label{assumption Lipshitz}
+\end{assumption}
+\begin{assumption}
+    There exists $p>2$ and a constant $K$ independent of $d$ such that the solutions of the equations 
+    $$
+    \mathrm dX=F(X)\,\mathrm dt\,+\,A(X)\,\mathrm dW_t \quad \quad X(0) \,=\,X_0
+    $$
+    and 
+    $$
+    \mathrm dX_d=F_d(X_d)\,\mathrm dt\,+\,A_d(X_d)\,\mathrm dW_t  \quad \quad X_d(0) \,=\,X_0 
+    $$
+    satisfy
+    $$
+    \mathbb E\left[\sup_{0 {\leq} t  {\leq} T} |X(t)|^p\right]\,{\vee}\,\mathbb
+    E\left[\sup_{0 {\leq} t  {\leq} T} |X_d(t)|^p\right] \, {\leq} \,K
+    $$
+    \label{assumption: bounded moments}
+\end{assumption} 
+\begin{theorem}
+    Under the three assumptions made above, the error between the approximate
+    and exact solutions of the simplified equation satisfies
+    \begin{multline*}
+        \mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |X(t) \,-\,X_d(t)|^2 \right]
+        \, {\leq} \,4\,(T\,+\,4)\,D_R\,T\,d^{-n}\,\exp \left(4\,(T\,+\,4)\,C_R\, T\right)
+        \\ \,+\, 2\,K\,
+        \left(\frac{2^p\,{\delta}}{p}\,+\,\frac{p-2}{R^p\,p\,{\delta}^{\frac{2}{p-2}}}\right).
+    \end{multline*}
+    for any ${\delta}\,>\,0$ and $R\,>\,X_0$.
+    \label{theorem: main converging coeff}
+\end{theorem}
+\begin{proof}
+    We start by defining the following stopping times:
+    $$
+    {\tau}_R\,=\,\inf\left\{t\, {\geq} \,0\,:\,X(t)\, {\geq} \,R\right\}, \quad \quad
+    {\tau}_R^d\,=\, \inf\left\{t\, {\geq} \,0\,:\,X_d(t)\, {\geq} \,R\right\}, \quad \quad
+    {\theta}_R^d\,=\, {\tau}_R\,{\wedge}\,{\tau}_R^d.
+    $$
+    We also define the error function $e_d(t)\,=\,X(t)\,-\,X_d(t)$. This satisfies
+    \begin{equation}
+        \mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T}\,|e_d(t)|^2 \right]\, = \,\mathbb E
+        \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t)|^2 \,\mathbf 1_{{\theta}_R^d\,>\,T} \right] \,+\,
+        \mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t)|^2 \, \mathbf 1_{{\theta}_R^d\, {\leq} \,T} \right].
+        \label{eq: theorem 1st}        
+    \end{equation}
+    To bound the second term of \eqref{eq: theorem 1st}, we use Young's
+    inequality \eqref{eq: Young} with $r \,=\, p/2$:
+    \begin{equation}
+        \mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t)|^2 \, \mathbf 1_{{\theta}_R^d  {\leq} T} \right]\,
+        \, {\leq} \,\frac{2\,{\delta}}{p}\,\mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t)|^p\right]
+        \,+\,\frac{p-2}{p\,{\delta}^{\frac{2}{p-2}}}\,\mathbb P({\theta}_R^d\, {\leq} \,T).
+        \label{eq:auxEq1}
+    \end{equation}
+    Using this formula and assumption \ref{assumption: bounded moments} above,
+    the two terms of the right-hand side of the above inequality can be bounded:
+    \begin{equation}
+        \mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t)|^p\right]\,=\,\mathbb E
+        \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |X(t)\,-\,X_d(t)|^p\right]
+        \, {\leq} \,2^{p}\,K,
+        \label{eq:auxIneq1}
+    \end{equation}
+    and 
+    \begin{equation}
+        \begin{aligned}
+            \mathbb P({\theta}_R^d\, {\leq} \,T)\,& {\leq} \,\mathbb P({\tau}_R \, {\leq} \,T) \,+\,\mathbb P({\tau}_R^d\, {\leq} \,T) \\
+            & {\leq} \,\mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} \frac{|X(t)|^p}{R^p}\right] \,+\,
+            \mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} \frac{|X_d(t)|^p}{R^p}\right]
+            \, {\leq} \, \frac{2\,K}{R^p}. 
+        \end{aligned}
+        \label{eq: auxIneq2}
+    \end{equation}
+    Using \eqref{eq:auxEq1}, \eqref{eq:auxIneq1}, and \eqref{eq: auxIneq2} in
+    inequality \eqref{eq: theorem 1st}, we obtain: 
+    \begin{multline}
+        \mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t)|^2 \right] \, {\leq} \,\mathbb E
+        \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t)|^2\,\mathbf 1_{{\theta}_R^d >T} \right]\,+\,
+        2\, K\, \left(\frac{2^p\,{\delta}}{p}\,+\,\frac{p-2}{R^p\,p\,{\delta}^{\frac{2}{p-2}}}\right).
+        \label{eq: theorem 2nd}        
+    \end{multline}
+    To bound the first term, we will use assumptions \ref{assumption Lipshitz}
+    and \ref{assumption: convergence coeffs} above. First, notice that 
+    \begin{equation}
+        \mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t)|^2 \, \mathbf 1_{{\theta}_R^d >T} \right]
+        \, {\leq} \,\mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t\,{\wedge}\,{\theta}_R^d)|^2 \right].
+        \label{eq:reformulation error term}
+    \end{equation}
+    Since $e_d(t)\,=\,X(t)\,-\,X_d(t)$, it satisfies the following equation
+    $$
+    e_d(t\,{\wedge}\,{\theta}_R^d) \,=\, {\int}_0^{t\,{\wedge}\,{\theta}_R^d} F(X(s))\,-\,F_d(X_d(s))\, ds
+    \,+\, {\int}_0^{t\,{\wedge}\,{\theta}_R^d} A(X(s))\,-\,A_d(X_d(s))\,\mathrm dW_s.
+    $$
+    Using the inequality $(a+b)^2\, {\leq} \,2a^2\,+\,2b^2$ and Cauchy-Schwarz, we have
+    \begin{multline}
+        \mathbb E \left[ \sup_{0\, {\leq} \,t\, {\leq} \,{\tau}} |e_d(t\,{\wedge}\,{\theta}_R^d)|^2\right]\, {\leq} \,
+        2\,T\,\mathbb E\,\left[ {\int}_0^{{\tau}\,{\wedge}\,{\theta}_R^d}
+            |F(X(s))\,-\,F_d(X_d(s))|^2 \,\mathrm ds\right] \,+\, \\ 2\,\mathbb E \left[\sup_{0 {\leq} 
+                t {\leq} {\tau}} \left| 
+                {\int}_0^{t\,{\wedge}\,{\theta}_R^d} A(X(s))\,-\,A_d(X_d(s))\,\mathrm dW_s \right|^2\right].
+        \label{eq:main eq global}
+    \end{multline}
+    The two terms on the right-hand side can be bounded. For the first term, we
+    use the triangle inequality and the assumptions to deduce:
+    \begin{equation}
+        \begin{aligned}
+            {\int}_0^{{\tau}\,{\wedge}\,{\theta}_R^d} & |F(X(s))\,-\,F_d(X_d(s))|^2\,\mathrm ds \\ 
+            &\, {\leq} \,{\int}_0^{{\tau}\,{\wedge}\,{\theta}_R^d}2|F(X(s))\,-\,F(X_d(s))|^2\,+\,2|F(X_d(s)) \,-\, F_d(X_d(s))|^2\,\mathrm ds  \\
+            &\, {\leq} \, 2\,D_R\,T\,d^{-n}\,+\,2\,C_R\,{\int}_0^{{\tau}\,{\wedge}\,{\theta}_R^d}|X(s)\,-\,X_d(s)|^2\,\mathrm ds \\
+            &\, {\leq} \, 2\,D_R\,T\,d^{-n}\,+\,2\,C_R\,{\int}_0^{{\tau}}|X(s\,{\wedge}\, {\theta}_R^d)\,-\,X_d(s\,{\wedge}\, {\theta}_R^d)|^2\,ds
+        \end{aligned}
+    \end{equation}
+    so
+    \begin{multline}
+        \mathbb E \left[ {\int}_0^{{\tau}\,{\wedge}\,{\theta}_R^d}|F(y(s))\,-\,F_d(y_d(s))|^2\,\mathrm ds\right] \\
+        \, {\leq} \, 2\,D_R\,T\,d^{-n}\,+\,2\,C_R\,{\int}_0^{{\tau}}\mathbb
+        E\left[\sup_{0\, {\leq} \,t\, {\leq} \,s}|e_d(t \,{\wedge}\, {\theta}_R^d)|^2\right]\,ds
+        \label{eq:1st term main eq}
+    \end{multline}
+    The second term can be bounded in a similar manner after using Doob's
+    inequality \eqref{eq:Doob's martingale} with $p\,=\,2$ and It\=o's formula:
+    \begin{equation}
+        \begin{aligned}
+            & \mathbb E \left[\sup_{0\, {\leq} \,t {\leq} \,{\tau}} \left|{\int}_0^{t\,{\wedge}\,{\theta}_R^d}
+                    A(y(s))\,-\,A_d(y_d(s)) \,\mathrm dW_s \right|^2\right] \\
+            & \quad \quad \quad \, {\leq} \,\,4\,\mathbb E \left|{\int}_0^{{\tau}\,{\wedge}\,{\theta}_R^d}
+                A\,(y(s))\,-\,A_d(y_d(s))\, \mathrm dW_s\right|^2 \\
+            & \quad \quad \quad {\leq} \, 4 \,\mathbb E{\int}_0^{{\tau}\,{\wedge}\,{\theta}_R^d} |A(y(s))\,-\,A_d(y_d(s))|^2\,\mathrm ds \\
+            & \quad \quad \quad {\leq} \,4\,\mathbb E{\int}_0^{{\tau}\,{\wedge}\,{\theta}_R^d}2|A(y(s))\,-\,A(y_d(s))|^2\,+\,2|A(y_d(s))
+            \,-\, A_d(y_d(s))|^2\,\mathrm ds  \\
+            & \quad \quad \quad  {\leq} \, 8\,D_R\,T \,d^{-n}\,+\,8\,C_R\,{\int}_0^{{\tau}}\mathbb
+            E\left[\sup_{0\, {\leq} \,t\, {\leq} \,s}|e_d(t \,{\wedge}\, {\theta}_R^d)|^2\right]\,ds
+        \end{aligned}
+        \label{eq:2nd term main eq}
+    \end{equation}
+    Using \eqref{eq:1st term main eq} and \eqref{eq:2nd term main eq} in
+    \eqref{eq:main eq global}, we obtain:
+    \begin{multline*}
+        \mathbb E \left[ \sup_{0\, {\leq} \,t\, {\leq} \,{\tau}} |e_d(t\,{\wedge}\,{\theta}_R^d)|^2\right]\, {\leq} \,\\
+        4\,(T\,+\,4)\,\left(D_R\,T \,d^{-n}\,+\,C_R\,{\int}_0^{{\tau}}\mathbb
+            E\left[\sup_{0\, {\leq} \,t\, {\leq} \,s}|e_d(t \,{\wedge}\, {\theta}_R^d)|^2\right]\,\mathrm ds\right).
+    \end{multline*}
+    which by Gronwall's inequality implies:
+    \begin{equation}
+        \mathbb E \left[ \sup_{0\, {\leq} \,t\, {\leq} \,{\tau}} |e_d(t\,{\wedge}\,{\theta}_R^d)|^2\right]\, {\leq} \,\\
+        4\,(T\,+\,4)\,D_R\,T\,d^{-n}\,\exp \left(4\,(T\,+\,4)\,C_R\, {\tau}\right)
+    \end{equation}
+    Combining this inequality and \eqref{eq:reformulation error term} in \eqref{eq:
+        theorem 2nd}, the following bound is obtained:
+    \begin{multline}
+        \mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t)|^2 \right]
+        \, {\leq} \,4\,(T\,+\,4)\,D_R\,T\,d^{-n}\,\exp \left(4\,(T\,+\,4)\,C_R\, T\right)
+        \,+\, \\ 2\,K\,
+        \left(\frac{2^p\,{\delta}}{p}\,+\,\frac{p-2}{R^p\,p\,{\delta}^{\frac{2}{p-2}}}\right).
+        \label{eq: theorem 2nd}        
+    \end{multline}
+\end{proof}
+\noindent From this theorem, it can be deduced that the solution of the approximate
+simplified equation converges to the exact solution when $d\,\to\,{\infty}$. For any ${\varepsilon}$ it
+is possible to choose ${\delta}$ such that the second term is bounded by
+${\varepsilon}/3$. Given this value of ${\delta}$, $R$ can be chosen so that the last
+term is also bounded by ${\varepsilon}/3$. Finally, it is clear that the first term can also
+be made arbitrarily small by increasing the value of $d$.  In the most general
+cases, the previous statement does not provide any information about the rate
+of convergence when $d\,\to\,{\infty}$. However, if the additional assumptions
+that $C_R\, {\leq} \,C$ and  $D_R\, {\leq} \,D$ are satisfied, for constants
+$C$ and $D$ independent of $R$, the error evolves as
+$$
+\mathbb E \left[\sup_{0\, {\leq} \,t\, {\leq} \,T} |e_d(t)|^2 \right]\,=\,\mathcal O(d^{-n})
+$$
+This fact can be seen by taking ${\delta}\,=\, d^{-n}$ and $R\,=\,d^{n/(p-2)}$.
+
