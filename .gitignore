@@ -1,3 +1,20 @@
+# Literature pdf files
+figures/
+*\~
+
+## Addition to the default .gitignore
+*.sty
+!header.sty
+
+*.zip
+*.pdf
+*.eps
+*.png
+*.jpg
+*.jpeg
+*.cls
+*.ropeproject
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
@@ -10,10 +27,6 @@
 ## Intermediate documents:
 *.dvi
 *-converted-to.*
-# these rules might exclude image files for figures etc.
-# *.ps
-# *.eps
-# *.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
@@ -26,101 +39,84 @@
 
 ## Build tool auxiliary files:
 *.fdb_latexmk
-*.synctex
 *.synctex.gz
 *.synctex.gz(busy)
-*.pdfsync
+    *.pdfsync
 
 ## Auxiliary and intermediate files from other packages:
 
 # algorithms
-*.alg
-*.loa
-
-# achemso
-acs-*.bib
+    *.alg
+    *.loa
 
 # amsthm
-*.thm
+    *.thm
 
 # beamer
-*.nav
-*.snm
-*.vrb
+    *.nav
+    *.snm
+    *.vrb
 
 #(e)ledmac/(e)ledpar
-*.end
-*.[1-9]
-*.[1-9][0-9]
-*.[1-9][0-9][0-9]
-*.[1-9]R
-*.[1-9][0-9]R
-*.[1-9][0-9][0-9]R
-*.eledsec[1-9]
-*.eledsec[1-9]R
-*.eledsec[1-9][0-9]
-*.eledsec[1-9][0-9]R
-*.eledsec[1-9][0-9][0-9]
-*.eledsec[1-9][0-9][0-9]R
+    *.end
+    *.[1-9]
+    *.[1-9][0-9]
+    *.[1-9][0-9][0-9]
+    *.[1-9]R
+    *.[1-9][0-9]R
+    *.[1-9][0-9][0-9]R
+    *.eledsec[1-9]
+    *.eledsec[1-9]R
+    *.eledsec[1-9][0-9]
+    *.eledsec[1-9][0-9]R
+    *.eledsec[1-9][0-9][0-9]
+    *.eledsec[1-9][0-9][0-9]R
 
 # glossaries
-*.acn
-*.acr
-*.glg
-*.glo
-*.gls
-
-# gnuplottex
-*-gnuplottex-*
+    *.acn
+    *.acr
+    *.glg
+    *.glo
+    *.gls
 
 # hyperref
-*.brf
-
-# knitr
-*-concordance.tex
-*.tikz
-*-tikzDictionary
+    *.brf
 
 # listings
-*.lol
+    *.lol
 
 # makeidx
-*.idx
-*.ilg
-*.ind
-*.ist
+    *.idx
+    *.ilg
+    *.ind
+    *.ist
 
 # minitoc
-*.maf
-*.mtc
-*.mtc0
+    *.maf
+    *.mtc
+    *.mtc0
 
 # minted
-_minted*
-*.pyg
+    *.pyg
 
 # morewrites
-*.mw
+    *.mw
 
 # nomencl
-*.nlo
+    *.nlo
 
 # sagetex
-*.sagetex.sage
-*.sagetex.py
-*.sagetex.scmd
+    *.sagetex.sage
+    *.sagetex.py
+    *.sagetex.scmd
 
 # sympy
-*.sout
-*.sympy
-sympy-plots-for-*.tex/
+    *.sout
+    *.sympy
+    sympy-plots-for-*.tex/
 
 # todonotes
-*.tdo
+    *.tdo
 
 # xindy
-*.xdy
-
-# WinEdt
-*.bak
-*.sav
+    *.xdy

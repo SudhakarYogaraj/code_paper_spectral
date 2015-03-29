@@ -1,0 +1,373 @@
+% Experimental addition
+\section{Application to multiscale SPDEs}
+\label{sec:application_to_multiscale_spdes}
+
+In this section, we apply the method introduced in the previous sections to
+the solution of multiscale SPDEs. Throughout this section, we will use the same
+framework as in \cite{abdulle2012numerical} and consider equations of the
+following type will be considered:
+\begin{equation}
+    du\,=\, \frac{1}{\varepsilon}  \op A u \,dt \,+\, \frac 1 \varepsilon \, F(u) \, dt\, +
+    \, \sqrt{\frac{1}\varepsilon}\,\op Q\,dW, 
+    \label{eq: basis spde} 
+\end{equation}
+and
+\begin{equation}
+    du\,=\, \frac{1}{\varepsilon^2}  \op A u \,dt \,+\, \frac 1 \varepsilon \, F(u) \, dt\, +
+    \,\frac{1}\varepsilon\,\op Q\,dW, 
+    \label{eq: basis spde} 
+\end{equation}
+posed in a bounded domain of $\mathbb R^d$ with suitable boundary conditions.
+We will refer to the first equation as the one associated with the advective
+time scale, while the second is said to correspond to the diffusive time scale.
+These denominations come from the fact that both equations can be obtained by
+rescaling another stochastic PDE (see  \cite{abdulle2012numerical}). The
+relevant scaling to consider depends on the problem at hand.  In
+these expressions, $\op A$ is a differential operator, assumed to be
+non-positive and self-adjoint in a Hilbert space $\Space H$, and with compact
+resolvent. It is furthermore assumed that $\op A$ has a finite dimensional
+kernel, noted $\op N$, which causes the multiscale nature of the problem.
+The term $W$ denotes a cylindrical Wiener process on $\Space H$, and $Q$ is
+the covariance operator associated with the noise. It is assumed that $Q$ and
+$\op A$ commute, and that the noise only acts on the orthogonal complement
+$\Space N^{\perp}$.  The function $F({\cdot})$ is an arbitrary function representing the
+nonlinearity. 
+
+Given the assumption that the differential operator $\op A$ has compact
+resolvent and is self-adjoint, there exists an orthonormal basis of $\Space
+H$ consisting of eigenfunctions of $\op A$. With each of these
+eigenfunctions is associated a real eigenvalue $-{\lambda}_k$ such that $\op
+A\,e_{k} = -{\lambda}_{k}\,e_{k}$. By assumption, $\lambda_k\,\geq\,0$ and
+$\lambda_k \to \infty$ when $k\to \infty$.  It is supposed that the eigenpairs
+are numbered by increasing modulus of the eigenvalues, so that the $m$ first
+eigenfunctions are in the kernel of the differential operator. Formally,
+the cylindrical Brownian motion can be expanded in the basis as $W(t) \,=\,
+\sum^{\infty}_{i=1} \, e_i \, w_i(t)$, where $\left\{w_i\right\}_{i=1}^{\infty}$ are independent
+Brownian motion. The assumption that the covariance operator $Q$ commutes with
+the differential operator $\op A$ means that this operator is given by
+$Q\,e_i \,=\, q_i\, e_i$, while the assumption that the noise only acts on
+\,$\Space N^{\perp}$ implies that $q_i \,=\, 0$ for $i\,=\,1,\,2,\,{\dots}\, , \, N$.
+
+Making precise sense of equation \eqref{eq: basis spde} requires a detailed study
+of Gaussian random variables in infinite dimensional spaces and stochastic
+partial differential equations, see
+\citep{da2008stochastic,hairer2009introduction}. For our purposes, we will see the
+solution as anelement of the space $\Space H$ that is determined via its projections on the
+eigenfunctions $e_i$. 
+
+Using the methodology presented in \cite{abdulle2012numerical}, the solution of an SPDE
+of the above form can be approximated by solving a system of stochastic
+differential equations, which we show in the case of the diffusive time scale.
+The first step is to decompose the equation into a fast slow system. Since the
+eigenfunctions of $\op A$ form an orthonormal basis of $\Space H$, the solution
+$u$ can be expanded as: 
+\begin{equation*} 
+    u = \sum_{k=1}^{m} \,x_{k}\,e_{k} \,+\,\sum_{k=m+1}^{\infty} \,y_{k}\,e_{k}.  
+\end{equation*}
+Using the assumption that $\mathcal A$ and the covariance
+operator of the noise commute, and that the noise only acts on the fast
+process, the term $Q{\xi}\,=\,Q (dW/dt)$ can be expanded in the same way: 
+\begin{equation*} 
+    Q{\xi}= \sum_{k=m+1}^{\infty}\,q_{k}\,e_{k}\,{\xi}_{k}(t),
+\end{equation*} 
+where $\{\xi_{k}(t) \}_{k=1}^{\infty}$ are independent one-dimensional white
+noise processes. Substitution of these expansions in the SPDE gives: 
+\begin{equation*}
+    \begin{aligned} 
+        \frac d{dt} & \left(\sum_{k=1}^{m}\,x_{k}\,e_{k}\,\,+\sum_{k=m+1}^{\infty}
+            y_{k}\,e_{k} \right) = \\ & -\frac 1{\varepsilon^{2}}\sum_{k=m+1}^{\infty}
+        \lambda_{k}\,y_{k}\,e_{k} + \frac 1 \varepsilon F(u) + \frac 1 \varepsilon\,
+        \sum_{k=m+1}^{\infty}q_{k}\,e_{k}\,\xi_{k}(t).  
+    \end{aligned} 
+\end{equation*}
+Projecting on the eigenfunctions, we obain the equations that govern
+the evolution of the coefficients $x_k$ and $y_k$:
+\begin{equation*} 
+    \left\{\begin{aligned}
+            \dot x_{i} &= \frac 1 \varepsilon\langle F(u), e_{i}\rangle & \quad i & = 1,\dots,
+            m;\\ \dot y_{i} &= -\frac 1 {\varepsilon^{2}} {\lambda}_{i}\,y_{i} + \frac 1\varepsilon\langle
+            F(u), e_{i}\rangle +\frac 1\varepsilon q_{i}\,\xi_{i} & \quad i &= m+1,m+2, \dots
+        \end{aligned} \right.  
+\end{equation*} 
+This system of equations is infinite dimensional, and so it can't be integrated
+as such by a numerical solver. Retaining only the eigenfunctions of lowest
+eigenvalues, $u\,\approx\, \sum^{n}_{i=1}x_i e_i + \sum_{i=n+1}^{m+n}
+\,y_{i}\,e_{i} := \hat u$, a finite dimensional system is obtained:
+\begin{equation*}
+    \left\{\begin{aligned} 
+            \dot x\,&=\,\frac 1 {\varepsilon}a(x, y) ,\\ \dot
+            y\,&=\,-\frac 1 {\varepsilon^{2}} \Lambda_{n}  y\,+\,\frac 1 {\varepsilon}
+            b(x,y)\,+\,\frac 1 \varepsilon Q_n\,{\xi}, 
+        \end{aligned} \right.  
+\end{equation*} 
+where $x = (x_1, \dots, x_m)^{T}$, $\bold y = (y_{m+1}, \dots, y_{m + n})^{T}$,
+$\xi= (\xi_{m+1}, \dots, \xi_{m+n})^{T}$, and $\Lambda_{n}$ and $Q_{n}$
+are diagonal matrices whose diagonals contain the $n$ first non-zero eigenvalues
+of $\op A$ and the corresponding $q_{i}$. The components of $a$ and $b$ are defined by: 
+\begin{equation*} 
+    a(x, y) = (a_{1}(x,y), {\dots},a_{m}(x,y))^{T} \quad \text{with} \quad a_{i}(x,y) = \ip{F(\hat u(x,y)}{e_i};
+\end{equation*} 
+\begin{equation*} 
+    b(x, y) = (b_{m+1}(x,y), {\dots},b_{m+n}(x,y))^{T} \quad \text{with} \quad b_{i}(x,y) = \ip{F(\hat u(x,y)}{e_i}.
+\end{equation*} 
+This system fits into the general framework of the previous section, and so the
+spectral method that we presented seems ideal to find an approximate solution.
+In some cases, an analytical approach is also possible. This is for example the case
+when the nonlinearity $F({\cdot})$ is quadratic. However, in almost all other
+cases, analytical calculations become to complicated, and one has to resort
+to numerical simulations. Two approaches are possible:
+\begin{itemize} 
+    \item The first method for the numerical solution of the system
+        of stochastic differential equations is to use the
+        heterogeneous multiscale method developped in
+        \cite{weinan2005analysis}.  This method was investigated in
+        \cite{abdulle2012numerical} for the case of quadratic
+        nonlinearities. In this chapter, the method is extended to
+        general nonlinearities. In addition, we presend an example for
+        which the SPDE is posed in a two-dimensional domain.
+    \item The second solution takes advantage of the
+        fact that, to leading order, the fast processes are
+        Ornstein-Uhlenbeck. Consequently, the theory developed in the
+        previous chapter applies. This approach, to the best of our
+        knowledge, has not been applied before. It is particularly
+        powerful for SPDEs for which the nonlinearity can be written in
+        terms of a multilinear form, because the exact simplified equation
+        associated with the truncated system can be obtained in this
+        case. 
+\end{itemize} 
+
+\section{Numerical solution} 
+\label{sec:Numerical solution}
+In this section, we present the two numerical methods that were used to
+solve the stochastic partial differential equations. The programs developed for
+this project were designed in such a way that the input from the user is
+minimized. In the current version of the program, the user only has to input
+the differential operator $\mathcal A$, its eigenfunctions, the nonlinearity
+$F$, the coefficients $q_i$ of the cylindrical Brownian motion, and
+informations about the boundaries of the domain. From these information, the
+truncated system of SDEs is computed automatically.
+
+In both of the methods studied, the first step is to compute the projection of $F(u)$
+on the kernel $\mathcal N$ of the differential operator. This step will be presented
+in the next subsection. In the subsequent parts, the application of the HMM to
+the solution of SPDEs with multiple scales is presented, and so is the spectral
+method using Hermite polynomials.
+
+\subsection{Projection of $F(u)$ onto $\mathcal N$}
+\label{sub:Projection of F(u) on  N}
+The first step is to project the nonlinearity $F(u)$ that appears in the SPDE.
+This requires the computation of
+$$
+a^i(x,y) \,=\, \langle F(u),\, e_i\rangle \quad
+\text{with} \quad u \,=\, \sum^{N}_{i=1} \, x_i \, e_i \,+\,
+\sum^{M+N}_{i=N+1}\, y_i \, e_i,
+$$
+for $i \,=\, 1,\,2,\,{\dots}\,,\, N \,+\, M$. In most practical problems, and in the examples
+that we will present further on,  the nonlinearities can be represented by
+multi-linear forms.  Numerically, this computation was done using the symbolic
+math toolbox of MATLAB. Once this calculation is performed, the system of SDEs
+associated with the initial SPDE can be written. Consider for example the case
+where the operator $\mathcal A$ is given by ${\partial}^2/{\partial}x^2 \,+\,1$ and the problem
+is posed in the domain $[-{\pi},\,{\pi}]$, with periodic boundary conditions. In this
+case, the normalized eigenfunctions are given by $\cos(ix/2)/\sqrt{\pi}$ if $i$ is
+even and $\sin((i+1)x/2)/\sqrt{\pi}$ if $i$ is odd. If $F(u)$ is a polynomial in
+$u$ and its derivatives, then $F(u)$ can be expressed as a sum of trigonometric
+functions, since $u$ is
+itself
+represented as a sum of trigonometric functions. Hence, computing the inner
+product $\langle F(u),\, e_i \rangle$ amounts to calculating integrals of
+trigonometric functions, which can be done efficiently by the toolbox.
+
+With the projections of $F(u)$ on each of the eigenfunctions that are retained
+in the approximation of the solution of the SPDE, the fast-slow system of SDEs
+can be constructed:
+\begin{equation}
+    \left\{\begin{aligned} 
+            \dot x_{i}\,&=\,\frac 1 {\varepsilon}\,a^{i}(x,y)
+            & \quad i = 1,{\dots}, N;  \\ \dot y_{i}\,&=\,-\frac 1 {{\varepsilon}^{2}}\, {\lambda}_{i}
+            y_{i}\,+\,\frac 1{\varepsilon}\,b^{i}(x,y)\,+\,\frac 1{{\varepsilon}}q_{i}\,{\xi}_{i} &
+            \quad i = N+1, {\dots}N+M;
+        \end{aligned} \right. 
+    \label{eq: fast-slow system SPDE}
+\end{equation}
+
+As explained before, the solution of this system can be approximated through the
+effective equation, the coefficients of which can be obtained using the HMM or via a spectral
+method for the cell problem.  
+
+\subsection{Hermite spectral method for the solution of the SPDE}
+\label{sub:spectral_method_for_the_solution_of_the_spde}
+In this part, we explain how the spectral method based on Hermite polynomials can be used to find an approximate solution of the SPDE. In the previous paragraphs, we saw that the solution of the SPDE could be approximated by solving a system of stochastic differential equations. In most practical situations, and in the examples that we will consider, the nonlinear terms of finite dimensional system of SDEs used to approximate the solution of SPDE are polynomials. In this case, the cell problem can be solved exactly. This can be done easily using the fact that we know that Hermite polynomials are the eigenfunctions of the operator of the cell problem. Suppose for simplicity that the kernel of the operator $\mathcal A$ is 1-dimensional, so that the cell problem is given by
+\begin{equation*}
+    -\mathcal L_0\,{\phi}(x,y) \,=\, a^1(x,y).
+\end{equation*}
+If $a^1(x,y)$ is a polynomial of degree $d$, then it can be expressed in terms of the Hermite polynomials that are the eigenfunctions of $\mathcal L_0$:  
+\begin{equation*}
+    a^1(x,y) \,=\, \sum_{0\,<\,|{\alpha}|\,{\leq}\,d} c_{\alpha} (x) \, \mathcal H_{\alpha}(y). 
+\end{equation*}
+The solution of the cell problem is then simply given by:
+\begin{equation*}
+    {\phi}(x,y) \,=\,\sum_{0 \,<\,|\mathcal {\alpha}| \,{\leq}\, d} \frac{c_{\alpha}(x)}{{\mu}_{\alpha}}\,   \mathcal H_{\alpha}(y). 
+\end{equation*}
+The coefficients of the simplified equation can then be obtained by the formulae presented before, which in this case only requires to calculate Gaussian integrals of polynomials. Computationally, the expensive part of the calculation is to express the function $a^1(x,y)$ in terms of Hermite polynomials. Several methods are possible to achieve that purpose. One possibility is to project the function $a^1(x,y)$ on the space spanned by the monomials $y^{\alpha}$, and use the change of variable matrix between the monomials and the Hermite polynomials to obtain the coefficients of these, as explained in the previous chapter. However, since the function $a^1(x,y)$ is a polynomial, it is possible to implement a faster solution. To illustrate the method implemented in the project, suppose that we want to obtain the expansion of a polynomial $p(z)$ in 1 variable of degree $d$ in terms of a given basis of monic polynomials, which we note $\left\{m_i(z)\right\}_{ i\,=\,1}^{ d}$, and assume that the symbolic expression of $p(z)$ is known. Since the polynomials of this basis are assumed to be monic, the coefficient of $m_d(z)$ is simply given by the coefficient of $p$ multiplying $z^d$. This coefficient is given by $c_d \,=\, \lim_{z\,\to\,{\infty}} (p(z)/z^d)$, which in MATLAB can be obtained with: \verb?subs(p/z^d,z,inf)?. By subtracting $c_d\,m_d(z)$ to $p(z)$, the coefficients of lower degrees can be obtained using exactly the same reasoning.
+
+The other parts of the program were done using classical programming techniques, and they will thus not be detailed here. The commented MATLAB code implementing the algorithm is presented in appendix \ref{Appendix: Matlab code of the main program.}.
+
+\subsection{Heterogeneous multiscale method for the SPDE}
+\label{sub:Heterogeneous multiscale method for the SPDE}
+The heterogeneous multiscale method was implemented for the system
+\eqref{eq: fast-slow system SPDE}. This part of the program was implemented both in
+MATLAB and C++. As the method requires several loops, the latter option proved
+to be much more efficient, and was retained for the final program. Although this
+choice renders the program faster, it comes with a few complications. First, as
+presented above, the system of SDEs is constructed using the symbolic math
+toolbox of MATLAB. To minimize the input that the user has to introduce to run
+the program, a code was implemented to translate this system in C++. This was
+done using the function \emph{ccode}, that generates C/C++ code from symbolic
+MATLAB expressions. This function, however, offers little flexibility about the
+variable names, or the data structures used for the storage of the solution. As
+a result, a shell script was created to modify and adapt the variables and
+data structures to the rest of the program. This was done using the
+non-interactive text editor \emph{Sed}, developed for the UNIX operating
+system. The most useful characteristic of this program is that it recognizes
+\emph{regular expressions}, which makes it a powerful tool for advanced
+automated text editing. For more information about \emph{Sed} and \emph{regular
+    expressions}, see \cite{mcmahon1979sed} and \cite{friedl2002mastering}. 
+This is presented in appendix \ref{Appendix: Shell script to link the Matlab and C++ codes}.
+
+When the extended system of stochastic differential equations is implemented in C++, the
+solution can be obtained using the heterogeneous multiscale method introduced in
+chapter \ref{cha:Background material}. We devoted particular efforts to make the program as 
+efficient and modular as possible. The commented code of the C++
+program is presented in appendix \ref{Appendix: C++ code of the main program.}.
+
+\subsection{Numerical example for the diffusive time scale}
+\label{sub:numerical_example}
+To illustrate the method, we present the numerical results for an example. We will consider the following stochastic partial differential equation, posed in the domain $ [ -{\pi},\,{\pi}]$ with periodic boundary conditions:
+\begin{equation*}
+    \frac{{\partial}u}{{\partial}t} \,=\,\frac{1}{{\varepsilon}^2}\, \left( \frac{\partial}{{\partial}x^2} \,+\,I\right)\,u \,+\, \frac{1}{\varepsilon} \, u^2\,\left(\frac{{\partial}(u^2)}{{\partial}x}\right) \,+\, \frac{1}{\varepsilon} \, \sum_{ i\,=\,3}^{ {\infty}}  q_i\,{\xi}_i(t)\, e_i(x) 
+\end{equation*}
+In this expressions, $\left\{e_i\right\}_{i\,=\,1}^{\infty}$ are the eigenfunctions of the operator multiplying $1/{\varepsilon}^2$. Using traditional techniques, it is readily observed that these functions are given by
+\begin{equation*}
+    e_i \,=\, \left\{
+        \begin{aligned}
+            & \frac{1}{\sqrt{\pi}}\sin\left(\frac{i+1}{2}\,x\right) &\quad \text{ if $i$ is odd,} \\
+            & \frac{1}{\sqrt {\pi}}\cos\left(\frac{i}{2}\,x\right) &\quad \text{ if $i$ is even.}
+        \end{aligned} \right .
+\end{equation*}
+We note $-{\lambda}_i$ the associated eigenvalues. Clearly, the eigenvalues corresponding with $i \,=\,1,2$ are equal to zero, i.e. the kernel of the differential operator is 2-dimensional. As explained before, we approximate the solution by a truncated Fourier series:
+\begin{equation*}
+    u \,=\, \sum_{ i\,=\,1}^{ 2} x_i\,e_i \,+\, \sum_{ i\,=\,3}^{ M\,+\,2} y_i \, e_i.
+\end{equation*}
+Substituting in the SPDE and taking the inner product with each of the eigenfunctions, a system of equation of the type \eqref{eq: fast-slow system SPDE} is obtained. Defining $z_i \,=\, x_i$ if $i \,=\,1,2$ and $z_i \,=\,y_i$ otherwise, the projection of the nonlinearity on the eigen-functions can be expressed as:
+\begin{equation}
+    \langle f(u),\,e_m\rangle \,=\,\sum_{ i\,=\,1}^{ M\,+\,2}\, \sum_{ j\,=\,1}^{ M\,+\,2}\,\sum_{ k\,=\,1}^{ M\,+\,2}\,\sum_{ {\ell}\,=\,1}^{ M\,+\,2}\, q_{ijk{\ell}m} \, z_i\,z_j\,z_k\,z_{\ell}, 
+    \label{eq: projection nonlin example 1}
+\end{equation}
+where we defined defined the coefficients $q_{ijk{\ell}m} \,=\, \langle\, Q(e_i,\,e_j,\,e_k,\,e_{\ell}),\,e_m \rangle$, where the quadri-linear form $Q$ is given by:
+\begin{equation*}
+    Q(u,v,f,g) \,=\, u \, v \, \frac{{\partial}(fg)}{{\partial}x}. 
+\end{equation*}
+We show how it can be checked that the centering condition is satisfied for this choice of the nonlinearity. From the previous equation, it is clear that the terms $a^1(x,y)$ and $a^2(x,y)$ of \eqref{eq: fast-slow system SPDE} are fourth degree polynomials in the variables. Since the leading order term $\mathcal L_0$ of the generator is the same as the one of an Ornstein-Uhlenbeck process, the density ${\rho}(y;x)$ in the kernel $\mathcal L_0^*$ is Gaussian. Hence, the only terms of $a^i(x,y)$ that could remain after integration with respect to ${\rho}$ are those of the type $x_i\,x_j\, y_k^2$, $y_k^2\,y_{\ell}^2$, and $x_i\,x_j\,x_k\,x_{\ell}$, where several indices can take the same value. Using symbolic math toolbox of MATLAB, it can be calculated that the corresponding coefficients in \eqref{eq: projection nonlin example 1} are all equal to zero, and so the centering condition is satisfied. Consequently, the theory of homogenization applies, and the evolution of the slow variables $x_1$ and $x_2$ can be approximated by the effective equation:
+\begin{equation}
+    \dot X \,=\, F(X) \, \,+\, A(X) \, \frac{dW}{dt},
+\end{equation}
+where $x,F\,{\in}\,\mathbb R^2$, $A \,{\in}\,\mathbb R^{2{\times}2}$, and $W$ is a standard Wiener process in $\mathbb R^2$. The right hand side of the equation of the cell problem being a polynomial, it can be solved exactly using the MATLAB program that we have written, and so the exact expressions of the coefficients of the simplified equation can be obtained. Along with this exact solution obtained using symbolic calculations, the effective dynamics of the slow variables can be approximated by the heterogeneous multiscale method. The parameters of the method were chosen equal to $$ ({\delta}t/{\varepsilon}^2, n_T, M,N, N') = ( 2^{-p}, 16, 1 , 10{\times}2^{3p}, 2^pp),$$ so that the computational cost is minimized, based on the theoretical considerations presented in \cite{weinan2005analysis}. This method does not require any reference to the cell problem, which is an advantage. To check that it works, we compared the solution that it provides with the one obtained by solving the cell problem with Hermite polynomials. The error measure used is the same as in \cite{weinan2005analysis}, see equation \eqref{eq: Error measure HMM homogenization}. Given the choice of parameters made, the error should theoretically behave as $\mathcal O(2^{- p })$. 
+
+In figures \ref{fig: spde different ps x1} and \ref{fig: spde different ps x2}, we compare the solution obtained by the heterogeneous method and the one using the exact solution of the cell problem corresponding with the truncated system of SDEs, using the same macro-solver for both. We note the former $X_n$ and the second $\hat X_n$. It can be observed that, when the value of the parameter $p$ is increased, the solution obtained using the HMM converges to the other one. In figure \ref{fig: spde error}, the error between $X_n$ and $\hat X_n$ is plotted as a function of the precision parameter, confirming the theory developed in \citep{abdulle2012numerical,weinan2005analysis}. Using the approximate solution for $x_1$ and $x_2$, an approximation of the solution of the initial SPDE can be obtained using the slow modes. However, in contrast with the deterministic homologue of equation \eqref{eq: basis spde}, the fast modes do not  decay to zero in general. Instead, the presence of the noise term implies that the amplitude of any of the fast modes is asymptotically distributed according to a given distribution, which tends to a normal distribution in the limit ${\varepsilon}\,\to\, 0$. The characteristic time of convergence of the fast processes to that invariant distribution is of order $\mathcal O({\varepsilon}^2)$, which is very short when ${\varepsilon}\,\leq\,1$. In the case of equation \eqref{eq: basis spde}, the approximation based on the slow modes is given by:
+\begin{equation*}
+    u(x,t) \,\,{\approx}\,\, X_1(t) \,\frac{\sin(x)}{\sqrt{\pi}} \,+\, X_2(t) \,\frac{\cos(x)}{\sqrt{\pi}}. 
+\end{equation*}
+\begin{figure}[h!]
+    % \begin{center}
+    %     \input{figures/comparison_x1.tex}
+    % \end{center} 
+    \caption{Comparison of the numerical solution obtained by the HMM (blue) and the one computed using the coefficients obtained by solution of the cell problem (red), for the variable $x_1$ and one sample of the driving Brownian motion.}
+    \label{fig: spde different ps x1}
+\end{figure}
+% \begin{figure}[h!]
+%     \begin{center}
+%         \input{figures/comparison_x2.tex}
+%     \end{center} 
+%     \caption{Comparison of the numerical solution obtained by the HMM (blue) and the one computed using the coefficients obtained by solution of the cell problem (red), for the variable $x_2$ and one sample of the driving Brownian motion.}
+%     \label{fig: spde different ps x2}
+% \end{figure}
+
+% \begin{figure}[h!]
+%     \begin{center}
+%         \input{figures/error_spde.tex}
+%     \end{center} 
+%     \caption{Error as a function of the precision parameter, for only one replica of the fast process at each iteration. The green line was found by polynomial fitting considering the values of $p$ larger or equal to 2. For this experiment, the slope obtained in the $p-\log_2(error)$ plane is equal to -1.01, which is close to the theoretical value of -1. This is in perfect agreement with the theory.} 
+%     \label{fig: spde error}
+% \end{figure}
+%
+\subsection{A 2-dimensional example}
+\label{sub:numerical_example 2D}
+The methodology presented in the previous subsection can be repeated to approximate the solution of SPDEs posed in a two dimensional domain. We consider here the following equation, posed in the square $ [ 0,\,{\pi}]{\times}[ 0,\,{\pi}]$ with homogeneous Dirichlet boundary conditions. 
+\begin{equation*}
+    \frac{{\partial}u}{{\partial}t} \,=\,\frac{1}{{\varepsilon}^2}\, \left( {\Delta}\,+\,2I\right)\,u \,+\, \frac{1}{\varepsilon} \, \left(\frac{{\partial}u}{{\partial}x}\frac{{\partial}u}{{\partial}y}\right) \, +\, \frac{1}{\varepsilon} \, \sum_{ i\,=\,2}^{ {\infty}}  q_{ij}\,\,{\xi}_{ij}(t)\, e_{ij}(x) 
+\end{equation*}
+In this expressions, $\left\{e_{ij}\right\}_{i\,=\,1}^{\infty}$ are again the eigenfunctions of the operator multiplying $1/{\varepsilon}^2$, which in this two dimensional case are given by:
+\begin{equation*}
+    e_{ij} \,=\, \frac{2}{\pi} \sin\left(i x\right) \, \sin\left(j y\right).
+\end{equation*}
+We denote by $-{\lambda}_{ ij }$ the associated eigenvalues. In this case, the kernel of the differential operator is 1-dimensional, and the only eigenfunctions associated with the eigenvalue 0 is obtained when $i\,=\,j\,=\,1$. The exact solution of the equation can be expressed by an infinite series using the eigenfunctions of the operator. For the numerical solution, however, only the modes associated with the lowest eigenvalues are retained. To that purpose, we define an index map $I: \, \mathbb N\, \to \, \mathbb N^2$ such that $-{\lambda}_{I(k)}$ is the $k$-th smallest eigenvalue of the operator. With this notation, we approximate $u$ by
+\begin{equation*}
+    u \,=\, x_1\,e_{11} \,+\, \sum_{ k\,=\,2}^{ M\,+\,1} y_{I(k)} \, e_{I(k)}.
+\end{equation*}
+To make the notations lighter, we define $e_i \,=\, e_{I(i)}$. The rest of the reasoning is exactly the same as before. Substituting in the SPDE and taking the inner product with each of the eigenfunctions, a system of the form \eqref{eq: fast-slow system SPDE} is obtained. The nonlinearity is simpler, and defining $z_1 \,=\, x_1$ and $z_i \,=\,y_i$ if $i \,{\geq}\,2$, the projection of the nonlinearity on the eigen-modes can be expressed as:
+\begin{equation}
+    \langle f(u),\,e_k\rangle \,=\,\sum_{ i\,=\,1}^{ M\,+\,1}\, \sum_{ j\,=\,1}^{ M\,+\,1}\,B_{ijk}\,z_i\,z_j, 
+    \label{eq: projection nonlin example}
+\end{equation}
+where we defined as before $B_{ijk} \,=\, \langle\, B(e_i,\,e_j),\,e_k \rangle$, where the bilinear form $B$ is given by: $B(u,v) \,=\, {\partial}_x u \, {\partial}_y v$. We show that the centering condition is satisfied for this choice of the nonlinearity. Taking into account the comments made for the previous example, a sufficient condition is that
+$$
+\int_{ 0}^{ {\pi}}\int_{ 0}^{ {\pi}} B(e_k,\,e_k) \, e_1 \, dx\, dy \,=\,0
+$$
+for all values of $k$. Using the expressions of the eigenfunctions, we can verify this condition analytically. Noting $(i,j) \,=\,I(k)$, we have by developing the left-hand side of the previous equation:
+\begin{multline*}
+    ij\,\int_{ 0}^{ {\pi}} \int_{ 0}^{ {\pi}} \cos(ix)\,\sin(jy)\,\sin(ix)\,\cos(jy)\,\sin(x)\,\sin(y)\, dx\, dy \\\,=\, ij\,\int_0^{\pi}\cos(ix)\,\sin(ix)\, \sin(x) \, dx \,{\times}\, \int_{ 0}^{ {\pi}} \sin(jy)\, \cos(jy)\, \sin(y)\,dy \\ \,=\, ij\,\int_{ 0}^{ {\pi}} \frac{1}{2}\,\sin(2ix)\,\sin(x) \, dx \,{\times}\,\int_{ 0}^{ {\pi}} \frac{1}{2}\,\sin(2jy)\,\sin(y)\,dy\,=\,0.
+\end{multline*}
+The rest of the reasoning is exactly the same as for the previous example, and
+so it will not be detailed here. Let us just mention that the numerical results
+obtained for this case are in very good agreement with the theory also.
+
+\section{The advective time scale}
+\label{sec:the_advective_time_scale}
+Because it is much easier to handle than equations corresponding to the
+diffusive time scale, we have not dedicated much of this chapter to the
+advective time scale. For completeness, we present here how this case can be
+handled numerically. For the advective time scale, the truncated system
+associated with the SPDE is very similar, given by:
+\begin{equation}
+    \left\{\begin{aligned} 
+            \dot x_{i}\,&=\,a^{i}(x,y)
+            & \quad i = 1,{\dots}, N;  \\ \dot y_{i}\,&=\,-\frac 1 {{\varepsilon}}\, {\lambda}_{i}
+            y_{i}\,+\,b^{i}(x,y)\,+\,\frac 1{\sqrt {\varepsilon}}\,q_{i}\,{\xi}_{i} &
+            \quad i = N+1, {\dots}N+M,
+        \end{aligned} \right. 
+\end{equation}
+where $a$ and $b$ are defined as before. The difference is that, here,
+$a^i(x,y)$ does not satisfy the centering condition. Hence the effective
+equation for the slow modes is given by:
+$$
+\frac{\mathrm d X}{\mathrm d t}\,=\, F(X),
+$$
+where $F({\cdot})$ is given by
+$$
+F(X) \,=\, \int_{\mathbb R^M} a^i(x,y) \, {\rho}(y)\,dy.
+$$
+In this equation, ${\rho}$ denotes the probability density associated with the
+operator $\mathcal L_0^*$, as explained before. In this case, this density is
+Gaussian, and so computing the drift coefficient of the effective equation only
+requires the computation of a Gaussian integral. This can be done efficiently
+using classical integration techniques, such as Gauss-Hermite integration, or
+using Monte-Carlo method, which proves very efficient in high dimension. In the case of 
+a quadratic nonlinearity, it is possible to obtain an exact analytical
+expression of the coefficients as demonstrated in \cite{abdulle2012numerical}.
+
+Finally, note that the HMM can also be used to find an approximate solution of
+the system. However, this approach is more expensive than a simple integration, so its 
+use is not really justified in this case. 
+
+
