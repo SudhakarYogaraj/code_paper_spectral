@@ -65,21 +65,24 @@ Projecting on the eigenfunctions, we obain the equations that govern the evoluti
 \end{equation*} 
 This system of equations is infinite dimensional, and so it can't be integrated as such by a numerical solver.
 Retaining only the eigenfunctions of lowest eigenvalues, $u\,\approx\, \sum^{n}_{i=1}x_i e_i + \sum_{i=n+1}^{m+n} \,y_{i}\,e_{i} =: \hat u$, a finite dimensional system is obtained:
-\begin{equation*}
+\begin{equation}
     \left\{\begin{aligned} 
             \dot x\,&=\,\frac 1 {\varepsilon}a(x, y) ,\\ \dot
             y\,&=\,-\frac 1 {\varepsilon^{2}} \Lambda_{n}  y\,+\,\frac 1 {\varepsilon}
             b(x,y)\,+\,\frac 1 \varepsilon Q_n\,{\xi}, 
         \end{aligned} \right.  
-\end{equation*} 
+    \label{eq: finite dimensional system of equations}
+\end{equation} 
 where $x = (x_1, \dots, x_m)^{T}$, $y = (y_{m+1}, \dots, y_{m + n})^{T}$, $\xi= (\xi_{m+1}, \dots, \xi_{m+n})^{T}$, and $\Lambda_{n}$ and $Q_{n}$ are diagonal matrices whose diagonals contain the $n$ first non-zero eigenvalues of $\op A$ and the corresponding $q_{i}$.
 The components of $a$ and $b$ are defined by: 
 \begin{equation*} 
     a(x, y) = (a_{1}(x,y), {\dots},a_{m}(x,y))^{T} \quad \text{with} \quad a_{i}(x,y) = \ip{F(\hat u(x,y)}{e_i};
+    \label{eq: coefficient a in the slow process}
 \end{equation*} 
-\begin{equation*} 
+\begin{equation} 
     b(x, y) = (b_{m+1}(x,y), {\dots},b_{m+n}(x,y))^{T} \quad \text{with} \quad b_{i}(x,y) = \ip{F(\hat u(x,y)}{e_i}.
-\end{equation*} 
+    \label{eq: coefficient b in the fast process}
+\end{equation} 
 This system fits into the general framework of the previous section, and so the spectral method that we presented seems ideal to find an approximate solution.
 In some cases, an analytical approach is also possible.
 This is for example the case when the nonlinearity $F({\cdot})$ is quadratic.
@@ -95,101 +98,43 @@ Two approaches are possible:
         It is particularly powerful for SPDEs for which the nonlinearity can be written in terms of a multilinear form, because the exact simplified equation associated with the truncated system can be obtained in this case. 
 \end{itemize} 
 
-\subsection{Numerical solution} 
-\label{sec:Numerical solution}
-In this section, we present the two numerical methods that were used to solve the stochastic partial differential equations.
-The programs developed for this project were designed in such a way that the input from the user is minimized.
-In the current version of the program, the user only has to input the differential operator $\op A$, its eigenfunctions, the nonlinearity $F$, the coefficients $q_i$ of the cylindrical Brownian motion, and informations about the boundaries of the domain.
-From these information, the truncated system of SDEs is computed automatically.
+\subsection{Implementation of the two solutions} 
+\label{sec: Implementation of the two solutions}
+In this section, we compare the two methods to solve multiscale stochastic partial differential equations.
+The first step, in both cases, is to obtain the finite dimensional system of equations, and in particular the coefficients defined by \cref{eq: coefficient a in the slow process} and \cref{eq: coefficient b in the fast process}.
+In most practical problems, and in the examples that we will present further on,  the nonlinearities can be represented by multi-linear forms.
+This can be done using symbolic math toolbox of MATLAB. 
+Consider for example the case where the operator $\op A$ is given by ${\partial}^2/{\partial}x^2 \,+\,1$ and the problem is posed in the domain $[-{\pi},\,{\pi}]$, with periodic boundary conditions.
+In this case, the normalized eigenfunctions are given by $\cos(ix/2)/\sqrt{\pi}$ if $i$ is even and $\sin((i+1)x/2)/\sqrt{\pi}$ if $i$ is odd.
+If $F(u)$ is a polynomial in $u$ and its derivatives, then $F(u)$ can be expressed as a sum of trigonometric functions, since $u$ is itself represented as a sum of trigonometric functions.
+Hence, computing the inner product $\langle F(u),\, e_i \rangle$ amounts to
+calculating integrals of trigonometric functions, which can be done efficiently using symbolic calculations.
 
-In both of the methods studied, the first step is to compute the projection of $F(u)$
-on the kernel $\space N$ of the differential operator. This step will be presented
-in the next subsection. In the subsequent parts, the application of the HMM to
-the solution of SPDEs with multiple scales is presented, and so is the spectral
-method using Hermite polynomials.
-
-\subsection{Symbolic computation of the finite dimensional system}
-\label{sub:Projection of F(u) on  N}
-The first step is to project the nonlinearity $F(u)$ that appears in the SPDE.
-This requires the computation of
-$$
-a^i(x,y) \,=\, \langle F(u),\, e_i\rangle \quad
-\text{with} \quad u \,=\, \sum^{N}_{i=1} \, x_i \, e_i \,+\,
-\sum^{M+N}_{i=N+1}\, y_i \, e_i,
-$$
-for $i \,=\, 1,\,2,\,{\dots}\,,\, N \,+\, M$. In most practical problems, and in the examples
-that we will present further on,  the nonlinearities can be represented by
-multi-linear forms.  Numerically, this computation was done using the symbolic
-math toolbox of MATLAB. Once this calculation is performed, the system of SDEs
-associated with the initial SPDE can be written. Consider for example the case
-where the operator $\op A$ is given by ${\partial}^2/{\partial}x^2 \,+\,1$ and the problem
-is posed in the domain $[-{\pi},\,{\pi}]$, with periodic boundary conditions. In this
-case, the normalized eigenfunctions are given by $\cos(ix/2)/\sqrt{\pi}$ if $i$ is
-even and $\sin((i+1)x/2)/\sqrt{\pi}$ if $i$ is odd. If $F(u)$ is a polynomial in
-$u$ and its derivatives, then $F(u)$ can be expressed as a sum of trigonometric
-functions, since $u$ is
-itself
-represented as a sum of trigonometric functions. Hence, computing the inner
-product $\langle F(u),\, e_i \rangle$ amounts to calculating integrals of
-trigonometric functions, which can be done efficiently by the toolbox.
-
-With the projections of $F(u)$ on each of the eigenfunctions that are retained
-in the approximation of the solution of the SPDE, the fast-slow system of SDEs
-can be constructed:
-\begin{equation}
-    \left\{\begin{aligned} 
-            \dot x_{i}\,&=\,\frac 1 {\varepsilon}\,a^{i}(x,y)
-            & \quad i = 1,{\dots}, N;  \\ \dot y_{i}\,&=\,-\frac 1 {{\varepsilon}^{2}}\, {\lambda}_{i}
-            y_{i}\,+\,\frac 1{\varepsilon}\,b^{i}(x,y)\,+\,\frac 1{{\varepsilon}}q_{i}\,{\xi}_{i} &
-            \quad i = N+1, {\dots}N+M;
-        \end{aligned} \right. 
-    \label{eq: fast-slow system SPDE}
-\end{equation}
-
-As explained before, the solution of this system can be approximated through the
-effective equation, the coefficients of which can be obtained using the HMM or via a spectral
-method for the cell problem.  
-
-\subsection{Hermite spectral method for the solution of the SPDE}
-\label{sub:spectral_method_for_the_solution_of_the_spde}
-In this part, we explain how the spectral method based on Hermite polynomials can be used to find an approximate solution of the SPDE. In the previous paragraphs, we saw that the solution of the SPDE could be approximated by solving a system of stochastic differential equations. In most practical situations, and in the examples that we will consider, the nonlinear terms of finite dimensional system of SDEs used to approximate the solution of SPDE are polynomials. In this case, the cell problem can be solved exactly. This can be done easily using the fact that we know that Hermite polynomials are the eigenfunctions of the operator of the cell problem. Suppose for simplicity that the kernel of the operator $\mathcal A$ is 1-dimensional, so that the cell problem is given by
+\subsection{Hermite spectral method}
+\label{sub:Hermite spectral method}
+In the case of the system of equations \eqref{eq: finite dimensional system of equations}, the invariant density associated with the leading order part of the generator is gaussian, with covariance matrix $\Sigma \,=\, \Lambda_n^{-1} Q_n /2$:
 \begin{equation*}
-    -\mathcal L_0\,{\phi}(x,y) \,=\, a^1(x,y).
+    \rho(y)= \frac{1}{\sqrt{(2\pi)^k| \Sigma_\infty|}}\exp\left(-\frac{1}{2}y^\mathrm{T}\Sigma y \right).
 \end{equation*}
-If $a^1(x,y)$ is a polynomial of degree $d$, then it can be expressed in terms of the Hermite polynomials that are the eigenfunctions of $\mathcal L_0$:  
+If $a(x,y)$ is a vector of polynomials of degree $d$, each of its components can be expressed in terms of the orthonormal polynomials of $\wlp{2}{\real^n}{\rho}$: 
 \begin{equation*}
-    a^1(x,y) \,=\, \sum_{0\,<\,|{\alpha}|\,{\leq}\,d} c_{\alpha} (x) \, \mathcal H_{\alpha}(y). 
+    a_i(x,y) \,=\, \sum_{0\,<\,|\alpha|\,\leq\,d} c_{\alpha} (x) \, \mathcal H_{\alpha}(y). 
 \end{equation*}
 The solution of the cell problem is then simply given by:
 \begin{equation*}
-    {\phi}(x,y) \,=\,\sum_{0 \,<\,|\mathcal {\alpha}| \,{\leq}\, d} \frac{c_{\alpha}(x)}{{\mu}_{\alpha}}\,   \mathcal H_{\alpha}(y). 
+    \phi_i(x,y) \,=\,\sum_{0 \,<\,|\alpha| \,\leq\, d} \frac{c_\alpha(x)}{\mu_\alpha}\,   \mathcal H_{\alpha}(y). 
 \end{equation*}
-The coefficients of the simplified equation can then be obtained by the formulae presented before, which in this case only requires to calculate Gaussian integrals of polynomials. Computationally, the expensive part of the calculation is to express the function $a^1(x,y)$ in terms of Hermite polynomials. Several methods are possible to achieve that purpose. One possibility is to project the function $a^1(x,y)$ on the space spanned by the monomials $y^{\alpha}$, and use the change of variable matrix between the monomials and the Hermite polynomials to obtain the coefficients of these, as explained in the previous chapter. However, since the function $a^1(x,y)$ is a polynomial, it is possible to implement a faster solution. To illustrate the method implemented in the project, suppose that we want to obtain the expansion of a polynomial $p(z)$ in 1 variable of degree $d$ in terms of a given basis of monic polynomials, which we note $\left\{m_i(z)\right\}_{ i\,=\,1}^{ d}$, and assume that the symbolic expression of $p(z)$ is known. Since the polynomials of this basis are assumed to be monic, the coefficient of $m_d(z)$ is simply given by the coefficient of $p$ multiplying $z^d$. This coefficient is given by $c_d \,=\, \lim_{z\,\to\,{\infty}} (p(z)/z^d)$, which in MATLAB can be obtained with: \verb?subs(p/z^d,z,inf)?. By subtracting $c_d\,m_d(z)$ to $p(z)$, the coefficients of lower degrees can be obtained using exactly the same reasoning.
+Hence there The coefficients of the simplified equation can then be obtained by the formulae presented before, which in this case only requires to calculate Gaussian integrals of polynomials.
+Computationally, the expensive part of the calculation is to express the functions $a_i(x,y)$ in terms of the orthonormal polynomials.
+This operation can also be done using symbolic calculations. To illustrate the method implemented in the project, suppose that we want to obtain the expansion of a univariate polynomial $p(z)$ degree $d$ in terms of a given basis of monic polynomials, which we note $\left\{m_i(z)\right\}_{ i\,=\,1}^{ d}$, and assume that the symbolic expression of $p(z)$ is known.
+Since the polynomials of this basis are assumed to be monic, the coefficient of $m_d(z)$ is simply given by the coefficient of $p$ multiplying $z^d$, which can be obtained in MATLAB by: \verb?subs(p/z^d,z,inf)?. The coefficents of the terms of lower degree can be obtained by applying the same reasoning to $p(z) \,-\,c_d\,m_d(z)$.
 
-The other parts of the program were done using classical programming techniques, and they will thus not be detailed here. The commented MATLAB code implementing the algorithm is presented in appendix \ref{Appendix: Matlab code of the main program.}.
-
-\subsection{Heterogeneous multiscale method for the SPDE}
-\label{sub:Heterogeneous multiscale method for the SPDE}
-The heterogeneous multiscale method was implemented for the system
-\eqref{eq: fast-slow system SPDE}. This part of the program was implemented both in
-MATLAB and C++. As the method requires several loops, the latter option proved
-to be much more efficient, and was retained for the final program. Although this
-choice renders the program faster, it comes with a few complications. First, as
-presented above, the system of SDEs is constructed using the symbolic math
-toolbox of MATLAB. To minimize the input that the user has to introduce to run
-the program, a code was implemented to translate this system in C++. This was
-done using the function \emph{ccode}, that generates C/C++ code from symbolic
-MATLAB expressions. This function, however, offers little flexibility about the
-variable names, or the data structures used for the storage of the solution. As
-a result, a shell script was created to modify and adapt the variables and
-data structures to the rest of the program. This was done using the
-non-interactive text editor \emph{Sed}, developed for the UNIX operating
-system. The most useful characteristic of this program is that it recognizes
-\emph{regular expressions}, which makes it a powerful tool for advanced
-automated text editing. For more information about \emph{Sed} and \emph{regular
-    expressions}, see \cite{mcmahon1979sed} and \cite{friedl2002mastering}. 
-This is presented in appendix \ref{Appendix: Shell script to link the Matlab and C++ codes}.
-
+\subsection{Heterogeneous multiscale method}
+\label{sub:Heterogeneous multiscale method}
+This method was implemented in C++. As the method requires several loops, this choice proved proved to be much more efficient than MATLAB.
+Although this choice renders the program faster, it comes with a few complications. First, as presented above, the system of SDEs is constructed using the symbolic math
+toolbox of MATLAB. To minimize the input that the user has to introduce to run the program, a code was implemented to translate this system in C++. This was
+done using the function \emph{ccode}, that generates C/C++ code from symbolic MATLAB expressions.
 
 
 \subsection{Numerical example for the diffusive time scale}
