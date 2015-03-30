@@ -1,4 +1,4 @@
-\chapter{C++ code of the main program}
+\section{C++ code of the main program}
 \label{Appendix: C++ code of the main program.}
 \lhead{Appendices}
 
@@ -13,30 +13,31 @@
     keywordstyle=\color{blue},
     commentstyle=\color[rgb]{0.8,0.4,0.},
     stringstyle=\color[rgb]{0.627,0.126,0.941},
+    showspaces=false,
     numberstyle=\color[rgb]{0,0,1}
 }
 
-\section{Header}
+Header file
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/header.h}
 
 \newpage
-\section{Classes}
+Classes
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/Problem.cpp}
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/Solver.cpp}
 
 \newpage
-\section{Function implementing the algorithm}
+Function implementing the algorithm 
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/solve.cpp}
 
 \newpage
-\section{Auxiliary functions}
+Auxiliary functions
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/aux.cpp}
 
 \newpage
-\section{Main function}
+Main function
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/main.cpp}
 
-\chapter{MATLAB code of the main program}
+\section{MATLAB code of the main program}
 \label{Appendix: Matlab code of the main program.}
 
 \lstset{ 
@@ -55,11 +56,12 @@
 
 \lstinputlisting[language=matlab]{/home/urbain/mres/source/program/output.m}
 
-\chapter{Shell script to link the MATLAB and C++ programs}
+\section{Shell script to link the MATLAB and C++ programs}
 \label{Appendix: Shell script to link the Matlab and C++ codes}
 
-\section{Program assembling everything together}
+Program assembling everything together
 \lstinputlisting[language=sh]{/home/urbain/mres/source/program/create.sh}
 \newpage
-\section{Program Producing the C++ code from the MATLAB program}
+
+Program Producing the C++ code from the MATLAB program
 \lstinputlisting[language=sh]{/home/urbain/mres/source/program/build/buildvec.sh}
