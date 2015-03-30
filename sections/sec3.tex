@@ -1,4 +1,3 @@
-% Experimental addition
 \section{Application to multiscale SPDEs}
 \label{sec:application_to_multiscale_spdes}
 
@@ -9,13 +8,13 @@ following type will be considered:
 \begin{equation}
     du\,=\, \frac{1}{\varepsilon}  \op A u \,dt \,+\, \frac 1 \varepsilon \, F(u) \, dt\, +
     \, \sqrt{\frac{1}\varepsilon}\,\op Q\,dW, 
-    \label{eq: basis spde} 
+    \label{eq: basis spde1} 
 \end{equation}
 and
 \begin{equation}
     du\,=\, \frac{1}{\varepsilon^2}  \op A u \,dt \,+\, \frac 1 \varepsilon \, F(u) \, dt\, +
     \,\frac{1}\varepsilon\,\op Q\,dW, 
-    \label{eq: basis spde} 
+    \label{eq: basis spde2} 
 \end{equation}
 posed in a bounded domain of $\mathbb R^d$ with suitable boundary conditions.
 We will refer to the first equation as the one associated with the advective
@@ -48,7 +47,7 @@ the differential operator $\op A$ means that this operator is given by
 $Q\,e_i \,=\, q_i\, e_i$, while the assumption that the noise only acts on
 \,$\Space N^{\perp}$ implies that $q_i \,=\, 0$ for $i\,=\,1,\,2,\,{\dots}\, , \, N$.
 
-Making precise sense of equation \eqref{eq: basis spde} requires a detailed study
+Making precise sense of equations \eqref{eq: basis spde1}, \eqref{eq: basis spde2} requires a detailed study
 of Gaussian random variables in infinite dimensional spaces and stochastic
 partial differential equations, see
 \citep{da2008stochastic,hairer2009introduction}. For our purposes, we will see the
@@ -64,7 +63,7 @@ $u$ can be expanded as:
 \begin{equation*} 
     u = \sum_{k=1}^{m} \,x_{k}\,e_{k} \,+\,\sum_{k=m+1}^{\infty} \,y_{k}\,e_{k}.  
 \end{equation*}
-Using the assumption that $\mathcal A$ and the covariance
+Using the assumption that $\op A$ and the covariance
 operator of the noise commute, and that the noise only acts on the fast
 process, the term $Q{\xi}\,=\,Q (dW/dt)$ can be expanded in the same way: 
 \begin{equation*} 
@@ -92,7 +91,7 @@ the evolution of the coefficients $x_k$ and $y_k$:
 This system of equations is infinite dimensional, and so it can't be integrated
 as such by a numerical solver. Retaining only the eigenfunctions of lowest
 eigenvalues, $u\,\approx\, \sum^{n}_{i=1}x_i e_i + \sum_{i=n+1}^{m+n}
-\,y_{i}\,e_{i} := \hat u$, a finite dimensional system is obtained:
+\,y_{i}\,e_{i} =: \hat u$, a finite dimensional system is obtained:
 \begin{equation*}
     \left\{\begin{aligned} 
             \dot x\,&=\,\frac 1 {\varepsilon}a(x, y) ,\\ \dot
@@ -100,7 +99,7 @@ eigenvalues, $u\,\approx\, \sum^{n}_{i=1}x_i e_i + \sum_{i=n+1}^{m+n}
             b(x,y)\,+\,\frac 1 \varepsilon Q_n\,{\xi}, 
         \end{aligned} \right.  
 \end{equation*} 
-where $x = (x_1, \dots, x_m)^{T}$, $\bold y = (y_{m+1}, \dots, y_{m + n})^{T}$,
+where $x = (x_1, \dots, x_m)^{T}$, $y = (y_{m+1}, \dots, y_{m + n})^{T}$,
 $\xi= (\xi_{m+1}, \dots, \xi_{m+n})^{T}$, and $\Lambda_{n}$ and $Q_{n}$
 are diagonal matrices whose diagonals contain the $n$ first non-zero eigenvalues
 of $\op A$ and the corresponding $q_{i}$. The components of $a$ and $b$ are defined by: 
@@ -136,24 +135,24 @@ to numerical simulations. Two approaches are possible:
         case. 
 \end{itemize} 
 
-\section{Numerical solution} 
+\subsection{Numerical solution} 
 \label{sec:Numerical solution}
 In this section, we present the two numerical methods that were used to
 solve the stochastic partial differential equations. The programs developed for
 this project were designed in such a way that the input from the user is
 minimized. In the current version of the program, the user only has to input
-the differential operator $\mathcal A$, its eigenfunctions, the nonlinearity
+the differential operator $\op A$, its eigenfunctions, the nonlinearity
 $F$, the coefficients $q_i$ of the cylindrical Brownian motion, and
 informations about the boundaries of the domain. From these information, the
 truncated system of SDEs is computed automatically.
 
 In both of the methods studied, the first step is to compute the projection of $F(u)$
-on the kernel $\mathcal N$ of the differential operator. This step will be presented
+on the kernel $\space N$ of the differential operator. This step will be presented
 in the next subsection. In the subsequent parts, the application of the HMM to
 the solution of SPDEs with multiple scales is presented, and so is the spectral
 method using Hermite polynomials.
 
-\subsection{Projection of $F(u)$ onto $\mathcal N$}
+\subsection{Symbolic computation of the finite dimensional system}
 \label{sub:Projection of F(u) on  N}
 The first step is to project the nonlinearity $F(u)$ that appears in the SPDE.
 This requires the computation of
@@ -167,7 +166,7 @@ that we will present further on,  the nonlinearities can be represented by
 multi-linear forms.  Numerically, this computation was done using the symbolic
 math toolbox of MATLAB. Once this calculation is performed, the system of SDEs
 associated with the initial SPDE can be written. Consider for example the case
-where the operator $\mathcal A$ is given by ${\partial}^2/{\partial}x^2 \,+\,1$ and the problem
+where the operator $\op A$ is given by ${\partial}^2/{\partial}x^2 \,+\,1$ and the problem
 is posed in the domain $[-{\pi},\,{\pi}]$, with periodic boundary conditions. In this
 case, the normalized eigenfunctions are given by $\cos(ix/2)/\sqrt{\pi}$ if $i$ is
 even and $\sin((i+1)x/2)/\sqrt{\pi}$ if $i$ is odd. If $F(u)$ is a polynomial in
@@ -235,18 +234,15 @@ automated text editing. For more information about \emph{Sed} and \emph{regular
     expressions}, see \cite{mcmahon1979sed} and \cite{friedl2002mastering}. 
 This is presented in appendix \ref{Appendix: Shell script to link the Matlab and C++ codes}.
 
-When the extended system of stochastic differential equations is implemented in C++, the
-solution can be obtained using the heterogeneous multiscale method introduced in
-chapter \ref{cha:Background material}. We devoted particular efforts to make the program as 
-efficient and modular as possible. The commented code of the C++
-program is presented in appendix \ref{Appendix: C++ code of the main program.}.
+
 
 \subsection{Numerical example for the diffusive time scale}
 \label{sub:numerical_example}
 To illustrate the method, we present the numerical results for an example. We will consider the following stochastic partial differential equation, posed in the domain $ [ -{\pi},\,{\pi}]$ with periodic boundary conditions:
-\begin{equation*}
+\begin{equation}
     \frac{{\partial}u}{{\partial}t} \,=\,\frac{1}{{\varepsilon}^2}\, \left( \frac{\partial}{{\partial}x^2} \,+\,I\right)\,u \,+\, \frac{1}{\varepsilon} \, u^2\,\left(\frac{{\partial}(u^2)}{{\partial}x}\right) \,+\, \frac{1}{\varepsilon} \, \sum_{ i\,=\,3}^{ {\infty}}  q_i\,{\xi}_i(t)\, e_i(x) 
-\end{equation*}
+    \label{eq: undefined label}
+\end{equation}
 In this expressions, $\left\{e_i\right\}_{i\,=\,1}^{\infty}$ are the eigenfunctions of the operator multiplying $1/{\varepsilon}^2$. Using traditional techniques, it is readily observed that these functions are given by
 \begin{equation*}
     e_i \,=\, \left\{
@@ -272,34 +268,34 @@ We show how it can be checked that the centering condition is satisfied for this
 \begin{equation}
     \dot X \,=\, F(X) \, \,+\, A(X) \, \frac{dW}{dt},
 \end{equation}
-where $x,F\,{\in}\,\mathbb R^2$, $A \,{\in}\,\mathbb R^{2{\times}2}$, and $W$ is a standard Wiener process in $\mathbb R^2$. The right hand side of the equation of the cell problem being a polynomial, it can be solved exactly using the MATLAB program that we have written, and so the exact expressions of the coefficients of the simplified equation can be obtained. Along with this exact solution obtained using symbolic calculations, the effective dynamics of the slow variables can be approximated by the heterogeneous multiscale method. The parameters of the method were chosen equal to $$ ({\delta}t/{\varepsilon}^2, n_T, M,N, N') = ( 2^{-p}, 16, 1 , 10{\times}2^{3p}, 2^pp),$$ so that the computational cost is minimized, based on the theoretical considerations presented in \cite{weinan2005analysis}. This method does not require any reference to the cell problem, which is an advantage. To check that it works, we compared the solution that it provides with the one obtained by solving the cell problem with Hermite polynomials. The error measure used is the same as in \cite{weinan2005analysis}, see equation \eqref{eq: Error measure HMM homogenization}. Given the choice of parameters made, the error should theoretically behave as $\mathcal O(2^{- p })$. 
+where $x,F\,{\in}\,\mathbb R^2$, $A \,{\in}\,\mathbb R^{2{\times}2}$, and $W$ is a standard Wiener process in $\mathbb R^2$. The right hand side of the equation of the cell problem being a polynomial, it can be solved exactly using the MATLAB program that we have written, and so the exact expressions of the coefficients of the simplified equation can be obtained. Along with this exact solution obtained using symbolic calculations, the effective dynamics of the slow variables can be approximated by the heterogeneous multiscale method. The parameters of the method were chosen equal to $$ ({\delta}t/{\varepsilon}^2, n_T, M,N, N') = ( 2^{-p}, 16, 1 , 10{\times}2^{3p}, 2^pp),$$ so that the computational cost is minimized, based on the theoretical considerations presented in \cite{weinan2005analysis}. This method does not require any reference to the cell problem, which is an advantage. To check that it works, we compared the solution that it provides with the one obtained by solving the cell problem with Hermite polynomials. The error measure used is the same as in \cite{weinan2005analysis}, \red{to be completed}. Given the choice of parameters made, the error should theoretically behave as $\mathcal O(2^{- p })$. 
 
-In figures \ref{fig: spde different ps x1} and \ref{fig: spde different ps x2}, we compare the solution obtained by the heterogeneous method and the one using the exact solution of the cell problem corresponding with the truncated system of SDEs, using the same macro-solver for both. We note the former $X_n$ and the second $\hat X_n$. It can be observed that, when the value of the parameter $p$ is increased, the solution obtained using the HMM converges to the other one. In figure \ref{fig: spde error}, the error between $X_n$ and $\hat X_n$ is plotted as a function of the precision parameter, confirming the theory developed in \citep{abdulle2012numerical,weinan2005analysis}. Using the approximate solution for $x_1$ and $x_2$, an approximation of the solution of the initial SPDE can be obtained using the slow modes. However, in contrast with the deterministic homologue of equation \eqref{eq: basis spde}, the fast modes do not  decay to zero in general. Instead, the presence of the noise term implies that the amplitude of any of the fast modes is asymptotically distributed according to a given distribution, which tends to a normal distribution in the limit ${\varepsilon}\,\to\, 0$. The characteristic time of convergence of the fast processes to that invariant distribution is of order $\mathcal O({\varepsilon}^2)$, which is very short when ${\varepsilon}\,\leq\,1$. In the case of equation \eqref{eq: basis spde}, the approximation based on the slow modes is given by:
+In figures \ref{fig: spde different ps x1} and \ref{fig: spde different ps x2}, we compare the solution obtained by the heterogeneous method and the one using the exact solution of the cell problem corresponding with the truncated system of SDEs, using the same macro-solver for both. We note the former $X_n$ and the second $\hat X_n$. It can be observed that, when the value of the parameter $p$ is increased, the solution obtained using the HMM converges to the other one. In figure \ref{fig: spde error}, the error between $X_n$ and $\hat X_n$ is plotted as a function of the precision parameter, confirming the theory developed in \citep{abdulle2012numerical,weinan2005analysis}. Using the approximate solution for $x_1$ and $x_2$, an approximation of the solution of the initial SPDE can be obtained using the slow modes. However, in contrast with the deterministic homologue of equation \eqref{eq: undefined label}, the fast modes do not  decay to zero in general. Instead, the presence of the noise term implies that the amplitude of any of the fast modes is asymptotically distributed according to a given distribution, which tends to a normal distribution in the limit ${\varepsilon}\,\to\, 0$. The characteristic time of convergence of the fast processes to that invariant distribution is of order $\mathcal O({\varepsilon}^2)$, which is very short when ${\varepsilon}\,\leq\,1$. In the case of equation \eqref{eq: undefined label}, the approximation based on the slow modes is given by:
 \begin{equation*}
     u(x,t) \,\,{\approx}\,\, X_1(t) \,\frac{\sin(x)}{\sqrt{\pi}} \,+\, X_2(t) \,\frac{\cos(x)}{\sqrt{\pi}}. 
 \end{equation*}
 \begin{figure}[h!]
-    % \begin{center}
-    %     \input{figures/comparison_x1.tex}
-    % \end{center} 
+    \begin{center}
+        \input{figures/comparison_x1.tex}
+    \end{center} 
     \caption{Comparison of the numerical solution obtained by the HMM (blue) and the one computed using the coefficients obtained by solution of the cell problem (red), for the variable $x_1$ and one sample of the driving Brownian motion.}
     \label{fig: spde different ps x1}
 \end{figure}
-% \begin{figure}[h!]
-%     \begin{center}
-%         \input{figures/comparison_x2.tex}
-%     \end{center} 
-%     \caption{Comparison of the numerical solution obtained by the HMM (blue) and the one computed using the coefficients obtained by solution of the cell problem (red), for the variable $x_2$ and one sample of the driving Brownian motion.}
-%     \label{fig: spde different ps x2}
-% \end{figure}
+\begin{figure}[h!]
+    \begin{center}
+        \input{figures/comparison_x2.tex}
+    \end{center} 
+    \caption{Comparison of the numerical solution obtained by the HMM (blue) and the one computed using the coefficients obtained by solution of the cell problem (red), for the variable $x_2$ and one sample of the driving Brownian motion.}
+    \label{fig: spde different ps x2}
+\end{figure}
 
-% \begin{figure}[h!]
-%     \begin{center}
-%         \input{figures/error_spde.tex}
-%     \end{center} 
-%     \caption{Error as a function of the precision parameter, for only one replica of the fast process at each iteration. The green line was found by polynomial fitting considering the values of $p$ larger or equal to 2. For this experiment, the slope obtained in the $p-\log_2(error)$ plane is equal to -1.01, which is close to the theoretical value of -1. This is in perfect agreement with the theory.} 
-%     \label{fig: spde error}
-% \end{figure}
+\begin{figure}[h!]
+    \begin{center}
+        \input{figures/error_spde.tex}
+    \end{center} 
+    \caption{Error as a function of the precision parameter, for only one replica of the fast process at each iteration. The green line was found by polynomial fitting considering the values of $p$ larger or equal to 2. For this experiment, the slope obtained in the $p-\log_2(error)$ plane is equal to -1.01, which is close to the theoretical value of -1. This is in perfect agreement with the theory.} 
+    \label{fig: spde error}
+\end{figure}
 %
 \subsection{A 2-dimensional example}
 \label{sub:numerical_example 2D}
@@ -332,7 +328,7 @@ The rest of the reasoning is exactly the same as for the previous example, and
 so it will not be detailed here. Let us just mention that the numerical results
 obtained for this case are in very good agreement with the theory also.
 
-\section{The advective time scale}
+\subsection{The advective time scale}
 \label{sec:the_advective_time_scale}
 Because it is much easier to handle than equations corresponding to the
 diffusive time scale, we have not dedicated much of this chapter to the
@@ -369,5 +365,3 @@ expression of the coefficients as demonstrated in \cite{abdulle2012numerical}.
 Finally, note that the HMM can also be used to find an approximate solution of
 the system. However, this approach is more expensive than a simple integration, so its 
 use is not really justified in this case. 
-
-
