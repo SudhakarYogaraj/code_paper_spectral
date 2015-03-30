@@ -17,24 +17,24 @@
     numberstyle=\color[rgb]{0,0,1}
 }
 
-Header file
+\lstset{caption={Header file}}
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/header.h}
 
 \newpage
-Classes
+\lstset{caption={Classes}}
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/Problem.cpp}
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/Solver.cpp}
 
 \newpage
-Function implementing the algorithm 
+\lstset{caption={Function implementing the algorithm}}
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/solve.cpp}
 
 \newpage
-Auxiliary functions
+\lstset{caption={Auxiliary functions}}
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/aux.cpp}
 
 \newpage
-Main function
+\lstset{caption={Main function}}
 \lstinputlisting[language=c++]{/home/urbain/mres/source/program/main.cpp}
 
 \section{MATLAB code of the main program}
@@ -52,6 +52,7 @@ Main function
     commentstyle=\color[rgb]{0.8,0.4,0.},
     stringstyle=\color[rgb]{0.627,0.126,0.941},
     numberstyle=\color[rgb]{0,0,1}
+    caption={Matlab program}
 }
 
 \lstinputlisting[language=matlab]{/home/urbain/mres/source/program/output.m}
@@ -60,8 +61,10 @@ Main function
 \label{Appendix: Shell script to link the Matlab and C++ codes}
 
 Program assembling everything together
+\lstset{caption={Shell script}}
 \lstinputlisting[language=sh]{/home/urbain/mres/source/program/create.sh}
 \newpage
 
-Program Producing the C++ code from the MATLAB program
+
+\lstset{caption={Program Producing the C++ code from the MATLAB program}}
 \lstinputlisting[language=sh]{/home/urbain/mres/source/program/build/buildvec.sh}
