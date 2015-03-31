@@ -24,7 +24,7 @@ $f(x,\,\cdot\,)$ via the following lemma.
             &u \in \wsobolev{1}{\real^n}{\rho}  
         \end{aligned} 
     \right .
-    \quad \text{subject to the condition} \quad \int_{\real^n} u \, \dd \rho = 0.
+    \quad \text{subject to the condition} \quad \int_{\real^n} u \, \d \rho = 0.
     $$
     In addition, $u \in H^{s+2}(\real^n, \rho)$ and the following estimate holds
     $$
@@ -49,14 +49,14 @@ $f(x,\,\cdot\,)$ via the following lemma.
     \citep{arnold2007interpolation,beckner1989generalized}), which states that
     for any function $u\,\in\,\wsobolev{1}{\real^n}{\rho}$,
     $$
-        \int_{\real^n} (u\,-\,\bar u)^2 \, \dd \rho\, \leq \,C\,\int_{\real^n} |\nabla
-        u|^2 \,\dd \rho \quad \text{with}\quad \bar u \,=\, \int_{\real^n} u\,\dd \rho.
+        \int_{\real^n} (u\,-\,\bar u)^2 \, \d \rho\, \leq \,C\,\int_{\real^n} |\nabla
+        u|^2 \,\d \rho \quad \text{with}\quad \bar u \,=\, \int_{\real^n} u\,\d \rho.
     $$
     A function $u\in \Space H$ is solution of the problem in the
     distributional sense if and only if
     $$
         a(u,v) = \frac{1}{2} \int_{\real^n}  \Sigma : \nabla u \nabla v \,
-        \dd \rho \,=\, \int_{\real^n} g \,v\,\dd \rho \quad \forall v \in C^\infty_c(\real^n).
+        \d \rho \,=\, \int_{\real^n} g \,v\,\d \rho \quad \forall v \in C^\infty_c(\real^n).
     $$
     By density of $\test{\real^n}$ in $\Space H$, this has to hold for any $v \in
     \Space H$. It can then be checked that the hypotheses of the Lax-Milgram
@@ -108,8 +108,8 @@ Using the approximate solution of the cell problem, we can calculate the
 effective drift and diffusion coefficients of the simplified equation, using
 \begin{equation}
     \begin{gathered}
-        F^d (x) = \int_{\real^n} \left(\grad_x \phi_d\,\cdot\,f\,+\,\grad_y \phi_d \cdot h\right) \,\dd \rho \\[0.5cm]
-        A(x) A^T(x) = \frac{1}{2}\left(A_0 + A_0^T\right) \quad \text{with}\quad A_0^d (x) = 2 \int_{\real^n}  f \otimes \phi_d \dd \rho
+        F^d (x) = \int_{\real^n} \left(\grad_x \phi_d\,\cdot\,f\,+\,\grad_y \phi_d \cdot h\right) \,\d \rho \\[0.5cm]
+        A(x) A^T(x) = \frac{1}{2}\left(A_0 + A_0^T\right) \quad \text{with}\quad A_0^d (x) = 2 \int_{\real^n}  f \otimes \phi_d \d \rho
     \end{gathered}
     \label{eq: coefficients of approximate equation}
 \end{equation}
@@ -151,7 +151,7 @@ formulae, we will make some regularity and boundedness assumptions.
         the desired conclusion. We have
         \begin{align*}
             F_i(x) &\,=\, \sum^{m}_{j=1}  \int_{\real^n} \left(\partial_{x_j}\phi_i
-                \, f_j\,+\, \phi_i\, \partial_{y_j}^* h_j\right) \,\dd \rho(y) \\
+                \, f_j\,+\, \phi_i\, \partial_{y_j}^* h_j\right) \,\d \rho(y) \\
             &\,=\, \sum^{m}_{j=1}
             \left(\ip{\partial_{x_j}\phi_i(x)}{f_j(x)}_{\rho}
                 \,+\,\ip{\phi_i(x)}{\partial_{y_j}^*h_j(x)}_{\rho}\right) 
@@ -182,7 +182,7 @@ for all $|x| \leq R$.
 \label{lemma: Approximation coefficients}
 \begin{proof}
     From the expressions of $F$ and $F_d$, and from Cauchy-Schwarz inequality, we have:
-    $$ \sum^{m}_{j=1} \int_{\real^n}  \left((\partial_{x_j}\hat \phi_i \,-\, \partial_{x_j}\phi)\, f_j\right) \dd \rho \,\leq\, \norm{f}_{\wlp{2}{\real^n}{ \rho} }\sum^{m}_{j=1}  \norm{\partial_{x_j}\hat \phi \,-\, \partial_{x_j}\phi}_{\wlp{2}{\real^n}{ \rho}}. \, $$
+    $$ \sum^{m}_{j=1} \int_{\real^n}  \left((\partial_{x_j}\hat \phi_i \,-\, \partial_{x_j}\phi)\, f_j\right) \d \rho \,\leq\, \norm{f}_{\wlp{2}{\real^n}{ \rho} }\sum^{m}_{j=1}  \norm{\partial_{x_j}\hat \phi \,-\, \partial_{x_j}\phi}_{\wlp{2}{\real^n}{ \rho}}. \, $$
     We saw in the proof of the previous lemma that $\partial_{x_i} \phi_i(x)
     \in \wsobolev{s+2}{\real^n}{\rho}$ and $\partial_{x_i} (\pi_d \phi) \,=\,
     \pi_d (\partial_{x_i}\phi)$. Consequently, the error estimate
@@ -193,7 +193,7 @@ for all $|x| \leq R$.
     The other term that appears in the drift coefficient of the simplified
     equation can be estimated using a similar argument:
     \begin{align*}
-        \sum^{n}_{j=1} \int_{\real^n} h_j(x,y) \, \partial_{y_j} \left(\phi_i(x,y)-\hat\phi_i(x,y)\right) \dd \rho(y) \,&=\,\sum^{n}_{j=1} \int_{\real^n} \partial^*_{y_j} h_j(x,y) \, (\phi_i(x,y)-\hat \phi_i(x,y)) \dd \rho(y) \,\\ &\leq\,C \norm{h(x)}_{\wsobolev{1}{\real^n}{\rho}} \norm{\phi_i(x) - \hat \phi_i(x)}_{\wlp{2}{\real^n}{ \rho}}.
+        \sum^{n}_{j=1} \int_{\real^n} h_j(x,y) \, \partial_{y_j} \left(\phi_i(x,y)-\hat\phi_i(x,y)\right) \d \rho(y) \,&=\,\sum^{n}_{j=1} \int_{\real^n} \partial^*_{y_j} h_j(x,y) \, (\phi_i(x,y)-\hat \phi_i(x,y)) \d \rho(y) \,\\ &\leq\,C \norm{h(x)}_{\wsobolev{1}{\real^n}{\rho}} \norm{\phi_i(x) - \hat \phi_i(x)}_{\wlp{2}{\real^n}{ \rho}}.
     \end{align*}
     It thus follows that
     \begin{multline*}
@@ -251,12 +251,12 @@ the approximate solution obtained by our numerical scheme. Three sources of erro
     \end{equation}
     Now, we note $X_t^{s,x}$ the process defined by:
     \begin{equation*}
-        X_t^{s,x} \,=\, x \,+\, \int_s^t F(X_r^{s,x}) \dd r \,+\, \int_s^t A(X_r^{s,x})  \dd W_r.
+        X_t^{s,x} \,=\, x \,+\, \int_s^t F(X_r^{s,x}) \d r \,+\, \int_s^t A(X_r^{s,x})  \d W_r.
     \end{equation*}
     Using Ito's formula for $Z_t \,=\, u(t,X_t^{s,x})$, and the fact that $u$
     is solution of the backward Kolmogorov equation
     \begin{equation*}
-        \expect Z_t - \expect Z_s \,=\, \int_s^t \left\{\pardl{u}{t}(r, X_r^{s,x}) \,+\, \op Lu(r, X_r^{s,x}) \right\} \dd r \,=\, 0,
+        \expect Z_t - \expect Z_s \,=\, \int_s^t \left\{\pardl{u}{t}(r, X_r^{s,x}) \,+\, \op Lu(r, X_r^{s,x}) \right\} \d r \,=\, 0,
     \end{equation*}
     from which we conclude that $\expect \left[u(t_{n+1},
         X_{t_{n+1}}^{s,x})\right] = \expect \left[u(t_n,
