@@ -131,12 +131,47 @@ Since the polynomials of this basis are assumed to be monic, the coefficient of 
 
 \subsection{Heterogeneous multiscale method}
 \label{sub:Heterogeneous multiscale method}
-This method was implemented in C++. As the method requires several loops, this choice proved proved to be much more efficient than MATLAB.
-Although this choice renders the program faster, it comes with a few complications. First, as presented above, the system of SDEs is constructed using the symbolic math
-toolbox of MATLAB. To minimize the input that the user has to introduce to run the program, a code was implemented to translate this system in C++. This was
-done using the function \emph{ccode}, that generates C/C++ code from symbolic MATLAB expressions.
+The HMM is a powerful method for the solution of multiscale problems (see \cite{weinan2003heterognous}).
+It was introduced and analysed in the case of stochastic differential equations in \cite{vanden2003fast} and \cite{weinan2005analysis}. 
+Roughly speaking, the HMM works as follows.
+The evolution of the slow variables is obtained by applying a classical method, such as the forward Euler-Maruyama scheme, to an approximation of the simplified equation.
+As the coefficients appearing in this effective equation are usually unknown functions of the slow variables, they are estimated by solving for the fast variables on a short time interval.
+The time step used for the evolution of the slow variables is called the macro time step, whereas the time step used for the fast variables at each macro time step is called the micro time step.
+Schematically, the algorithm is composed of three building blocks: 
+\begin{itemize}
+	\item \emph{The micro-solver} is the numerical method used to integrate the fast process in time at each macro time step.  
+	\item \emph{The estimator} provides approximations of the coefficients of the effective equation, relying on the ergodicity of the fast process and using the solution given by the micro-solver.
+	\item \emph{The macro-solver} is the numerical method used to integrate the approximate effective equation, whose coefficients are calculated with the \emph{estimator}, based on the solution for the fast process given by the \emph{micro-solver} on a short time interval. 
+\end{itemize}
+The HMM applies to both the advective and the diffusive time scales.
+However, as this paper treats the diffusive time scale only, we will restrain our attention to this case.
+The method is suitable for (but not limited to) the following general multiscale system:
+\begin{equation*}
+	\left\{\begin{aligned}
+		\dot x &\,=\, \frac{1}{\varepsilon}\, f(x,\,y), \quad \quad & x(0) \,=\, x_0, \\ 
+		\dot y &\,=\, \frac{1}{{\varepsilon}^2}\, g(y) \,+\, \frac{1}{\varepsilon} h(x,\,y)\,+\, \frac{1}{\varepsilon}\,{\sigma}(y)\, \dot W, & \quad y(0) \,=\, y_0.
+	\end{aligned}\right.
+\end{equation*}
+Following the procedure outlined in \cite{weinan2005analysis}, the first step of the method is to construct an extended system. 
+\begin{equation*}
+   \left\{
+    \begin{aligned}
+        &\dot x   \, = \, \frac 1 {\varepsilon}   \, f(x,y_1) \, + \, y_2                     \, \cdot       \, \nabla_y   \, f (x, y_1) \\
+        &\dot y_1 \, = \, \frac 1 {\varepsilon^2} \, g(y_1)   \, + \, \frac{1}\varepsilon     \, \sigma(y_1) \, \dot W, \\
+        &\dot y_2 \, = \, \frac 1 {\varepsilon^2} \, h(x,y_1) \, + \, \frac{1}{\varepsilon^2} \, (y_2        \, \cdot      \, \nabla_y)   \, g(y_1) \, + \, \frac 1 \varepsilon \, (y_2 \, \cdot \, \nabla_y) \, \sigma(y_1) \, \dot W
+    \end{aligned}\right.
+\end{equation*}
 
-
+\noindent At each macro time step, the fast processes of this extended system are simulated over a small time of order $\mathcal O\left({1}/{{\varepsilon}^2}\right)$, while the slow variable $x$ is kept constant.
+Noting $Y_{n,m,k}^{1}$ and $Y_{n,m,k}^{2}$ the numerical solutions obtained at macro time step $n$, micro time step $m$, and for the $k$-th replica, using for simplicity Euler-Maruyama scheme at both scales, the coefficients of the simplified equation can be obtained by:
+The initial conditions at each macro time-step can be chosen using the last value of the previous macro time step. 
+The coefficients are estimated using the following formulae:
+\begin{align*}
+& \hat F_0(X_n) = \frac{({\delta}_t/{\varepsilon}^2)}{MN} \sum_{k=1}^{M} \sum_{m = n_T}^{n_T + N - 1} \sum_{m' = 0}^{N'} f(X_n, Y_{n,m,k}^{1})\,{\cdot}\,{\nabla}_x f(X_n, Y_{n,m+m',k}^{1}) \, , \\[0.3cm]
+& \hat F_1(X_n) \,=\, \frac{1}{MN} \sum_{k=1}^{M} \sum_{m = n_T}^{n_T + N - 1} Y_{n,m,k}^{2}\,{\cdot}\,{\nabla}_y f(X_n, Y_{n,m,k}^{1}) , \\[0.3cm]
+& \hat A_0(X_n) = \frac{2({\delta}_t/{\varepsilon}^2)}{MN} \sum_{k=1}^{M} \sum_{m = n_T}^{n_T + N - 1} \sum_{m' = 0}^{N'}  f(X_n, Y_{n,m,k}^{1}) \,{\otimes}\,f(X_n, Y_{n,m+m',k}^{1}).
+\end{align*}
+A weak convergence theorem of this algorithm is proven in \cite{weinan2005analysis} in the case where the macro-solver uses the Euler-Maruyama scheme, and an efficiency analysis is carried out.
 \subsection{Numerical example for the diffusive time scale}
 \label{sub:numerical_example}
 To illustrate the method, we present the numerical results for an example. We will consider the following stochastic partial differential equation, posed in the domain $ [ -{\pi},\,{\pi}]$ with periodic boundary conditions:
