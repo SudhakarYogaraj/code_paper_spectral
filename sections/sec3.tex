@@ -266,30 +266,15 @@ obtained for this case are in very good agreement with the theory also.
 
 \subsection{The advective time scale}
 \label{sec:the_advective_time_scale}
-Because it is much easier to handle than equations corresponding to the
-diffusive time scale, we have not dedicated much of this chapter to the
 advective time scale. For completeness, we present here how this case can be
 handled numerically. For the advective time scale, the truncated system
 associated with the SPDE is very similar, given by:
 \begin{equation}
     \left\{\begin{aligned} 
-            \dot x_{i}\,&=\,a^{i}(x,y)
-            & \quad i = 1,{\dots}, N;  \\ \dot y_{i}\,&=\,-\frac 1 {{\varepsilon}}\, {\lambda}_{i}
             y_{i}\,+\,b^{i}(x,y)\,+\,\frac 1{\sqrt {\varepsilon}}\,q_{i}\,{\xi}_{i} &
             \quad i = N+1, {\dots}N+M,
         \end{aligned} \right. 
 \end{equation}
-where $a$ and $b$ are defined as before. The difference is that, here,
-$a^i(x,y)$ does not satisfy the centering condition. Hence the effective
-equation for the slow modes is given by:
-$$
-\frac{\mathrm d X}{\mathrm d t}\,=\, F(X),
-$$
-where $F({\cdot})$ is given by
-$$
-F(X) \,=\, \int_{\mathbb R^M} a^i(x,y) \, {\rho}(y)\,dy.
-$$
-In this equation, ${\rho}$ denotes the probability density associated with the
 operator $\mathcal L_0^*$, as explained before. In this case, this density is
 Gaussian, and so computing the drift coefficient of the effective equation only
 requires the computation of a Gaussian integral. This can be done efficiently
