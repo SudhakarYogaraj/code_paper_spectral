@@ -172,14 +172,16 @@ The coefficients are estimated using the following formulae:
 & \hat A_0(X_n) = \frac{2({\delta}_t/{\varepsilon}^2)}{MN} \sum_{k=1}^{M} \sum_{m = n_T}^{n_T + N - 1} \sum_{m' = 0}^{N'}  f(X_n, Y_{n,m,k}^{1}) \,{\otimes}\,f(X_n, Y_{n,m+m',k}^{1}).
 \end{align*}
 A weak convergence theorem of this algorithm is proven in \cite{weinan2005analysis} in the case where the macro-solver uses the Euler-Maruyama scheme, and an efficiency analysis is carried out.
+
 \subsection{Numerical example}
 \label{sub:numerical_example}
-To illustrate the method, we present the numerical results for an example. We will consider the following stochastic partial differential equation, posed in the domain $ [ -{\pi},\,{\pi}]$ with periodic boundary conditions:
+We illustrate the method through two examples. 
+We will consider the following stochastic partial differential equation, posed in the domain $ [ -{\pi},\,{\pi}]$ with periodic boundary conditions:
 \begin{equation}
     \frac{{\partial}u}{{\partial}t} \,=\,\frac{1}{{\varepsilon}^2}\, \left( \frac{\partial}{{\partial}x^2} \,+\,I\right)\,u \,+\, \frac{1}{\varepsilon} \, u^2\,\left(\frac{{\partial}(u^2)}{{\partial}x}\right) \,+\, \frac{1}{\varepsilon} \, \sum_{ i\,=\,3}^{ {\infty}}  q_i\,{\xi}_i(t)\, e_i(x) 
     \label{eq: undefined label}
 \end{equation}
-In this expressions, $\left\{e_i\right\}_{i\,=\,1}^{\infty}$ are the eigenfunctions of the operator multiplying $1/{\varepsilon}^2$. Using traditional techniques, it is readily observed that these functions are given by
+In this expressions, $\left\{e_i\right\}_{i\,=\,1}^{\infty}$ are the eigenfunctions of the operator multiplying $1/{\varepsilon}^2$:
 \begin{equation*}
     e_i \,=\, \left\{
         \begin{aligned}
@@ -187,11 +189,14 @@ In this expressions, $\left\{e_i\right\}_{i\,=\,1}^{\infty}$ are the eigenfuncti
             & \frac{1}{\sqrt {\pi}}\cos\left(\frac{i}{2}\,x\right) &\quad \text{ if $i$ is even.}
         \end{aligned} \right .
 \end{equation*}
-We note $-{\lambda}_i$ the associated eigenvalues. Clearly, the eigenvalues corresponding with $i \,=\,1,2$ are equal to zero, i.e. the kernel of the differential operator is 2-dimensional. As explained before, we approximate the solution by a truncated Fourier series:
+We note $-{\lambda}_i$ the associated eigenvalues. 
+Clearly, the kernel of the differential operator is 2-dimensional.
+As explained before, we approximate the solution by a truncated Fourier series:
 \begin{equation*}
-    u \,=\, \sum_{ i\,=\,1}^{ 2} x_i\,e_i \,+\, \sum_{ i\,=\,3}^{ M\,+\,2} y_i \, e_i.
+    u \,=\, \sum_{ i\,=\,1}^{ 2} x_i\,e_i \,+\, \sum_{ i\,=\,3}^{ n\,+\,2} y_i \, e_i.
 \end{equation*}
-Substituting in the SPDE and taking the inner product with each of the eigenfunctions, a system of equation of the type \eqref{eq: fast-slow system SPDE} is obtained. Defining $z_i \,=\, x_i$ if $i \,=\,1,2$ and $z_i \,=\,y_i$ otherwise, the projection of the nonlinearity on the eigen-functions can be expressed as:
+Substituting in the SPDE and taking the inner product with each of the eigenfunctions, a system of equation of the type \eqref{eq: finite dimensional system of equations} is obtained.
+Defining $z_i \,=\, x_i$ if $i \,=\,1,2$ and $z_i \,=\,y_i$ otherwise, the projection of the nonlinearity on the eigen-functions can be expressed as:
 \begin{equation}
     \langle f(u),\,e_m\rangle \,=\,\sum_{ i\,=\,1}^{ M\,+\,2}\, \sum_{ j\,=\,1}^{ M\,+\,2}\,\sum_{ k\,=\,1}^{ M\,+\,2}\,\sum_{ {\ell}\,=\,1}^{ M\,+\,2}\, q_{ijk{\ell}m} \, z_i\,z_j\,z_k\,z_{\ell}, 
     \label{eq: projection nonlin example 1}
@@ -200,13 +205,34 @@ where we defined defined the coefficients $q_{ijk{\ell}m} \,=\, \langle\, Q(e_i,
 \begin{equation*}
     Q(u,v,f,g) \,=\, u \, v \, \frac{{\partial}(fg)}{{\partial}x}. 
 \end{equation*}
-We show how it can be checked that the centering condition is satisfied for this choice of the nonlinearity. From the previous equation, it is clear that the terms $a^1(x,y)$ and $a^2(x,y)$ of \eqref{eq: fast-slow system SPDE} are fourth degree polynomials in the variables. Since the leading order term $\mathcal L_0$ of the generator is the same as the one of an Ornstein-Uhlenbeck process, the density ${\rho}(y;x)$ in the kernel $\mathcal L_0^*$ is Gaussian. Hence, the only terms of $a^i(x,y)$ that could remain after integration with respect to ${\rho}$ are those of the type $x_i\,x_j\, y_k^2$, $y_k^2\,y_{\ell}^2$, and $x_i\,x_j\,x_k\,x_{\ell}$, where several indices can take the same value. Using symbolic math toolbox of MATLAB, it can be calculated that the corresponding coefficients in \eqref{eq: projection nonlin example 1} are all equal to zero, and so the centering condition is satisfied. Consequently, the theory of homogenization applies, and the evolution of the slow variables $x_1$ and $x_2$ can be approximated by the effective equation:
+Using MATLAB, it can be showed that the centering condition applies, and so the theory of homogenization applies. 
+The simplified equation associated with the slow modes is given by:
 \begin{equation}
     \dot X \,=\, F(X) \, \,+\, A(X) \, \frac{dW}{dt},
 \end{equation}
-where $x,F\,{\in}\,\mathbb R^2$, $A \,{\in}\,\mathbb R^{2{\times}2}$, and $W$ is a standard Wiener process in $\mathbb R^2$. The right hand side of the equation of the cell problem being a polynomial, it can be solved exactly using the MATLAB program that we have written, and so the exact expressions of the coefficients of the simplified equation can be obtained. Along with this exact solution obtained using symbolic calculations, the effective dynamics of the slow variables can be approximated by the heterogeneous multiscale method. The parameters of the method were chosen equal to $$ ({\delta}t/{\varepsilon}^2, n_T, M,N, N') = ( 2^{-p}, 16, 1 , 10{\times}2^{3p}, 2^pp),$$ so that the computational cost is minimized, based on the theoretical considerations presented in \cite{weinan2005analysis}. This method does not require any reference to the cell problem, which is an advantage. To check that it works, we compared the solution that it provides with the one obtained by solving the cell problem with Hermite polynomials. The error measure used is the same as in \cite{weinan2005analysis}, \red{to be completed}. Given the choice of parameters made, the error should theoretically behave as $\mathcal O(2^{- p })$. 
-
-In figures \ref{fig: spde different ps x1} and \ref{fig: spde different ps x2}, we compare the solution obtained by the heterogeneous method and the one using the exact solution of the cell problem corresponding with the truncated system of SDEs, using the same macro-solver for both. We note the former $X_n$ and the second $\hat X_n$. It can be observed that, when the value of the parameter $p$ is increased, the solution obtained using the HMM converges to the other one. In figure \ref{fig: spde error}, the error between $X_n$ and $\hat X_n$ is plotted as a function of the precision parameter, confirming the theory developed in \citep{abdulle2012numerical,weinan2005analysis}. Using the approximate solution for $x_1$ and $x_2$, an approximation of the solution of the initial SPDE can be obtained using the slow modes. However, in contrast with the deterministic homologue of equation \eqref{eq: undefined label}, the fast modes do not  decay to zero in general. Instead, the presence of the noise term implies that the amplitude of any of the fast modes is asymptotically distributed according to a given distribution, which tends to a normal distribution in the limit ${\varepsilon}\,\to\, 0$. The characteristic time of convergence of the fast processes to that invariant distribution is of order $\mathcal O({\varepsilon}^2)$, which is very short when ${\varepsilon}\,\leq\,1$. In the case of equation \eqref{eq: undefined label}, the approximation based on the slow modes is given by:
+where $X,F\,{\in}\,\mathbb R^2$, $A \,{\in}\,\mathbb R^{2{\times}2}$, and $W$ is a standard Wiener process in $\mathbb R^2$.
+In addition, it is clear that the right-hand side of the cell problem is a polynomial of degree 4 in the variables $z_i$.
+So the coefficients of the simplified equation can be obtained exactly, and the solution of the simplified equation can be compared with the one provided by the HMM.
+This latter method does not require any reference to the cell problem, which is an advantage. 
+The parameters of the method were chosen equal to $$ ({\delta}t/{\varepsilon}^2, n_T, M,N, N') = ( 2^{-p}, 16, 1 , 10{\times}2^{3p}, 2^pp),$$ so that the computational cost is minimized, based on the theoretical considerations presented in \cite{weinan2005analysis}. 
+In the comparison of the The error measure used is the same as in
+\cite{weinan2005analysis}, \red{to be completed}. Given the choice of
+parameters made, the error should theoretically behave as $\mathcal O(2^{- p
+})$.  In figures \ref{fig: spde different ps x1} and \ref{fig: spde different
+    ps x2}, we compare the solution obtained by the heterogeneous method and
+the one using the exact solution of the cell problem, using the method of Euler-Maruyama for the micro and macro-solvers. 
+We note the former $X_n$ and the second $\hat X_n$. 
+It can be observed that, when the value of the parameter $p$ is increased, the solution obtained using the HMM converges to the other one.
+In figure \ref{fig: spde error}, the error between $X_n$ and $\hat X_n$ is plotted as a function of the precision parameter, confirming the theory developed in \citep{abdulle2012numerical,weinan2005analysis}.
+Using the approximate solution for $x_1$ and $x_2$, an approximation of the solution of the initial SPDE can be obtained using the slow modes.
+However, in contrast with the deterministic homologue of equation \eqref{eq: undefined label}, the fast modes do not  decay to zero in general.
+Instead, the presence of the noise term implies that the amplitude of any of the fast modes is asymptotically distributed according to a
+given distribution, which tends to a normal distribution in the limit
+${\varepsilon}\,\to\, 0$. The characteristic time of convergence of the fast
+processes to that invariant distribution is of order $\mathcal
+O({\varepsilon}^2)$, which is very short when ${\varepsilon}\,\leq\,1$. In the
+case of equation \eqref{eq: undefined label}, the approximation based on the
+slow modes is given by:
 \begin{equation*}
     u(x,t) \,\,{\approx}\,\, X_1(t) \,\frac{\sin(x)}{\sqrt{\pi}} \,+\, X_2(t) \,\frac{\cos(x)}{\sqrt{\pi}}. 
 \end{equation*}
@@ -276,13 +302,13 @@ For the advective time scale, the truncated system associated with the SPDE is v
         \end{aligned} \right. 
 \end{equation}
 where $a$ and $b$ are defined as before. The difference is that, here, $a(x,y)$ does not satisfy the centering condition.
-Hence, the effective equation for the slow modes is given by:
+Hence, the effective equation for the slow modes has the following form:
 $$ \frac{\d X}{\d t}\,=\, F(X), $$
 where $F(\cdot)$ is given by
 $$ F(X) \,=\, \int_{\mathbb R^n} a(x,y) \, \rho(y)\, \d y.  $$
 In this equation, $\rho$ denotes the same probability density as before. 
 Since this density is Gaussian, computing the drift coefficient of the effective equation only requires the computation of a Gaussian integral.
-This can be done efficiently using classical integration techniques, such as Gauss-Hermite integration, or using Monte-Carlo method, which proves very efficient in high dimension.
-In the case of a quadratic nonlinearity, it is possible to obtain an exact analytical expression of the coefficients as demonstrated in \cite{abdulle2012numerical}.
+This can be done efficiently using classical integration techniques, such as Gauss-Hermite integration, or using the Monte-Carlo method, which proves very efficient in high dimensional problems.
+In the case of a quadratic nonlinearity, it is possible to obtain an exact analytical expression of the coefficients, as demonstrated in \cite{abdulle2012numerical}.
 The HMM can also be used to find an approximate solution of the system.
 However, this approach is more expensive than a simple integration, so its use is not really justified in this case. 
