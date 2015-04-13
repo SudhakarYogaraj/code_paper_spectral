@@ -1,0 +1,2 @@
+vector< vector<double> > Problem::dax(vector<double> x, vector<double> y) { 
+    vector< vector<double> > result(this->d,vector<double>(this->d,0.));
