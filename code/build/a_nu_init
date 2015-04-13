@@ -1,0 +1,2 @@
+vector<double> Problem::a_nu(vector<double> x, vector<double> y) {
+    vector<double> result(this->d,0.);
