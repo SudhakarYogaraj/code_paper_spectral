@@ -1,6 +1,6 @@
 # Literature pdf files
 figures/
-code/
+*.exec
 *\~
 
 ## Addition to the default .gitignore
