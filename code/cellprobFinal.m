@@ -5,7 +5,7 @@ clc; clear all; close all;
 %% Parameters of the simulation
 alpha = 1;
 
-lambda = [3;1]; q = [1;1]; 
+lambda = [3 1]; q = [1 2]; 
 sigma = (sqrt(q.^2./(2*lambda)));
 
 % Symbolic variables
@@ -26,7 +26,7 @@ for k=1:nvars;
 end
 
 % Maximal degree
-N = 10; 
+N = 20; 
 
 % Basis
 basis = sym(zeros(N + 1, nvars));
@@ -90,7 +90,7 @@ f = sin(ys(1))*ys(2);
 A = zeros(length(bvec));
 for i = 1:length(bvec)
     for j = 1:length(bvec)
-        I = oper(bvec(i))*bvec(i);
+        I = oper(bvec(i))*bvec(i)
         
     end
 end
@@ -164,6 +164,4 @@ for i = 2:length(t)
 end
 
 plot(t,x,t,X);
-
 end
-

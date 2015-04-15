@@ -99,7 +99,7 @@ f_n   = matlabFunction(fy);
 rho_n = matlabFunction(rho);
 fd_n  = matlabFunction(fd);
 
-method = 'MONTECARLO';
+method = 'NUMERICAL';
 switch method
     
     % Symbolic integration for the projection

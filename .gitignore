@@ -1,7 +1,9 @@
 # Literature pdf files
 figures/
 *.exec
+*.mat
 *\~
+Session.vim
 
 ## Addition to the default .gitignore
 *.sty
