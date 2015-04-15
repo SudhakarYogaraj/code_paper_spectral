@@ -21,7 +21,7 @@ syms pi real positive;
 %% Hermite basis of polynomials
 
 % Maximal degree
-N = 10; 
+N = 15; 
 
 % Weight function
 gamma = 1/sqrt(sym(pi))*exp(-y^2);
@@ -56,7 +56,7 @@ c'
 
 % basis = mon_y(2:end);
 
-V = y^2 - 10*y^4*exp(-2*y^2);
+V = y^2 %- 10*y^4*exp(-2*y^2);
 rho = exp(-V);
 oper = @(f) diff(V)*diff(f) - diff(f,2);
 
