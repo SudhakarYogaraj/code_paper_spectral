@@ -275,44 +275,4 @@ the approximate solution obtained by our numerical scheme. Three sources of erro
     \begin{equation*}
         \hat X_{n+1} \,-\, X^{t_n,\hat X^n}_{t_{n+1}} \,=\,  
     \end{equation*}
-    
-
-
 \end{proof}
-
-
-
-\begin{assumption}
-    For every $x \in \real^d$, we have $f(x,\cdot)\in H^n(\real^N, \rho)^d$, $\nabla_x f(x,\cdot) \in H^n(\real^N, \rho)^(d\times d)$, and $h(x,\cdot) \in L^2(\real^N, \rho)^N$. In addition, these functions satisfy the 
-    boundedness property that for all $R>0$, there exists $B_R$ such that
-    $$
-    \|h(x,\cdot)\|_{\rho}\,{\vee}\,
-    \|f(x,\cdot)\|_{{\rho},n}\,{\vee}\,\|\nabla_x f(x,\cdot)\|_{{\rho},n}
-    \,{\leq}\, B_R \quad \text{for all} \quad |x| \,{\leq}\,R.
-    $$
-\end{assumption}
-\begin{assumption}
-    The exact drift and diffusion coefficients satisfy the following
-    Lipschitz condition:
-    $$ 
-    \left|F(a)-F(b)\right|^2\,{\vee}\,\left|A(a)-A(b)\right|^2\, {\leq} \,C_R\, |a-b|^2
-    $$
-    for any $a,b$ such that $a,b\, {\leq} \,R$.
-    \label{assumption Lipshitz}
-\end{assumption}
-\begin{assumption}
-    There exists $p>2$ and a constant $K$ independent of $d$ such that the solutions of the equations 
-    $$
-    \mathrm dX=F(X)\,\mathrm dt\,+\,A(X)\,\mathrm dW_t \quad \quad X(0) \,=\,X_0
-    $$
-    and 
-    $$
-    \mathrm dX_d=F_d(X_d)\,\mathrm dt\,+\,A_d(X_d)\,\mathrm dW_t  \quad \quad X_d(0) \,=\,X_0 
-    $$
-    satisfy
-    $$
-    \mathbb E\left[\sup_{0 {\leq} t  {\leq} T} |X(t)|^p\right]\,{\vee}\,\mathbb
-    E\left[\sup_{0 {\leq} t  {\leq} T} |X_d(t)|^p\right] \, {\leq} \,K
-    $$
-    \label{assumption: bounded moments}
-\end{assumption} 
