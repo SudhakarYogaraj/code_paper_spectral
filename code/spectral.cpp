@@ -26,14 +26,14 @@ int bin(int n, int k) {
 }
 
 // Functions of the problem
-double slow_drift(double x, double y) {
-    return sin(x)*cos(y);
+double slow_drift(double x, vector<double> y) {
+    return sin(x)*cos(y[1]);
 }
 double h(double x, double y) {
     return cos(x)*cos(y);
 }
 
-// Physicists' Hermite polynomials
+// Normalized Hermite polynomials
 double hermite(int n, double x, double sigma) {    
     double toReturn = 0.;
 
@@ -76,7 +76,7 @@ double hermite(int n, double x, double sigma) {
 int main(int argc, char *argv[]) {
 
     // Degree of polynomials approximation.
-    int degree = 10;
+    int degree = 6;
 
     // Macro time step
     double Dt = .1;
@@ -97,7 +97,6 @@ int main(int argc, char *argv[]) {
 
     // Relation linear index - multiindex
     vector< vector<int> > indexMap(nBasis, vector<int>(nf,0));
-
     vector<int> currentMult(nf,0);
     currentMult[nf-1] = 0;
     int movingIndex;
@@ -120,59 +119,45 @@ int main(int argc, char *argv[]) {
             currentMult[auxIndex-1] ++;
         } 
     }
-    for (int i = 0; i < nBasis; ++i) {
-       cout << "Element number " << i << ": ";
-       for (int j = 0; j < nf; ++j) {
-           cout << indexMap[i][j] << ", ";
-       }
-       cout << endl;
-    }
 
     // Final time
     double T = 1;
 
-    // Vector of coefficients
-    vector<double> coefficients(degree+1, 0.);
 
     // Vector of times
     int sizet = (int) (T/Dt) + 1;
     vector<double> t(sizet,0.);
-
-    // Construction of the vector containing the times at which
-    // the slow variable is calculated
     for (int i = 0; i < sizet; i++) {
         t[i] = i*Dt;
     }
 
-    // Random variable for generator
+    // Parameters for random numbers
     int seed = time(NULL);
-
-    // Random number generator
     default_random_engine generator; generator.seed(seed);
     normal_distribution<double> distribution(0.0,1.0);
 
     // Slow variable
     vector<double> x(sizet,0.2);
 
-    // Macro loop
     for (int i = 0; i < sizet; ++i) {
-        
         cout << "Time of simulation: " << t[i] << endl;
-
-        // Solution of the cell problem
-
-        // Computation of the coefficients
-        for (int n = 0; n <= nBasis; ++n) {
-
-            // Monte Carlo
+        vector<double> coefficients(nBasis, 0.);
+        for (int j = 0; j < nBasis; ++j) {
+            vector<int> multIndex = indexMap[j];
             int N_mc = 100000;
             double sum = 0.;
+
+            // Monte-Carlo to compute the coefficients
             for (int k = 0; k < N_mc; ++k) {
-                double randn = distribution(generator);
-                sum += hermite(n,randn,1.)*slow_drift(x[i],randn);   
+                vector<double> randn(nf, 0.);
+                double h_eval = 1.;
+                for (int l = 0; l < nf; ++l) {
+                    randn[l] = distribution(generator);
+                    h_eval *= hermite(multIndex[l],randn[l],sigmas[l]);
+                }
+                coefficients[j] += h_eval*slow_drift(x[i],randn);
             }
-            coefficients[n] = sum/N_mc;
-            cout << "Value of coefficient " << coefficients[n] << endl;
+            coefficients[j] = coefficients[j]/N_mc;
         }
         cout << endl;
     }
