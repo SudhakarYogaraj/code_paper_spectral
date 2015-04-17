@@ -13,10 +13,10 @@ using namespace std;
 // Binomial coefficients
 int bin(int n, int k) {
     int res = 1;
- 
+
     if ( k > n - k )
         k = n - k;
- 
+
     for (int i = 0; i < k; ++i)
     {
         res *= (n - i);
@@ -29,8 +29,14 @@ int bin(int n, int k) {
 double slow_drift(double x, vector<double> y) {
     return sin(x)*cos(y[1]);
 }
-double h(double x, double y) {
-    return cos(x)*cos(y);
+
+double slow_drift_dx(double x, vector<double> y) {
+    return cos(x)*cos(y[1]);
+}
+
+vector<double> fast_drift_h(double x, vector<double> y) {
+    vector<double> toReturn = {0.,0.,0.};
+    return toReturn;
 }
 
 // Normalized Hermite polynomials
@@ -72,6 +78,18 @@ double hermite(int n, double x, double sigma) {
     return toReturn;
 }
 
+vector<double> mult2ind() {
+}
+
+// Canonical integer associated with a multindex
+int canonicalInd(vector<int> alpha, int n, int degree) {
+    int toReturn; 
+    for (int j = 0; j < n; ++j) {
+        toReturn += alpha[j]*pow(degree + 1, n -j - 1);
+    }
+    return toReturn;
+}
+
 // Main method
 int main(int argc, char *argv[]) {
 
@@ -96,14 +114,14 @@ int main(int argc, char *argv[]) {
     int nBasis = bin(degree + nf, nf);
 
     // Relation linear index - multiindex
-    vector< vector<int> > indexMap(nBasis, vector<int>(nf,0));
+    vector< vector<int> > ind2mult(nBasis, vector<int>(nf,0));
+    vector<int> mult2ind(pow(degree + 1, nf), -1);
     vector<int> currentMult(nf,0);
-    currentMult[nf-1] = 0;
-    int movingIndex;
     for (int i = 0; i < nBasis; ++i) {
         for (int j = 0; j < nf; ++j) {
-            indexMap[i][j] = currentMult[j];
+            ind2mult[i][j] = currentMult[j];
         }
+        mult2ind[canonicalInd(currentMult, nf, degree)] = i;
         int sum = 0;
         for (int j = 0; j < nf; ++j) {
             sum += currentMult[j];
@@ -119,6 +137,8 @@ int main(int argc, char *argv[]) {
             currentMult[auxIndex-1] ++;
         } 
     }
+
+
 
     // Final time
     double T = 1;
@@ -144,8 +164,10 @@ int main(int argc, char *argv[]) {
 
         // Expansion of right-hand side of the Poisson equation
         vector<double> coefficients(nBasis, 0.);
+        vector<double> coefficients_dx(nBasis, 0.);
+        vector< vector<double> > coefficients_h(nBasis, vector<double>(nf,0.));
         for (int j = 0; j < nBasis; ++j) {
-            vector<int> multIndex = indexMap[j];
+            vector<int> multIndex = ind2mult[j];
             int N_mc = 100000;
             double sum = 0.;
 
@@ -158,20 +180,49 @@ int main(int argc, char *argv[]) {
                     h_eval *= hermite(multIndex[l],randn[l],sigmas[l]);
                 }
                 coefficients[j] += h_eval*slow_drift(x[i],randn);
+                coefficients_dx[j] += h_eval*slow_drift_dx(x[i],randn);
+                vector<double> fast_drift_aux = fast_drift_h(x[i],randn);
+                for (int l = 0; l < nf; ++l) {
+                    coefficients_h[j][l] += h_eval*fast_drift_aux[l];
+                }
             }
             coefficients[j] = coefficients[j]/N_mc;
+            coefficients_dx[j] = coefficients_dx[j]/N_mc;
+            for (int l = 0; l < nf; ++l) {
+                coefficients_h[j][l] = coefficients_h[j][l]/N_mc;
+            }
         }
 
         // Solution of the Poisson equation
         vector<double> solution(nBasis, 0.);
+        vector<double> solution_dx(nBasis, 0.);
+        vector< vector<double> > solution_dy(nBasis, vector<double>(nf,0.));
         for (int j = 0; j < nBasis; ++j) {
             double eig = 0.;
             for (int k = 0; k < nf; ++k) {
-                eig += indexMap[j][k]*lambdas[k];
+                eig += ind2mult[j][k]*lambdas[k];
             }
             solution[j] = coefficients[j]/eig;
+            solution_dx[j] = coefficients_dx[j]/eig;
+            for (int l = 0; l < nf; ++l) {
+                solution_dy[j][l] = solution[j];
+            }
         }
 
+
+        // Calculation of the coefficients of the simplified equation
+        double F1 = 0., F2 = 0., A0 = 0.;
+        for (int j = 0; j < nBasis; ++j) {
+
+            F1 += solution_dx[j]*coefficients[j];
+
+            // For F2, map multi-index to linear index.
+            /* for (int k = 0; k < nf; ++k) { */
+            /*     F2 += solution_dy[j]*sqrt(n+1)/sigmas[k] */
+            /* } */
+
+            A0 += solution[j]*coefficients[j];
+        }
         cout << endl;
     }
 }
