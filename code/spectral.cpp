@@ -76,7 +76,7 @@ double hermite(int n, double x, double sigma) {
 int main(int argc, char *argv[]) {
 
     // Degree of polynomials approximation.
-    int degree = 6;
+    int degree = 3;
 
     // Macro time step
     double Dt = .1;
@@ -141,6 +141,8 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < sizet; ++i) {
         cout << "Time of simulation: " << t[i] << endl;
+
+        // Expansion of right-hand side of the Poisson equation
         vector<double> coefficients(nBasis, 0.);
         for (int j = 0; j < nBasis; ++j) {
             vector<int> multIndex = indexMap[j];
@@ -159,6 +161,17 @@ int main(int argc, char *argv[]) {
             }
             coefficients[j] = coefficients[j]/N_mc;
         }
+
+        // Solution of the Poisson equation
+        vector<double> solution(nBasis, 0.);
+        for (int j = 0; j < nBasis; ++j) {
+            double eig = 0.;
+            for (int k = 0; k < nf; ++k) {
+                eig += indexMap[j][k]*lambdas[k];
+            }
+            solution[j] = coefficients[j]/eig;
+        }
+
         cout << endl;
     }
 }
