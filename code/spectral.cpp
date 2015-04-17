@@ -138,18 +138,6 @@ int main(int argc, char *argv[]) {
         } 
     }
 
-    // Test of thing
-    for (int j = 0; j < nBasis; ++j) {
-        cout << "Element number " << j << ": ";
-        for (int k = 0; k < nf; ++k) {
-            cout << ind2mult[j][k] << ", ";
-        }
-        cout << endl;
-        vector<int> auxMult = ind2mult[j];
-        int auxInd = canonicalInd(auxMult, nf, degree); 
-        cout << "Associated ind" << mult2ind[auxInd] << endl << endl;
-    }
-
     // Final time
     double T = 1;
 
@@ -214,8 +202,21 @@ int main(int argc, char *argv[]) {
             }
             solution[j] = coefficients[j]/eig;
             solution_dx[j] = coefficients_dx[j]/eig;
+            vector<int> thisMult = ind2mult[j];
+            int sum = 0;
             for (int l = 0; l < nf; ++l) {
-                solution_dy[j][l] = solution[j];
+                sum += thisMult[l];
+            }
+            if (sum < degree) {
+                for (int l = 0; l < nf; ++l) {
+                    vector<int> newMult(nf, 0);
+                    for (int m = 0; m < nf; ++m) {
+                        newMult[m] = thisMult[m];
+                    }
+                    newMult[l] = newMult[l] + 1;
+                    int newInd = mult2ind[canonicalInd(newMult, nf, degree)];
+                    solution_dy[j][l] = solution[newInd]*sqrt(newMult[l])/sigmas[l];
+                }
             }
         }
 
@@ -226,10 +227,9 @@ int main(int argc, char *argv[]) {
 
             F1 += solution_dx[j]*coefficients[j];
 
-            // For F2, map multi-index to linear index.
-            /* for (int k = 0; k < nf; ++k) { */
-            /*     F2 += solution_dy[j]*sqrt(n+1)/sigmas[k] */
-            /* } */
+            for (int k = 0; k < nf; ++k) {
+                F2 += solution_dy[j][k]*coefficients_h[j][k];
+            }
 
             A0 += solution[j]*coefficients[j];
         }
