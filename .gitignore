@@ -3,6 +3,7 @@ figures/
 *.exec
 *.mat
 *\~
+.dropbox
 Session.vim
 
 ## Addition to the default .gitignore
