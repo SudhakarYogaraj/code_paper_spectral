@@ -10,10 +10,27 @@
 // Namespace
 using namespace std;
 
+// Binomial coefficients
+int bin(int n, int k) {
+    int res = 1;
+ 
+    if ( k > n - k )
+        k = n - k;
+ 
+    for (int i = 0; i < k; ++i)
+    {
+        res *= (n - i);
+        res /= (i + 1);
+    }
+    return res;
+}
 
 // Functions of the problem
-double f(double x, double y) {
+double slow_drift(double x, double y) {
     return sin(x)*cos(y);
+}
+double h(double x, double y) {
+    return cos(x)*cos(y);
 }
 
 // Physicists' Hermite polynomials
@@ -52,21 +69,69 @@ double hermite(int n, double x, double sigma) {
         case 20: toReturn = 2.149162627629654E2*((x*x)*-6.54729075E9+(x*x*x*x)*9.820936125E9-(x*x*x*x*x*x)*5.2378326E9+(x*x*x*x*x*x*x*x)*1.30945815E9-pow(x,1.0E1)*1.7459442E8+pow(x,1.2E1)*1.322685E7-pow(x,1.4E1)*5.814E5+pow(x,1.6E1)*1.4535E4-pow(x,1.8E1)*1.9E2+pow(x,2.0E1)+6.54729075E8)*2.983104118295037E-12; break;
         default: cout << "Degree too high" << endl; exit(0);
     }
-
     return toReturn;
 }
 
 // Main method
 int main(int argc, char *argv[]) {
 
+    // Degree of polynomials approximation.
+    int degree = 10;
+
     // Macro time step
     double Dt = .1;
+
+    // Number of fast variables
+    int nf = 3;
+
+    // Eigenvalues
+    vector<double> lambdas = {1.,2.,4.};
+    vector<double> qs      = {2.,4.,2.};
+    vector<double> sigmas(nf, 0.);
+    for (int i = 0; i < nf; ++i) {
+        sigmas[i] = sqrt(0.5*qs[i]*qs[i]/lambdas[i]);
+    }
+
+    // Number of polynomials in the basis
+    int nBasis = bin(degree + nf, nf);
+
+    // Relation linear index - multiindex
+    vector< vector<int> > indexMap(nBasis, vector<int>(nf,0));
+
+    vector<int> currentMult(nf,0);
+    currentMult[nf-1] = 0;
+    int movingIndex;
+    for (int i = 0; i < nBasis; ++i) {
+        for (int j = 0; j < nf; ++j) {
+            indexMap[i][j] = currentMult[j];
+        }
+        int sum = 0;
+        for (int j = 0; j < nf; ++j) {
+            sum += currentMult[j];
+        }
+        if (sum < degree) {
+            currentMult[nf-1] += 1;
+        } else {
+            int auxIndex = nf - 1;
+            while (currentMult[auxIndex] == 0) {
+                auxIndex --;
+            }
+            currentMult[auxIndex] = 0;
+            currentMult[auxIndex-1] ++;
+        } 
+    }
+    for (int i = 0; i < nBasis; ++i) {
+       cout << "Element number " << i << ": ";
+       for (int j = 0; j < nf; ++j) {
+           cout << indexMap[i][j] << ", ";
+       }
+       cout << endl;
+    }
 
     // Final time
     double T = 1;
 
     // Vector of coefficients
-    int degree = 10;
     vector<double> coefficients(degree+1, 0.);
 
     // Vector of times
@@ -97,14 +162,14 @@ int main(int argc, char *argv[]) {
         // Solution of the cell problem
 
         // Computation of the coefficients
-        for (int n = 0; n <= degree; ++n) {
+        for (int n = 0; n <= nBasis; ++n) {
 
             // Monte Carlo
             int N_mc = 100000;
             double sum = 0.;
             for (int k = 0; k < N_mc; ++k) {
                 double randn = distribution(generator);
-                sum += hermite(n,randn,1.)*f(x[i],randn);   
+                sum += hermite(n,randn,1.)*slow_drift(x[i],randn);   
             }
             coefficients[n] = sum/N_mc;
             cout << "Value of coefficient " << coefficients[n] << endl;
