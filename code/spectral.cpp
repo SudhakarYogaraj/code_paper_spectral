@@ -94,7 +94,7 @@ int canonicalInd(vector<int> alpha, int n, int degree) {
 int main(int argc, char *argv[]) {
 
     // Degree of polynomials approximation.
-    int degree = 3;
+    int degree = 6;
 
     // Macro time step
     double Dt = .1;
@@ -138,7 +138,17 @@ int main(int argc, char *argv[]) {
         } 
     }
 
-
+    // Test of thing
+    for (int j = 0; j < nBasis; ++j) {
+        cout << "Element number " << j << ": ";
+        for (int k = 0; k < nf; ++k) {
+            cout << ind2mult[j][k] << ", ";
+        }
+        cout << endl;
+        vector<int> auxMult = ind2mult[j];
+        int auxInd = canonicalInd(auxMult, nf, degree); 
+        cout << "Associated ind" << mult2ind[auxInd] << endl << endl;
+    }
 
     // Final time
     double T = 1;
