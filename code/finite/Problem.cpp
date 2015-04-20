@@ -27,7 +27,6 @@ vector< vector<double> > Problem::soldiff(vector<double> x) {
     vector< vector<double> > result(this->d,vector<double>(this->d,0.));
     result[0][0] = pow(x[0]-2,2)/12.;
     result = cholesky(result);
-    result[0][0] = sqrt(result[0][0]);
     return result;
 }
 
