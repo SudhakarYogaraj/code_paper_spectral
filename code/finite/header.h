@@ -106,3 +106,9 @@ double normMat (vector< vector<double> > x);
 
 // Write matrix to a file
 void writeMatToFile(string s, vector< vector<double> > x);
+
+// Normalized Hermite polynomials
+double hermite(int n, double x, double sigma);    
+
+// Binomial coefficients
+int bin(int n, int k);
