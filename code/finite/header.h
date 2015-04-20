@@ -21,20 +21,27 @@ class Problem {
 
         // Number of fast processes
         int nf;
+
+        // Number of slow processes
         int d;
-        double nu;
 
         // Initial condition for the slow process
         vector<double> x0;
         
         // Drift coefficient of the slow process
         vector<double> a(vector<double> x, vector<double> y); // f0 in Pavliotis-Stuart
-        vector<double> a_nu(vector<double> x, vector<double> y); // f1 in Pavliotis-Stuart
         
         // Derivatives of a(,)
         vector< vector<double> > dax(vector<double> x, vector<double> y);
         vector< vector<double> > day(vector<double> x, vector<double> y);
 
+        // FOR SPECTRAL
+        // Non-leading order part of drift in the fast process
+        vector<double>  fast_drift_h(vector<double> x, vector<double> y);
+        vector<double> lambdas;
+        vector<double> betas;
+
+        // FOR HMM
         // Drift and diffusion terms of the fast system, in its transformed 
         // version. The first nf components correspond to the initial 
 		// variables, whereas the last nf components correspend to the
