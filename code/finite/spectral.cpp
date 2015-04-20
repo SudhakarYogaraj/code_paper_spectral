@@ -7,8 +7,15 @@
 #include <fstream>
 #include <time.h>
 
+/* TODO: Take problem as input (urbain, Sun 19 Apr 2015 13:45:33 BST) */
+
 // Namespace
 using namespace std;
+
+struct sde_data {
+    vector<double> drift;
+    vector<double> diffusion;
+}
 
 // Binomial coefficients
 int bin(int n, int k) {
