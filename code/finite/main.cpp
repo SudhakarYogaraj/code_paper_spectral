@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     normal_distribution<double> distribution(0.0,1.0);
     
     // Precision of the cout command
-    cout.precision(4);
+    cout.precision(8);
     cout << scientific;
 
     // Macro time-step
@@ -83,8 +83,10 @@ int main(int argc, char* argv[])
             // Initial value for the fast process at each macro time-step
             vector<double> yInit(2*problem.nf, 0.); 
 
+            int seed = (int) abs(1000*distribution(generator));
+
             // Solution of the problem using the HMM method
-            solve(problem, solver, xt[i], yInit, fi, hi, t[i]);
+            solve(problem, solver, xt[i], yInit, fi, hi, seed, t[i]);
 
 
             // Output to terminal
