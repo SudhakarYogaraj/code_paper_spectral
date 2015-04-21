@@ -70,7 +70,9 @@ void solve_spectral(Problem &problem, \
     vector< vector<double> > coefficients(ns, vector<double>(nBasis, 0.));
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nBasis, 0.)));
     vector< vector<double> > coefficients_h(nf, vector<double>(nBasis,0.));
+
     for (int j = 0; j < nBasis; ++j) {
+        cout << "Calculating ceofficient " << j << endl;
         vector<int> multIndex = ind2mult[j];
         int N_mc = 100000;
         double sum = 0.;
@@ -78,12 +80,13 @@ void solve_spectral(Problem &problem, \
         // Monte-Carlo to compute the coefficients
         for (int k = 0; k < N_mc; ++k) {
 
+            cout << "k = " << k << endl;
             vector<double> randn(nf, 0.);
 
             for (int l = 0; l < nf; ++l) 
                 randn[l] = distribution(generator);
             double h_eval = hermiteM(multIndex,randn,sigmas);
-            
+
             vector<double> slow_drift = problem.a(xt,randn);
             vector< vector<double> > slow_drift_dx = problem.dax(xt,randn);
             for (int l = 0; l < ns; ++l) {
@@ -92,8 +95,14 @@ void solve_spectral(Problem &problem, \
                     coefficients_dx[l][m][j] += h_eval*slow_drift_dx[l][m];
                 }
             }
+
             vector<double> fast_drift_aux = problem.fast_drift_h(xt,randn);
             for (int l = 0; l < nf; ++l) {
+                cout << h_eval << endl;
+                cout << fast_drift_aux[l];
+                cout << "l = " << l; 
+                exit(0);
+
                 coefficients_h[l][j] += h_eval*fast_drift_aux[l];
             }
         }
@@ -106,6 +115,8 @@ void solve_spectral(Problem &problem, \
             coefficients_h[l][j] /= N_mc;
         }
     }
+
+    cout << "Stage 2 successful" << endl;
 
     // Solution of the Poisson equation
     vector< vector<double> > solution(ns, vector<double>(nBasis,0.));
@@ -140,6 +151,8 @@ void solve_spectral(Problem &problem, \
         }
     }
 
+    cout << "Stage 3 successful" << endl;
+
     // Calculation of the coefficients of the simplified equation
     vector<double> F1(ns, 0.);
     vector<double> F2(ns, 0.);
@@ -160,6 +173,7 @@ void solve_spectral(Problem &problem, \
                 A0[k][l] += 2*solution[k][j]*coefficients[l][j];
         }
     }
+    
 
     hi = cholesky(A0);
     for (int i = 0; i < ns; ++i) 

@@ -79,9 +79,8 @@ class Solver {
 		void set(double p, int M);
 };
 
-// Function used to solve the multiscale problem, given the parameter
-// specified in the solver.
 void solve_hmm(Problem &problem, Solver &solver, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
+void solve_spectral(Problem &problem, Solver &solver, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
 
 // Function to write vector to a file
 void writeToFile(string s, vector<double> x);
