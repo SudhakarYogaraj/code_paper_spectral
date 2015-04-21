@@ -180,6 +180,14 @@ double solve(int seed, Problem &problem, Solver &solver) {
         } 
         
         // Approximate diffusion coefficient
+        cout << "   Diffusion coefficient before cholesky: " << endl;
+        printMat(hi); cout << endl;
+
+        hi = symmetric(hi);
+
+        cout << "   Symmetric part of the diffusion" << endl;
+        printMat(hi); cout << endl;
+
         hi = cholesky(hi);
         
         // Initial condition for next iteratation

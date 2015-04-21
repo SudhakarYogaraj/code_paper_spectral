@@ -82,6 +82,9 @@ void writeToFile(string s, vector<double> x);
 // Kronecker delta
 double delta(int a, int b);
 
+// Symmetric part
+vector< vector<double> > symmetric(vector< vector<double> > A);
+
 // Cholesky factorization
 vector< vector<double> > cholesky(vector< vector<double> > A);
 
