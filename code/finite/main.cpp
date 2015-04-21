@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 	problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {2,2.5,3,3.5,4,4.5,5,5.5,6};
+    vector<double> p_values = {5.};
 
 	// Vector of the log of the error
     vector<double> errors(p_values.size(), 0.);
