@@ -1,4 +1,3 @@
-// Working version of the code
 #include "header.h"
 
 /* TODO: Integrate spectral method in the code (urbain, Mon 20 Apr 2015 14:40:06 BST) */
@@ -86,7 +85,7 @@ int main(int argc, char* argv[])
             int seed = (int) abs(1000*distribution(generator));
 
             // Solution of the problem using the HMM method
-            solve(problem, solver, xt[i], yInit, fi, hi, seed, t[i]);
+            solve_hmm(problem, solver, xt[i], yInit, fi, hi, seed, t[i]);
 
 
             // Output to terminal

@@ -1,14 +1,14 @@
 #include "header.h"
 
 // Function implementing the numerical method
-void solve(Problem &problem, \
-        Solver &solver, \
-        vector<double> xt, \
-        vector<double>& yInit, \
-        vector<double>& fi, \
-        vector< vector<double> >& hi, \
-        int seed, \
-        double t) { 
+void solve_hmm(Problem &problem, \
+               Solver &solver, \
+               vector<double> xt, \
+               vector<double>& yInit, \
+               vector<double>& fi, \
+               vector< vector<double> >& hi, \
+               int seed, \
+               double t) { 
 
     default_random_engine generator; 
     normal_distribution<double> distribution(0.0,1.0);
@@ -126,7 +126,7 @@ void solve(Problem &problem, \
     } 
 
     // Approximate diffusion coefficient
-    hi = cholesky(hi);
+    hi = cholesky(symmetric(hi));
 
     // Initial condition for next iteration and storage of y
     yInit = yAux[yAux.size()-1]; 

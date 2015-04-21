@@ -81,13 +81,16 @@ class Solver {
 
 // Function used to solve the multiscale problem, given the parameter
 // specified in the solver.
-void solve(Problem &problem, Solver &solver, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
+void solve_hmm(Problem &problem, Solver &solver, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
 
 // Function to write vector to a file
 void writeToFile(string s, vector<double> x);
 
 // Kronecker delta
 double delta(int a, int b);
+
+// Symmetric part
+vector< vector<double> > symmetric(vector< vector<double> > A);
 
 // Cholesky factorization
 vector< vector<double> > cholesky(vector< vector<double> > A);
@@ -109,6 +112,8 @@ void writeMatToFile(string s, vector< vector<double> > x);
 
 // Normalized Hermite polynomials
 double hermite(int n, double x, double sigma);    
+double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas);
 
 // Binomial coefficients
 int bin(int n, int k);
+
