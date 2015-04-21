@@ -36,6 +36,20 @@ double delta(int a, int b) {
 	else return 0.;
 }
 
+// Symmetric part of a matrix
+vector< vector<double> > symmetric(vector< vector<double> > A) {
+    int n = A.size();
+    vector< vector <double> > result(n,vector<double>(n,0.));
+
+    for (int i = 0.; i < n; i++) {
+        for (int j = 0; j <= i; j++) {
+            result[i][j] = 0.5*(A[i][j] + A[j][i]);
+            result[j][i] = result[i][j];
+        }
+    }
+    return result;
+}
+
 // Cholesky factorization of a matrix
 vector< vector<double> > cholesky(vector< vector<double> > A) {
     int n = A.size();
