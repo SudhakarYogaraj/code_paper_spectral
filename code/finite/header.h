@@ -81,7 +81,7 @@ class Solver {
 
 // Function used to solve the multiscale problem, given the parameter
 // specified in the solver.
-double solve(int seed, Problem &problem, Solver &solver);  
+void solve(Problem &problem, Solver &solver, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, double t);
 
 // Function to write vector to a file
 void writeToFile(string s, vector<double> x);

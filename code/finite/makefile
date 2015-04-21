@@ -1,4 +1,4 @@
-COMPILER      = g++ -O3 -Ofast
+COMPILER      = g++ -g
 OBJECTS       = *.cpp
 OUTPUT        = spde.exec
 
