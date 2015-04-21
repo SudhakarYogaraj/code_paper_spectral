@@ -1,169 +1,167 @@
-/* #include <iostream> */
-/* #include <vector> */
-/* #include <cmath> */
-/* #include <random> */
-/* #include <algorithm> */
-/* #include <iterator> */
-/* #include <fstream> */
-/* #include <time.h> */
+#include "header.h"
 
-/* /1* TODO: Take problem as input (urbain, Sun 19 Apr 2015 13:45:33 BST) *1/ */
+/* TODO: Take problem as input (urbain, Sun 19 Apr 2015 13:45:33 BST) */
 
-/* // Namespace */
-/* using namespace std; */
+// Canonical integer associated with a multindex
+int canonicalInd(vector<int> alpha, int n, int degree) {
+    int toReturn; 
+    for (int j = 0; j < n; ++j) {
+        toReturn += alpha[j]*pow(degree + 1, n -j - 1);
+    }
+    return toReturn;
+}
 
-/* // Canonical integer associated with a multindex */
-/* int canonicalInd(vector<int> alpha, int n, int degree) { */
-/*     int toReturn; */ 
-/*     for (int j = 0; j < n; ++j) { */
-/*         toReturn += alpha[j]*pow(degree + 1, n -j - 1); */
-/*     } */
-/*     return toReturn; */
-/* } */
+// Main method
+void solve_spectral(Problem &problem, \
+                    Solver &solver, \
+                    vector<double> xt, \
+                    vector<double>& fi, \
+                    vector< vector<double> >& hi, \
+                    int seed, \
+                    double t) { 
 
-/* // Main method */
-/* int main(int argc, char *argv[]) { */
+    // Degree of polynomials approximation.
+    int degree = 6;
 
-/*     // Degree of polynomials approximation. */
-/*     int degree = 6; */
+    // Number of fast and slow variables
+    int nf = problem.nf;
+    int ns = problem.d;
 
-/*     // Macro time step */
-/*     double Dt = .1; */
+    // Eigenvalues
+    vector<double> sigmas(nf, 0.);
+    for (int i = 0; i < nf; ++i) {
+        double aux = problem.betas[i];
+        sigmas[i] = sqrt(0.5*aux*aux/problem.lambdas[i]);
+    }
 
-/*     // Number of fast variables */
-/*     int nf = 3; */
+    // Number of polynomials in the basis
+    int nBasis = bin(degree + nf, nf);
 
-/*     // Eigenvalues */
-/*     vector<double> lambdas = {1.,2.,4.}; */
-/*     vector<double> qs      = {2.,4.,2.}; */
-/*     vector<double> sigmas(nf, 0.); */
-/*     for (int i = 0; i < nf; ++i) { */
-/*         sigmas[i] = sqrt(0.5*qs[i]*qs[i]/lambdas[i]); */
-/*     } */
+    // Relation linear index - multiindex
+    vector< vector<int> > ind2mult(nBasis, vector<int>(nf,0));
+    vector<int> mult2ind(pow(degree + 1, nf), -1);
+    vector<int> currentMult(nf,0);
+    for (int i = 0; i < nBasis; ++i) {
+        for (int j = 0; j < nf; ++j) {
+            ind2mult[i][j] = currentMult[j];
+        }
+        mult2ind[canonicalInd(currentMult, nf, degree)] = i;
+        int sum = 0;
+        for (int j = 0; j < nf; ++j) {
+            sum += currentMult[j];
+        }
+        if (sum < degree) {
+            currentMult[nf-1] += 1;
+        } else {
+            int auxIndex = nf - 1;
+            while (currentMult[auxIndex] == 0) {
+                auxIndex --;
+            }
+            currentMult[auxIndex] = 0;
+            currentMult[auxIndex-1] ++;
+        } 
+    }
 
-/*     // Number of polynomials in the basis */
-/*     int nBasis = bin(degree + nf, nf); */
+    // Parameters for random numbers
+    default_random_engine generator; generator.seed(seed);
+    normal_distribution<double> distribution(0.0,1.0);
 
-/*     // Relation linear index - multiindex */
-/*     vector< vector<int> > ind2mult(nBasis, vector<int>(nf,0)); */
-/*     vector<int> mult2ind(pow(degree + 1, nf), -1); */
-/*     vector<int> currentMult(nf,0); */
-/*     for (int i = 0; i < nBasis; ++i) { */
-/*         for (int j = 0; j < nf; ++j) { */
-/*             ind2mult[i][j] = currentMult[j]; */
-/*         } */
-/*         mult2ind[canonicalInd(currentMult, nf, degree)] = i; */
-/*         int sum = 0; */
-/*         for (int j = 0; j < nf; ++j) { */
-/*             sum += currentMult[j]; */
-/*         } */
-/*         if (sum < degree) { */
-/*             currentMult[nf-1] += 1; */
-/*         } else { */
-/*             int auxIndex = nf - 1; */
-/*             while (currentMult[auxIndex] == 0) { */
-/*                 auxIndex --; */
-/*             } */
-/*             currentMult[auxIndex] = 0; */
-/*             currentMult[auxIndex-1] ++; */
-/*         } */ 
-/*     } */
+    // Expansion of right-hand side of the Poisson equation
+    vector< vector<double> > coefficients(ns, vector<double>(nBasis, 0.));
+    vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nBasis, 0.)));
+    vector< vector<double> > coefficients_h(nf, vector<double>(nBasis,0.));
+    for (int j = 0; j < nBasis; ++j) {
+        vector<int> multIndex = ind2mult[j];
+        int N_mc = 100000;
+        double sum = 0.;
 
-/*     // Final time */
-/*     double T = 1; */
+        // Monte-Carlo to compute the coefficients
+        for (int k = 0; k < N_mc; ++k) {
 
+            vector<double> randn(nf, 0.);
 
-/*     // Vector of times */
-/*     int sizet = (int) (T/Dt) + 1; */
-/*     vector<double> t(sizet,0.); */
-/*     for (int i = 0; i < sizet; i++) { */
-/*         t[i] = i*Dt; */
-/*     } */
+            for (int l = 0; l < nf; ++l) 
+                randn[l] = distribution(generator);
+            double h_eval = hermiteM(multIndex,randn,sigmas);
+            
+            vector<double> slow_drift = problem.a(xt,randn);
+            vector< vector<double> > slow_drift_dx = problem.dax(xt,randn);
+            for (int l = 0; l < ns; ++l) {
+                coefficients[l][j] += h_eval*slow_drift[l];
+                for (int m = 0; m < ns; ++m) {
+                    coefficients_dx[l][m][j] += h_eval*slow_drift_dx[l][m];
+                }
+            }
+            vector<double> fast_drift_aux = problem.fast_drift_h(xt,randn);
+            for (int l = 0; l < nf; ++l) {
+                coefficients_h[l][j] += h_eval*fast_drift_aux[l];
+            }
+        }
+        for (int l = 0; l < ns; ++l) {
+            coefficients[l][j] /= N_mc;
+            for (int m = 0; m < ns; ++m)
+                coefficients_dx[l][m][j] /= N_mc;
+        }
+        for (int l = 0; l < nf; ++l) {
+            coefficients_h[l][j] /= N_mc;
+        }
+    }
 
-/*     // Parameters for random numbers */
-/*     int seed = time(NULL); */
-/*     default_random_engine generator; generator.seed(seed); */
-/*     normal_distribution<double> distribution(0.0,1.0); */
+    // Solution of the Poisson equation
+    vector< vector<double> > solution(ns, vector<double>(nBasis,0.));
+    vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nBasis, 0.)));
+    vector< vector< vector<double> > > solution_dy(ns, vector< vector <double> >(nf, vector<double>(nBasis,0.)));
+    for (int j = 0; j < nBasis; ++j) {
+        double eig = 0.;
+        for (int k = 0; k < nf; ++k) {
+            eig += ind2mult[j][k]*problem.lambdas[k];
+        }
+        for (int l = 0; l < ns; ++l) {
+            solution[l][j] = coefficients[l][j]/eig; 
+            for (int m = 0; m < ns; ++m)
+                solution_dx[l][m][j] = coefficients_dx[l][m][j]/eig;
+        }
+        vector<int> thisMult = ind2mult[j];
+        int sum = 0;
+        for (int l = 0; l < nf; ++l) {
+            sum += thisMult[l];
+        }
+        if (sum < degree) {
+            for (int l = 0; l < nf; ++l) {
+                vector<int> newMult(nf, 0);
+                for (int m = 0; m < nf; ++m) {
+                    newMult[m] = thisMult[m];
+                }
+                newMult[l] = newMult[l] + 1;
+                int newInd = mult2ind[canonicalInd(newMult, nf, degree)];
+                for (int m = 0; m < ns; ++m)
+                    solution_dy[m][l][j] = solution[m][newInd]*sqrt(newMult[l])/sigmas[l];
+            }
+        }
+    }
 
-/*     // Slow variable */
-/*     vector<double> x(sizet,0.2); */
+    // Calculation of the coefficients of the simplified equation
+    vector<double> F1(ns, 0.);
+    vector<double> F2(ns, 0.);
+    vector< vector <double> > A0(ns, vector<double>(ns,0.));
+    for (int j = 0; j < nBasis; ++j) {
+        for (int k = 0; k < ns; ++k) {
+            for (int l = 0; l < ns; ++l) 
+                F1[k] += solution_dx[k][l][j]*coefficients[k][j];
+        }
 
-/*     for (int i = 0; i < sizet; ++i) { */
-/*         cout << "Time of simulation: " << t[i] << endl; */
+        for (int k = 0; k < ns; ++k) {
+            for (int l = 0; l < nf; ++l) 
+                F2[k] += solution_dy[k][l][j]*coefficients_h[l][j];
+        }
 
-/*         // Expansion of right-hand side of the Poisson equation */
-/*         vector<double> coefficients(nBasis, 0.); */
-/*         vector<double> coefficients_dx(nBasis, 0.); */
-/*         vector< vector<double> > coefficients_h(nBasis, vector<double>(nf,0.)); */
-/*         for (int j = 0; j < nBasis; ++j) { */
-/*             vector<int> multIndex = ind2mult[j]; */
-/*             int N_mc = 100000; */
-/*             double sum = 0.; */
+        for (int k = 0; k < ns; ++k) {
+            for (int l = 0; l < ns; ++l) 
+                A0[k][l] += 2*solution[k][j]*coefficients[l][j];
+        }
+    }
 
-/*             // Monte-Carlo to compute the coefficients */
-/*             for (int k = 0; k < N_mc; ++k) { */
-/*                 vector<double> randn(nf, 0.); */
-/*                 double h_eval = 1.; */
-/*                 for (int l = 0; l < nf; ++l) { */
-/*                     randn[l] = distribution(generator); */
-/*                     h_eval *= hermite(multIndex[l],randn[l],sigmas[l]); */
-/*                 } */
-/*                 coefficients[j] += h_eval*slow_drift(x[i],randn); */
-/*                 coefficients_dx[j] += h_eval*slow_drift_dx(x[i],randn); */
-/*                 vector<double> fast_drift_aux = fast_drift_h(x[i],randn); */
-/*                 for (int l = 0; l < nf; ++l) { */
-/*                     coefficients_h[j][l] += h_eval*fast_drift_aux[l]; */
-/*                 } */
-/*             } */
-/*             coefficients[j] = coefficients[j]/N_mc; */
-/*             coefficients_dx[j] = coefficients_dx[j]/N_mc; */
-/*             for (int l = 0; l < nf; ++l) { */
-/*                 coefficients_h[j][l] = coefficients_h[j][l]/N_mc; */
-/*             } */
-/*         } */
-
-/*         // Solution of the Poisson equation */
-/*         vector<double> solution(nBasis, 0.); */
-/*         vector<double> solution_dx(nBasis, 0.); */
-/*         vector< vector<double> > solution_dy(nBasis, vector<double>(nf,0.)); */
-/*         for (int j = 0; j < nBasis; ++j) { */
-/*             double eig = 0.; */
-/*             for (int k = 0; k < nf; ++k) { */
-/*                 eig += ind2mult[j][k]*lambdas[k]; */
-/*             } */
-/*             solution[j] = coefficients[j]/eig; */
-/*             solution_dx[j] = coefficients_dx[j]/eig; */
-/*             vector<int> thisMult = ind2mult[j]; */
-/*             int sum = 0; */
-/*             for (int l = 0; l < nf; ++l) { */
-/*                 sum += thisMult[l]; */
-/*             } */
-/*             if (sum < degree) { */
-/*                 for (int l = 0; l < nf; ++l) { */
-/*                     vector<int> newMult(nf, 0); */
-/*                     for (int m = 0; m < nf; ++m) { */
-/*                         newMult[m] = thisMult[m]; */
-/*                     } */
-/*                     newMult[l] = newMult[l] + 1; */
-/*                     int newInd = mult2ind[canonicalInd(newMult, nf, degree)]; */
-/*                     solution_dy[j][l] = solution[newInd]*sqrt(newMult[l])/sigmas[l]; */
-/*                 } */
-/*             } */
-/*         } */
-
-
-/*         // Calculation of the coefficients of the simplified equation */
-/*         double F1 = 0., F2 = 0., A0 = 0.; */
-/*         for (int j = 0; j < nBasis; ++j) { */
-
-/*             F1 += solution_dx[j]*coefficients[j]; */
-
-/*             for (int k = 0; k < nf; ++k) { */
-/*                 F2 += solution_dy[j][k]*coefficients_h[j][k]; */
-/*             } */
-
-/*             A0 += solution[j]*coefficients[j]; */
-/*         } */
-/*         cout << endl; */
-/*     } */
-/* } */
+    hi = cholesky(A0);
+    for (int i = 0; i < ns; ++i) 
+        fi[i] = F1[i] + F2[i];
+}

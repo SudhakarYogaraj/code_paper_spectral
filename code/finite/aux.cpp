@@ -31,9 +31,23 @@ void writeMatToFile(string s, vector< vector<double> > x) {
 
 // Delta function
 double delta(int a, int b) {
-	if (fabs(b-a) < 0.1)
-		return 1.;
-	else return 0.;
+    if (fabs(b-a) < 0.1)
+        return 1.;
+    else return 0.;
+}
+
+// Symmetric part of a matrix
+vector< vector<double> > symmetric(vector< vector<double> > A) {
+    int n = A.size();
+    vector< vector <double> > result(n,vector<double>(n,0.));
+
+    for (int i = 0.; i < n; i++) {
+        for (int j = 0; j <= i; j++) {
+            result[i][j] = 0.5*(A[i][j] + A[j][i]);
+            result[j][i] = result[i][j];
+        }
+    }
+    return result;
 }
 
 // Cholesky factorization of a matrix
@@ -156,4 +170,13 @@ double hermite(int n, double x, double sigma) {
         default: cout << "Degree too high" << endl; exit(0);
     }
     return toReturn;
+}
+
+// Multidimensional Hermite
+double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas) {    
+    double h_eval = 1.;
+    for (int i = 0; i < multIndex.size(); ++i) {
+        h_eval *= hermite(multIndex[i],x[i],sigmas[i]);
+    }
+    return h_eval;
 }
