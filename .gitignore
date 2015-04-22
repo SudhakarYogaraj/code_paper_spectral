@@ -1,5 +1,7 @@
 # Literature pdf files
 figures/
+*.tex
+*.cpp
 *.exec
 *.mat
 *\~
