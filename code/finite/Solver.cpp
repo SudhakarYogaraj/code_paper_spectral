@@ -1,5 +1,6 @@
 #include "header.h"
 
+
 void Solver::set(double p, int M)
 {
     // Precision parameter

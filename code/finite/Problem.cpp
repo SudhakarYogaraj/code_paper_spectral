@@ -72,4 +72,5 @@ vector<double> Problem::fast_drift_h(vector<double> x, vector<double> y) {
     vector<double> result(this->nf);
     result[0] = x[0]*y[1];
     result[1] = x[0]*y[0];
+    return result;
 }
