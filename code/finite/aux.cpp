@@ -180,3 +180,12 @@ double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas) 
     }
     return h_eval;
 }
+
+// Canonical integer associated with a multindex
+int canonicalInd(vector<int> alpha, int n, int degree) {
+    int toReturn = 0; 
+    for (int j = 0; j < n; ++j) {
+        toReturn += alpha[j]*pow(degree + 1, n -j - 1);
+    }
+    return toReturn;
+}

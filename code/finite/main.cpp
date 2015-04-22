@@ -85,9 +85,9 @@ int main(int argc, char* argv[])
             int seed = (int) abs(1000*distribution(generator));
 
             // Solution of the problem using the HMM method
-            solve_hmm(problem, solver, xt[i], yInit, fi, hi, seed, t[i]);
+            /* solve_hmm(problem, solver, xt[i], yInit, fi, hi, seed, t[i]); */
             solve_spectral(problem, solver, xt[i], fi, hi, seed, t[i]);
-
+            cout << "Good till here" << endl; exit(0);
 
             // Output to terminal
             cout << "   Drift coefficient: " << endl; printVec(fi); cout << endl;
@@ -100,6 +100,7 @@ int main(int argc, char* argv[])
             printVec(xt[i]); cout << endl;
             cout << "   Exact value of the slow variable: " << endl;
             printVec(x_exact[i]); cout << endl;
+            cout << "Good till here" << endl; exit(0);
 
             // Exact drift and diffusion coefficients
             vector<double> exact_drif = problem.soldrif(xt[i]);
