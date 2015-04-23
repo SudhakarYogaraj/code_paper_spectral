@@ -32,10 +32,7 @@ void solve_spectral(const Problem &problem, \
     vector< vector<int> > ind2mult(nBasis, vector<int>(nf,0));
     vector<int> mult2ind(pow(degree + 1, nf), -1);
     vector<int> currentMult(nf,0);
-    for (int i = 0; i < nBasis; ++i) {
-        for (int j = 0; j < nf; ++j) {
-            ind2mult[i][j] = currentMult[j];
-        }
+    for (int i = 1; i < nBasis; ++i) {
         mult2ind[canonicalInd(currentMult, nf, degree)] = i;
         int sum = 0;
         for (int j = 0; j < nf; ++j) {
@@ -52,6 +49,9 @@ void solve_spectral(const Problem &problem, \
             currentMult[auxIndex] = 0;
             currentMult[auxIndex-1] = currentMult[auxIndex-1] + 1;
         } 
+        for (int j = 0; j < nf; ++j) {
+            ind2mult[i][j] = currentMult[j];
+        }
     }
 
     /* // Parameters for random numbers */
