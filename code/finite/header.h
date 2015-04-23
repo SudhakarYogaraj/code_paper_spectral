@@ -1,5 +1,8 @@
 // Includes
 #include <iostream>
+#include <iomanip>
+#include <string>
+#include <sstream>
 #include <vector>
 #include <cmath>
 #include <random>
@@ -80,7 +83,7 @@ class Solver {
 };
 
 void solve_hmm(Problem &problem, Solver &solver, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
-void solve_spectral(const Problem &problem, const Solver &solver, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
+void solve_spectral(Problem &problem, Solver &solver, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
 
 // Function to write vector to a file
 void writeToFile(string s, vector<double> x);
@@ -95,9 +98,11 @@ vector< vector<double> > symmetric(vector< vector<double> > A);
 vector< vector<double> > cholesky(vector< vector<double> > A);
 
 // Printing vector
+void print2Vecs (vector<double> x, vector<double> y);
 void printVec (vector<double> x);
 
 // Printing matrix
+void print2Mats (vector< vector<double> > x, vector< vector<double> > y);
 void printMat (vector< vector<double> > x);
 
 // Norm of a vector
