@@ -1,12 +1,11 @@
 # Literature pdf files
-figures/
-*.tex
-*.cpp
+figures
 *.exec
 *.mat
 *\~
 .dropbox
 Session.vim
+main.tex
 
 ## Addition to the default .gitignore
 *.sty
