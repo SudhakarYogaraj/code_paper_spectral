@@ -80,7 +80,7 @@ class Solver {
 };
 
 void solve_hmm(Problem &problem, Solver &solver, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
-void solve_spectral(Problem &problem, Solver &solver, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
+void solve_spectral(const Problem &problem, const Solver &solver, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
 
 // Function to write vector to a file
 void writeToFile(string s, vector<double> x);
@@ -116,3 +116,5 @@ double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas);
 // Binomial coefficients
 int bin(int n, int k);
 
+// Function that associates a multiIndex with a "canonical linear index"
+int canonicalInd(vector<int> alpha, int n, int degree);

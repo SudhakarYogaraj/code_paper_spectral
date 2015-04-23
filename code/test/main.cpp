@@ -13,8 +13,9 @@
 // Namespace
 using namespace std;
 
-vector<double> oneverynicetestfunction(vector<double>& arg) {
+vector<double> oneverynicetestfunction(vector<double> arg) {
     vector<double> barg = {4.,5.,6.};
+    vector<double> carg(3,0.);
     arg = barg;
     /* arg[0] ++; arg[1] ++; arg[2] ++; */
     return arg;
