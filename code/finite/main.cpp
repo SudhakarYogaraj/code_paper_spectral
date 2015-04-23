@@ -1,7 +1,5 @@
 #include "header.h"
 
-/* TODO: Integrate spectral method in the code (urbain, Mon 20 Apr 2015 14:40:06 BST) */
-
 // Main function
 int main(int argc, char* argv[])
 {
@@ -29,7 +27,7 @@ int main(int argc, char* argv[])
     normal_distribution<double> distribution(0.0,1.0);
     
     // Precision of the cout command
-    cout.precision(8);
+    cout.precision(2);
     cout << scientific;
 
     // Macro time-step
@@ -68,16 +66,17 @@ int main(int argc, char* argv[])
         solver.set(p_values[j],M);
 
         // Error due to the estimation of the coefficients
-        double error = 0.; 
+        double error_hmm = 0.; 
+        double error_spectral = 0.; 
         
         for (int i = 0; i < sizet - 1; i++) {
-            cout << "<< i = " << i << ", p = " << solver.p <<" >>" << endl << endl;
-
 
             // Numerical estimation of the drift and diffusion coefficients
             // at time step i (initialized at 0).
-            vector<double> fi(problem.d, 0.);
-            vector< vector<double> > hi(problem.d, vector<double>(problem.d,0.));
+            vector<double> fi_hmm(problem.d, 0.);
+            vector<double> fi_spectral(problem.d, 0.);
+            vector< vector<double> > hi_hmm(problem.d, vector<double>(problem.d,0.));
+            vector< vector<double> > hi_spectral(problem.d, vector<double>(problem.d,0.));
 
             // Initial value for the fast process at each macro time-step
             vector<double> yInit(2*problem.nf, 0.); 
@@ -85,22 +84,9 @@ int main(int argc, char* argv[])
             int seed = (int) abs(1000*distribution(generator));
 
             // Solution of the problem using the HMM method
-            /* solve_hmm(problem, solver, xt[i], yInit, fi, hi, seed, t[i]); */
-            solve_spectral(problem, solver, xt[i], fi, hi, seed, t[i]);
-            cout << "Good till here" << endl; exit(0);
+            solve_hmm(problem, solver, xt[i], yInit, fi_hmm, hi_hmm, seed, t[i]);
+            solve_spectral(problem, solver, xt[i], fi_spectral, hi_spectral, seed, t[i]);
 
-            // Output to terminal
-            cout << "   Drift coefficient: " << endl; printVec(fi); cout << endl;
-            cout << "   Diffusion coefficient: " << endl; printMat(hi); cout << endl;
-            cout << "   Exact value of the drift coefficient: " << endl;
-            printVec(problem.soldrif(xt[i])); cout << endl;
-            cout << "   Exact value of the diffusion coefficient: " << endl;
-            printMat(problem.soldiff(xt[i])); cout << endl;
-            cout << "   Value of the slow variable x: " << endl;
-            printVec(xt[i]); cout << endl;
-            cout << "   Exact value of the slow variable: " << endl;
-            printVec(x_exact[i]); cout << endl;
-            cout << "Good till here" << endl; exit(0);
 
             // Exact drift and diffusion coefficients
             vector<double> exact_drif = problem.soldrif(xt[i]);
@@ -111,18 +97,95 @@ int main(int argc, char* argv[])
 
             for (int i1 = 0; i1 < problem.d; i1++) {
                 for (int i2 = 0; i2 < problem.d; i2++) {
-                    Ddiff[i1][i2] = hi[i1][i2] - exact_diff[i1][i2];
+                    Ddiff[i1][i2] = hi_hmm[i1][i2] - exact_diff[i1][i2];
                 }
-                Ddrif[i1] = fi[i1] - exact_drif[i1];
+                Ddrif[i1] = fi_hmm[i1] - exact_drif[i1];
             }
 
-            error += 1./sizet*(normVec(Ddrif) + normMat(Ddiff));
-            double errorDrift = normVec(Ddrif)/normVec(exact_drif);
-            double errorDiff  = normMat(Ddiff)/normMat(exact_diff);
+            error_hmm += 1./sizet*(normVec(Ddrif) + normMat(Ddiff));
+            double errorDrift_hmm = normVec(Ddrif)/normVec(exact_drif);
+            double errorDiff_hmm  = normMat(Ddiff)/normMat(exact_diff);
 
-            cout << endl << "   Error in the drift term: " << errorDrift << endl;
-            cout << "   Error in the diffusion term: " << errorDiff << endl;
-            cout << "   Total error up to the current iteration: " << error << endl << endl;
+            for (int i1 = 0; i1 < problem.d; i1++) {
+                for (int i2 = 0; i2 < problem.d; i2++) {
+                    Ddiff[i1][i2] = hi_spectral[i1][i2] - exact_diff[i1][i2];
+                }
+                Ddrif[i1] = fi_spectral[i1] - exact_drif[i1];
+            }
+
+            error_spectral += 1./sizet*(normVec(Ddrif) + normMat(Ddiff));
+            double errorDrift_spectral = normVec(Ddrif)/normVec(exact_drif);
+            double errorDiff_spectral  = normMat(Ddiff)/normMat(exact_diff);
+
+            // Output to terminal
+            cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
+            cout << "|----------------- Iteration " << setw(3) <<  i+1 << "/" << sizet-1 << ". Time: " << t[i] << ". Precision parameter: " << solver.p <<". -----------------|" << endl;
+            cout << "o--------------------------------------------------o--------------------------------------------------o" << endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+
+            cout << "|" << left << setw(50) <<  " 1) The HMM method:" << "|";
+            cout << setw(50) <<  " 2) The Hermite spectral method:" << "|" << endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+
+            cout << "|" << setw(50) << "   -Drift coefficient:" << "|"; 
+            cout << setw(50) <<  "   -Drift coefficient:" << "|" << endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+            print2Vecs(fi_hmm, fi_spectral);
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+
+            cout << "|" << setw(50) << "   -Diffusion coefficient:" << "|"; 
+            cout << setw(50) <<  "   -Diffusion coefficient:" << "|" << endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+            print2Mats(hi_hmm, hi_spectral);
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+
+            cout << "|" << setw(50) <<  "   -Value of the slow variable x:" << "|";
+            cout << setw(50) <<  "   -Value of the slow variable x:" << "|" << endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+            print2Vecs(xt[i],xt[i]);
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+
+            cout << "o--------------------------------------------------o--------------------------------------------------o" << endl;
+
+            cout << "|" << left << setw(50) <<  " 3) Error for the HMM method:" << "|";
+            cout << setw(50) <<  " 4) Error for the Hermite spectral method:" << "|" << endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+
+            cout << "|" << setw(50) << "   -Error for drift coefficient:" << "|"; 
+            cout << setw(50) <<  "   -Error for drift coefficient:" << "|" << endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+            cout << "|" << "    " << setw(46) <<  errorDrift_hmm  << "|" << "    " <<  setw(46) << errorDrift_spectral <<  "|" <<  endl; 
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+            cout << "|" << setw(50) << "   -Error for diffusion coefficient:" << "|"; 
+            cout << setw(50) <<  "   -Error for diffusion coefficient:" << "|" << endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+            cout << "|" << "    " << setw(46) <<  errorDiff_hmm << "|" << "    " << setw(46) << errorDiff_spectral <<  "|" <<  endl; 
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+            cout << "|" << setw(50) << "   -Total error up to current iteration:" << "|"; 
+            cout << setw(50) <<  "   -Total error up to current iteration:" << "|" << endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+            cout << "|" << "    " << setw(46) <<  error_hmm << "|" << "    " << setw(46) << error_spectral <<  "|" <<  endl; 
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl; 
+
+            cout << "o--------------------------------------------------o--------------------------------------------------o" << endl;
+
+            cout << "|" << setw(101) <<  "5) Exact solution" << "|" << endl; 
+            cout << "|" << setw(101) <<  " " << "|" << endl; 
+            cout << "|" << setw(101) << "   -Drift coefficient" << "|" << endl;
+            cout << "|" << setw(101) <<  " " << "|" << endl; 
+            printVec(problem.soldrif(xt[i]));
+            cout << "|" << setw(101) <<  " " << "|" << endl; 
+            cout << "|" << setw(101) << "   -Diffusion coefficient" << "|" << endl;
+            cout << "|" << setw(101) <<  " " << "|" << endl; 
+            printMat(problem.soldiff(xt[i]));
+            cout << "|" << setw(101) <<  " " << "|" << endl; 
+            cout << "|" << setw(101) << "   -Value of the slow variable x" << "|" << endl;
+            cout << "|" << setw(101) <<  " " << "|" << endl; 
+            printVec(x_exact[i]);
+            cout << "|" << setw(101) <<  " " << "|" << endl; 
+
+            cout << "o--------------------------------------------------o--------------------------------------------------o" << endl;
+            cout << endl << endl;
 
             // Computation of the exact coefficients based on the exact solution
             exact_drif = problem.soldrif(x_exact[i]);
@@ -134,26 +197,26 @@ int main(int argc, char* argv[])
             for (int i1 = 0; i1 < problem.d; i1++) {
                 for (int i2 = 0; i2 < problem.d; i2++) {
                     x_exact[i+1][i1] += exact_diff[i1][i2]*sqrt(solver.macro_dt)*dWs[i][i2]; 
-                    xt[i+1][i1] += hi[i1][i2]*sqrt(solver.macro_dt)*dWs[i][i2];
+                    xt[i+1][i1] += hi_hmm[i1][i2]*sqrt(solver.macro_dt)*dWs[i][i2];
                 }
                 x_exact[i+1][i1] += solver.macro_dt*exact_drif[i1];
-                xt[i+1][i1] += solver.macro_dt*fi[i1];
+                xt[i+1][i1] += solver.macro_dt*fi_hmm[i1];
             }
         }
         writeToFile("time.dat",t); int p_aux = (int) (10*solver.p + 0.0001);
         writeMatToFile("xt" + to_string(p_aux) + ".dat", xt);
         writeMatToFile("x_exact.dat", x_exact);
 
-        cout << "Total error: " << error << endl; 
+        /* cout << "Total error: " << error << endl; */ 
 
         // log2 of the error, used to produce a plot
-        errors[j] = log2(error);
+        /* errors[j] = log2(error); */
     }
 
-    for (unsigned int i = 0; i < p_values.size(); i++) {
-        cout << "Error for p = " << p_values[i] << ": " << errors[i] << endl; 
-    }
-    cout << endl << endl;
+    /* for (unsigned int i = 0; i < p_values.size(); i++) { */
+    /*     cout << "Error for p = " << p_values[i] << ": " << errors[i] << endl; */ 
+    /* } */
+    /* cout << endl << endl; */
 
     // writeToFile("errors.dat", errors);
     // writeToFile("p_values.dat", p_values); 
