@@ -1,5 +1,7 @@
 // Includes
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <vector>
 #include <cmath>
 #include <random>
@@ -23,12 +25,15 @@ vector<double> oneverynicetestfunction(vector<double> arg) {
 
 int main(int argc, char *argv[])
 {
-    vector<double> a = {1.,2.,3.};
-    vector<double> b;
-    b = oneverynicetestfunction(a);
+    stringstream s; 
+    s << "a" << "b" << "c" << "\0";
+    cout << setw(60) <<  s.str() << endl;
+    /* vector<double> a = {1.,2.,3.}; */
+    /* vector<double> b; */
+    /* b = oneverynicetestfunction(a); */
 
-    cout << b[0] << b[1] << b[2] << endl;
-    cout << a[0] << a[1] << a[2] << endl;
+    /* cout << b[0] << b[1] << b[2] << endl; */
+    /* cout << a[0] << a[1] << a[2] << endl; */
     
     return 0;
 }
