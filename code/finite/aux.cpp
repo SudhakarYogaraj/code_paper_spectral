@@ -77,23 +77,43 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
     return L;
 }
 
-// Print vec
 void printVec (vector<double> x) {
-    cout << "   ";
+    stringstream vec;
+    vec << "    ";
     for (int i = 0; i < x.size(); i++) {
-        cout << "\t" << x[i];
+        vec << x[i] << "  ";
     }
-    cout << endl;
+    vec << "\0";
+    cout << "|" << setw(101) << vec.str() << "|" <<  endl; 
 }
 
-// Print mat
+void print2Vecs (vector<double> x, vector<double> y) {
+    stringstream vec1;
+    vec1 << "    ";
+    for (int i = 0; i < x.size(); i++) {
+        vec1 << x[i] << "  ";
+    }
+    vec1 << "\0";
+
+    stringstream vec2;
+    vec2 << "    ";
+    for (int i = 0; i < y.size(); i++) {
+        vec2 << y[i] << "  ";
+    }
+    vec2 << "\0";
+
+    cout << "|" << setw(50) << vec1.str() << "|" << setw(50) << vec2.str() << "|" <<  endl; 
+}
+
 void printMat (vector< vector<double> > x) {
     for (int i = 0; i < x.size(); i++) {
-        cout << "   ";
-        for (int j = 0; j < x[0].size(); j++) {
-            cout << "\t" << x[i][j];
-        }
-        cout << endl;
+        printVec(x[i]);
+    }
+}
+
+void print2Mats (vector< vector<double> > x, vector< vector<double> > y) {
+    for (int i = 0; i < x.size(); i++) {
+        print2Vecs(x[i], y[i]);
     }
 }
 
