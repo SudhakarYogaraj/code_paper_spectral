@@ -1,6 +1,7 @@
 // Includes
 #include <iostream>
 #include <iomanip>
+#include <functional>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -80,6 +81,22 @@ class Solver {
         double p;
 
 		void set(double p, int M);
+};
+
+class Solver_spectral {
+    public: 
+
+        int n_mcmc; 
+        int degree;
+        int nvars;
+        double p;
+        int nBasis;
+        vector< vector<int> > ind2mult_aux;
+        vector<int> mult2ind_aux;
+
+		void set(double p, int n);
+		int mult2ind(vector<int> alpha);
+		vector<int> ind2mult(int ind);
 };
 
 void solve_hmm(Problem &problem, Solver &solver, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
