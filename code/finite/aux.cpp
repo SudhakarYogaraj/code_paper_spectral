@@ -1,6 +1,6 @@
 #include "header.h"
 
-const string output_path = "/home/urbain/mres/output/spde/";
+const string output_path = "/home/urbain/output/";
 
 // Function to write vector to file
 void writeToFile(string s, vector<double> x) {
@@ -23,10 +23,10 @@ void writeMatToFile(string s, vector< vector<double> > x) {
             fout << endl;
         }
     }
-    // else {
-    //     cout << "There was a mistake while writing the output file" << endl;
-    //     exit(0);
-    // }
+    else {
+        cout << "There was a mistake while writing the output file" << endl;
+        exit(0);
+    }
 }
 
 // Delta function
