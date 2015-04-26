@@ -13,7 +13,6 @@ void Solver_spectral::set(double p, int n)
 
     vector<int> currentMult(nvars,0);
     for (int i = 1; i < nBasis; ++i) {
-        mult2ind_aux[canonicalInd(currentMult, nvars, this->degree)] = i;
         int sum = 0;
         for (int j = 0; j < nvars; ++j) {
             sum += currentMult[j];
@@ -31,6 +30,7 @@ void Solver_spectral::set(double p, int n)
         for (int j = 0; j < nvars; ++j) {
             ind2mult_aux[i][j] = currentMult[j];
         }
+        mult2ind_aux[canonicalInd(currentMult, nvars, this->degree)] = i;
     }
 }
 
