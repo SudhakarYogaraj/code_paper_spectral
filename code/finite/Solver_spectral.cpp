@@ -19,7 +19,7 @@ void Solver_spectral::set(double p, int n)
             sum += currentMult[j];
         }
         if (sum < this->degree) {
-            currentMult[nvars-1] ++; 
+            currentMult[nvars-1] ++;
         } else {
             int auxIndex = nvars - 1;
             while (currentMult[auxIndex] == 0) {
@@ -27,7 +27,7 @@ void Solver_spectral::set(double p, int n)
             }
             currentMult[auxIndex] = 0;
             currentMult[auxIndex-1] = currentMult[auxIndex-1] + 1;
-        } 
+        }
         for (int j = 0; j < nvars; ++j) {
             ind2mult_aux[i][j] = currentMult[j];
         }
@@ -35,7 +35,7 @@ void Solver_spectral::set(double p, int n)
 }
 
 int Solver_spectral::mult2ind(vector<int> alpha) {
-    int canonicalInd;
+    int canonicalInd = 0.;
     for (int j = 0; j < this->nvars; ++j) {
         canonicalInd += alpha[j]*pow(this->degree + 1, (this->nvars - 1) -j);
     }

@@ -8,16 +8,16 @@ void solve_hmm(Problem &problem, \
                vector<double>& fi, \
                vector< vector<double> >& hi, \
                int seed, \
-               double t) { 
+               double t) {
 
-    default_random_engine generator; 
+    default_random_engine generator;
     normal_distribution<double> distribution(0.0,1.0);
     generator.seed(seed);
 
-    // Construction of the array that will contain the solution for the 
-    // fast process at each macro time-step. 
+    // Construction of the array that will contain the solution for the
+    // fast process at each macro time-step.
     vector< vector<double> > yAux(solver.nt + solver.n + solver.np, \
-            vector<double>(2*problem.nf,0.)); 
+            vector<double>(2*problem.nf,0.));
 
     // Loop for ensemble average
     for (int m = 0; m < solver.M; m++) {
@@ -36,14 +36,14 @@ void solve_hmm(Problem &problem, \
 
             for (int k = 0; k < 2*problem.nf; k++)
             {
-                yAux[j+1][k] = yAux[j][k] + drift[k]*solver.micro_dt + 
+                yAux[j+1][k] = yAux[j][k] + drift[k]*solver.micro_dt +
                     diffu[k]*sqrt(solver.micro_dt)*distribution(generator);
             }
         }
 
         // Construction of auxiliary vector for efficiency.
 
-        // sumsAux1 =approx= dax 
+        // sumsAux1 =approx= dax
         vector< vector< vector<double> > > sumsAux1(solver.nt + solver.n, \
                 vector< vector<double> >(problem.d,vector<double>(problem.d,0.)));
 
@@ -81,15 +81,15 @@ void solve_hmm(Problem &problem, \
         for (int j = solver.nt; j < solver.nt + solver.n; j++) {
 
             // evaluation of data
-            vector< vector<double> > dya_j = problem.day(xt, yAux[j]);             
+            vector< vector<double> > dya_j = problem.day(xt, yAux[j]);
 
             // first term
             for (int i1 = 0; i1 < problem.d; i1++) {
-                for (int k = 0; k < problem.nf; k++) 
+                for (int k = 0; k < problem.nf; k++)
                     fim1[i1] += dya_j[i1][k]*yAux[j][problem.nf+k];
             }
 
-            // second term: improved 
+            // second term: improved
             for (int i1 = 0; i1 < problem.d; i1++) {
                 for (int i2 = 0; i2 < problem.d; i2++) {
                     fim2[i1] += solver.micro_dt*problem.a(xt, \
@@ -99,15 +99,18 @@ void solve_hmm(Problem &problem, \
         }
 
         for (int i1 = 0; i1 < problem.d; i1++) {
+            fim1[i1] = fim1[i1]/solver.n;
+            fim2[i1] = fim2[i1]/solver.n;
             fim[i1] = fim1[i1] + fim2[i1];
-            fim[i1] = fim[i1]/solver.n;
         }
+        cout << "First drift : " << fim1[0];
+        cout << "Second drift : " << fim2[0];
 
         // Diffusion term by the HMM
         vector< vector<double> > him(problem.d, vector<double>(problem.d,0.));
 
         for (int i1 = 0; i1 < problem.d; i1++) {
-            for (int i2 = 0; i2 < problem.d; i2++) { 
+            for (int i2 = 0; i2 < problem.d; i2++) {
                 for (int j = solver.nt; j < solver.nt + solver.n; j++) {
                     him[i1][i2] += solver.micro_dt*problem.a(xt, \
                             yAux[j])[i1]*sumsAux2[j][i2];
@@ -123,11 +126,11 @@ void solve_hmm(Problem &problem, \
             }
             fi[i1] = (fi[i1]*m + fim[i1])/(m+1);
         }
-    } 
+    }
 
     // Approximate diffusion coefficient
     hi = cholesky(symmetric(hi));
 
     // Initial condition for next iteration and storage of y
-    yInit = yAux[yAux.size()-1]; 
+    yInit = yAux[yAux.size()-1];
 }

@@ -37,7 +37,7 @@ vector<double> Problem::a(vector<double> x, vector<double> y) {
     return result;
 }
 
-vector< vector<double> > Problem::dax(vector<double> x, vector<double> y) { 
+vector< vector<double> > Problem::dax(vector<double> x, vector<double> y) {
     vector< vector<double> > result(this->d,vector<double>(this->d,0.));
     result[0][0] = (y[0]*y[1]);
     return result;
@@ -54,7 +54,7 @@ vector<double> Problem::drif(vector<double> x, vector<double> y) {
     vector<double> result(2*this->nf);
     result[0] = -y[0];
     result[1] = -2*y[1];
-    result[2] = -y[2] + x[0]*y[1]; 
+    result[2] = -y[2] + x[0]*y[1];
     result[3] = -2*y[3] + x[0]*y[0];
     return result;
 }
@@ -63,7 +63,7 @@ vector<double> Problem::diff(vector<double> x, vector<double> y) {
     vector<double> result(2*nf);
     result[0] = 1.;
     result[1] = 1.;
-    result[2] = 0.; 
+    result[2] = 0.;
     result[3] = 0.;
     return result;
 }

@@ -19,7 +19,7 @@ using namespace std;
 
 class Problem {
     public:
-        
+
         // Final time
         double t_end;
 
@@ -31,10 +31,10 @@ class Problem {
 
         // Initial condition for the slow process
         vector<double> x0;
-        
+
         // Drift coefficient of the slow process
         vector<double> a(vector<double> x, vector<double> y); // f0 in Pavliotis-Stuart
-        
+
         // Derivatives of a(,)
         vector< vector<double> > dax(vector<double> x, vector<double> y);
         vector< vector<double> > day(vector<double> x, vector<double> y);
@@ -46,8 +46,8 @@ class Problem {
         vector<double> betas;
 
         // FOR HMM
-        // Drift and diffusion terms of the fast system, in its transformed 
-        // version. The first nf components correspond to the initial 
+        // Drift and diffusion terms of the fast system, in its transformed
+        // version. The first nf components correspond to the initial
 		// variables, whereas the last nf components correspend to the
 		// auxiliary variables.
         vector<double> drif(vector<double> x, vector<double> y);
@@ -62,20 +62,20 @@ class Problem {
 };
 
 class Solver {
-    public: 
+    public:
 
-        // Macro and micro time-steps 
-        double macro_dt; 
+        // Macro and micro time-steps
+        double macro_dt;
         double micro_dt;
 
         // Parameters of the estimator
-        int n; 
-        int nt; 
+        int n;
+        int nt;
         int np;
         int M;
 
         // Order of accuracy of the micro-solver
-        double l; 
+        double l;
 
         // Precision parameter of the solver
         double p;
@@ -84,9 +84,9 @@ class Solver {
 };
 
 class Solver_spectral {
-    public: 
+    public:
 
-        int n_mcmc; 
+        int n_mcmc;
         int degree;
         int nvars;
         double p;
@@ -100,7 +100,7 @@ class Solver_spectral {
 };
 
 void solve_hmm(Problem &problem, Solver &solver, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
-void solve_spectral(Problem &problem, Solver &solver, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
+void solve_spectral(Problem &problem, Solver_spectral &solver, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
 
 // Function to write vector to a file
 void writeToFile(string s, vector<double> x);
@@ -132,7 +132,7 @@ double normMat (vector< vector<double> > x);
 void writeMatToFile(string s, vector< vector<double> > x);
 
 // Normalized Hermite polynomials
-double hermite(int n, double x, double sigma);    
+double hermite(int n, double x, double sigma);
 double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas);
 
 // Binomial coefficients

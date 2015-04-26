@@ -84,7 +84,7 @@ void printVec (vector<double> x) {
         vec << x[i] << "  ";
     }
     vec << "\0";
-    cout << "|" << setw(101) << vec.str() << "|" <<  endl; 
+    cout << "|" << setw(101) << vec.str() << "|" <<  endl;
 }
 
 void print2Vecs (vector<double> x, vector<double> y) {
@@ -102,7 +102,7 @@ void print2Vecs (vector<double> x, vector<double> y) {
     }
     vec2 << "\0";
 
-    cout << "|" << setw(50) << vec1.str() << "|" << setw(50) << vec2.str() << "|" <<  endl; 
+    cout << "|" << setw(50) << vec1.str() << "|" << setw(50) << vec2.str() << "|" <<  endl;
 }
 
 void printMat (vector< vector<double> > x) {
@@ -154,7 +154,7 @@ int bin(int n, int k) {
 }
 
 // Normalized Hermite polynomials
-double hermite(int n, double x, double sigma) {    
+double hermite(int n, double x, double sigma) {
     double toReturn = 0.;
 
     // Scaling in case the variance is different from 1.
@@ -193,7 +193,7 @@ double hermite(int n, double x, double sigma) {
 }
 
 // Multidimensional Hermite
-double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas) {    
+double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas) {
     double h_eval = 1.;
     for (int i = 0; i < multIndex.size(); ++i) {
         h_eval *= hermite(multIndex[i],x[i],sigmas[i]);
@@ -203,7 +203,7 @@ double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas) 
 
 // Canonical integer associated with a multindex
 int canonicalInd(vector<int> alpha, int n, int degree) {
-    int toReturn = 0; 
+    int toReturn = 0;
     for (int j = 0; j < n; ++j) {
         toReturn += alpha[j]*pow(degree + 1, n -j - 1);
     }
