@@ -202,7 +202,6 @@ int main(int argc, char* argv[])
             cout << "|" << setw(101) <<  " " << "|" << endl;
             cout << "o--------------------------------------------------o--------------------------------------------------o" << endl;
             cout << endl << endl;
-            exit(0);
         }
         writeToFile("time.dat",t); int p_aux = (int) (10*solver.p + 0.0001);
         writeMatToFile("xt_hmm" + to_string(p_aux) + ".dat", xt_hmm);

@@ -14,6 +14,13 @@ void solve_spectral(Problem &problem, \
     int degree = solver.degree;
     int ns     = problem.d;
 
+    for (int i = 0; i < nBasis; ++i) {
+        vector<int> multIndex = solver.ind2mult(i);
+        /* cout << "i = " << i << endl; */
+        /* cout << "multIndex: " << multIndex[0] << " " << multIndex[1] << endl; */
+        /* cout << "mult2ind: " << solver.mult2ind(multIndex) << endl; */
+    }
+
     // Eigenvalues
     vector<double> sigmas(nf, 0.);
     for (int i = 0; i < nf; ++i) {
@@ -31,13 +38,13 @@ void solve_spectral(Problem &problem, \
     vector< vector<double> > coefficients_h(nf, vector<double>(nBasis,0.));
 
     for (int j = 0; j < nBasis; ++j) {
+        /* cout << "j = " << j << endl; */
         vector<int> multIndex = solver.ind2mult(j);
-        cout << "multIndex" << multIndex[0] << " " << multIndex[1] << endl;
-        int N_mc = 1e4;
+        /* cout << "multIndex" << multIndex[0] << " " << multIndex[1] << endl; */
         double sum = 0.;
 
         // Monte-Carlo to compute the coefficients
-        for (int k = 0; k < N_mc; ++k) {
+        for (int k = 0; k < solver.n_mcmc; ++k) {
             vector<double> randn(nf, 0.);
 
             for (int l = 0; l < nf; ++l)
@@ -61,17 +68,15 @@ void solve_spectral(Problem &problem, \
             }
         }
         for (int l = 0; l < ns; ++l) {
-            coefficients[l][j] /= N_mc;
+            coefficients[l][j] /= solver.n_mcmc;
             for (int m = 0; m < ns; ++m)
-                coefficients_dx[l][m][j] /= N_mc;
+                coefficients_dx[l][m][j] /= solver.n_mcmc;
         }
         for (int l = 0; l < nf; ++l) {
-            coefficients_h[l][j] /= N_mc;
+            coefficients_h[l][j] /= solver.n_mcmc;
         }
-        cout << "coefficient " << j << ": " << coefficients[0][j] << endl;
-        cout << "coefficient_dx " << j << ": " << coefficients_dx[0][0][j] << endl;
-        cout << "coefficient_h " << j << ": " << coefficients_h[0][j] << endl;
-        cout << "coefficient_h " << j << ": " << coefficients_h[1][j] << endl << endl;
+        /* cout << "coefficient_h " << j << ": " << coefficients_h[0][j] << endl; */
+        /* cout << "coefficient_h " << j << ": " << coefficients_h[1][j] << endl << endl; */
     }
 
     // Solution of the Poisson equation
@@ -79,7 +84,7 @@ void solve_spectral(Problem &problem, \
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nBasis, 0.)));
     vector< vector< vector<double> > > solution_dy(ns, vector< vector <double> >(nf, vector<double>(nBasis,0.)));
     for (int j = 1; j < nBasis; ++j) {
-        cout << "multIndex" << solver.ind2mult(j)[0] << " " << solver.ind2mult(j)[1] << endl;
+        /* cout << "multIndex: " << solver.ind2mult(j)[0] << " " << solver.ind2mult(j)[1] << endl; */
         double eig = 0.;
         for (int k = 0; k < nf; ++k) {
             eig += solver.ind2mult(j)[k]*problem.lambdas[k];
@@ -89,15 +94,16 @@ void solve_spectral(Problem &problem, \
             for (int m = 0; m < ns; ++m)
                 solution_dx[l][m][j] = coefficients_dx[l][m][j]/eig;
         }
+    }
+
+    // y-Derivatives of the solution
+    for (int j = 0; j < nBasis; ++j) {
         vector<int> thisMult = solver.ind2mult(j);
         int sum = 0;
         for (int l = 0; l < nf; ++l) {
             sum += thisMult[l];
         }
-        cout << "ThisMult" <<  thisMult[0] << " " <<  thisMult[1] << endl;
-        cout << "sum = " << sum;
-        cout << "degree = " << degree;
-        cout << "sum < degree" << (sum < degree);
+        /* cout << "ThisMult: " <<  thisMult[0] << " " <<  thisMult[1] << endl; */
         if (sum < degree) {
             for (int l = 0; l < nf; ++l) {
                 vector<int> newMult(nf, 0);
@@ -106,17 +112,16 @@ void solve_spectral(Problem &problem, \
                 }
                 newMult[l] ++;
                 int newInd = solver.mult2ind(newMult);
-                cout << "New mult" <<  newMult[0] << " " <<  newMult[1] << endl;
-                cout << "New ind" <<  newInd << "/" << nBasis << endl;
-                for (int m = 0; m < ns; ++m)
+                /* cout << "New mult: " <<  newMult[0] << " " <<  newMult[1] << endl; */
+                /* cout << "New ind: " <<  newInd << "/" << nBasis << endl; */
+                for (int m = 0; m < ns; ++m) {
                     solution_dy[m][l][j] = solution[m][newInd]*sqrt(newMult[l])/sigmas[l];
+                }
             }
         }
 
-        cout << "solution " << j << ": " << solution[0][j] << endl;
-        cout << "solution_dx " << j << ": " << solution_dx[0][0][j] << endl << endl;
-        cout << "solution_dy 1 " << j << ": " << solution_dy[0][0][j] << endl << endl;
-        cout << "solution_dy 2 " << j << ": " << solution_dy[0][1][j] << endl << endl;
+        /* cout << "solution_dy 1 " << j << ": " << solution_dy[0][0][j] << endl << endl; */
+        /* cout << "solution_dy 2 " << j << ": " << solution_dy[0][1][j] << endl << endl; */
     }
 
     // Calculation of the coefficients of the simplified equation
@@ -136,17 +141,17 @@ void solve_spectral(Problem &problem, \
 
         for (int k = 0; k < ns; ++k) {
             for (int l = 0; l < ns; ++l) {
-                cout << 2*solution[k][j]*coefficients[l][j] << endl;
+                /* cout << 2*solution[k][j]*coefficients[l][j] << endl; */
                 A0[k][l] += 2*solution[k][j]*coefficients[l][j];
             }
         }
     }
 
-    cout << "First drift" << F1[0];
-    cout << "Second drift" << F2[0];
+    /* cout << "First drift" << F1[0]; */
+    /* cout << "Second drift" << F2[0]; */
 
     hi = cholesky(symmetric(A0));
     for (int i = 0; i < ns; ++i) {
-        fi[i] = F1[i];// + F2[i];
+        fi[i] = F1[i] + F2[i];
     }
 }
