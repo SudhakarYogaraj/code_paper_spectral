@@ -3,8 +3,8 @@
 void Solver_spectral::set(double p, int n)
 {
     this->p = p;
-    this->n_mcmc = 100*pow(2,p);
-    this->degree = p;
+    this->n_mcmc = 100000;
+    this->degree = 4;
     this->nvars = n;
 
     this-> nBasis = bin(this->degree + this->nvars, this->nvars);
