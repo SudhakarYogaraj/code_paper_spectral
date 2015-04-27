@@ -62,7 +62,7 @@ class Problem {
 		void init();
 };
 
-class Solver {
+class Solver_hmm {
     public:
 
         // Macro and micro time-steps
@@ -81,7 +81,8 @@ class Solver {
         // Precision parameter of the solver
         double p;
 
-		void set(double p, int M);
+        void estimator(Problem &problem, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
+        void set(double, int);
 };
 
 class Solver_spectral {
@@ -98,10 +99,9 @@ class Solver_spectral {
 		void set(double p, int n);
 		int mult2ind(vector<int> alpha);
 		vector<int> ind2mult(int ind);
+        void estimator(Problem &problem, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, double t);
 };
 
-void solve_hmm(Problem &problem, Solver &solver, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
-void solve_spectral(Problem &problem, Solver_spectral &solver, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, double t);
 
 // Function to write vector to a file
 void writeToFile(string s, vector<double> x);
