@@ -37,46 +37,27 @@ void solve_spectral(Problem &problem, \
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nBasis, 0.)));
     vector< vector<double> > coefficients_h(nf, vector<double>(nBasis,0.));
 
+    // Calculation of the coefficients
     for (int j = 0; j < nBasis; ++j) {
-        /* cout << "j = " << j << endl; */
         vector<int> multIndex = solver.ind2mult(j);
-        /* cout << "multIndex" << multIndex[0] << " " << multIndex[1] << endl; */
-        double sum = 0.;
-
-        // Monte-Carlo to compute the coefficients
-        for (int k = 0; k < solver.n_mcmc; ++k) {
-            vector<double> randn(nf, 0.);
-
-            for (int l = 0; l < nf; ++l)
-                randn[l] = sigmas[l]*distribution(generator);
-            double h_eval = hermiteM(multIndex,randn,sigmas);
-            /* cout << "h_eval" << h_eval << endl; */
-
-            vector<double> slow_drift = problem.a(xt,randn);
-            vector< vector<double> > slow_drift_dx = problem.dax(xt,randn);
+        for (int k = 0; k < ns; ++k) {
             for (int l = 0; l < ns; ++l) {
-                coefficients[l][j] += h_eval*slow_drift[l];
-                for (int m = 0; m < ns; ++m) {
-                    coefficients_dx[l][m][j] += h_eval*slow_drift_dx[l][m];
-                }
+                auto lambda = [&] (vector<double> y) -> double {
+                    return problem.dax(xt,y)[k][l]*hermiteM(multIndex, y, sigmas);
+                };
+                coefficients_dx[k][l][j] = gauss_hermite_nD(lambda,sigmas);
             }
-
-            vector<double> fast_drift_aux(nf, 0.);
-            fast_drift_aux = problem.fast_drift_h(xt,randn);
-            for (int l = 0; l < nf; ++l) {
-                coefficients_h[l][j] += h_eval*fast_drift_aux[l];
-            }
+            auto lambda = [&] (vector<double> y) -> double {
+                return problem.a(xt,y)[k]*hermiteM(multIndex, y, sigmas);
+            };
+            coefficients[k][j] = gauss_hermite_nD(lambda,sigmas);
         }
-        for (int l = 0; l < ns; ++l) {
-            coefficients[l][j] /= solver.n_mcmc;
-            for (int m = 0; m < ns; ++m)
-                coefficients_dx[l][m][j] /= solver.n_mcmc;
+        for (int k = 0; k < nf; ++k) {
+            auto lambda = [&] (vector<double> y) -> double {
+                return problem.fast_drift_h(xt,y)[k]*hermiteM(multIndex, y, sigmas);
+            };
+            coefficients_h[k][j] = gauss_hermite_nD(lambda,sigmas);
         }
-        for (int l = 0; l < nf; ++l) {
-            coefficients_h[l][j] /= solver.n_mcmc;
-        }
-        /* cout << "coefficient_h " << j << ": " << coefficients_h[0][j] << endl; */
-        /* cout << "coefficient_h " << j << ": " << coefficients_h[1][j] << endl << endl; */
     }
 
     // Solution of the Poisson equation
@@ -99,11 +80,7 @@ void solve_spectral(Problem &problem, \
     // y-Derivatives of the solution
     for (int j = 0; j < nBasis; ++j) {
         vector<int> thisMult = solver.ind2mult(j);
-        int sum = 0;
-        for (int l = 0; l < nf; ++l) {
-            sum += thisMult[l];
-        }
-        /* cout << "ThisMult: " <<  thisMult[0] << " " <<  thisMult[1] << endl; */
+        int sum = accumulate(thisMult.begin(),thisMult.end(),0);
         if (sum < degree) {
             for (int l = 0; l < nf; ++l) {
                 vector<int> newMult(nf, 0);
@@ -112,16 +89,11 @@ void solve_spectral(Problem &problem, \
                 }
                 newMult[l] ++;
                 int newInd = solver.mult2ind(newMult);
-                /* cout << "New mult: " <<  newMult[0] << " " <<  newMult[1] << endl; */
-                /* cout << "New ind: " <<  newInd << "/" << nBasis << endl; */
                 for (int m = 0; m < ns; ++m) {
                     solution_dy[m][l][j] = solution[m][newInd]*sqrt(newMult[l])/sigmas[l];
                 }
             }
         }
-
-        /* cout << "solution_dy 1 " << j << ": " << solution_dy[0][0][j] << endl << endl; */
-        /* cout << "solution_dy 2 " << j << ": " << solution_dy[0][1][j] << endl << endl; */
     }
 
     // Calculation of the coefficients of the simplified equation
