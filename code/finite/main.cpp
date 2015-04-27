@@ -1,6 +1,5 @@
 #include "header.h"
 
-// Main function
 int main(int argc, char* argv[])
 {
     // Initialization of the problem
@@ -21,7 +20,7 @@ int main(int argc, char* argv[])
     int seed = time(NULL);
 
     // Initialization of the solver
-    Solver solver;
+    Solver_hmm solver_hmm;
     Solver_spectral solver_spectral;
 
     // Random numbers generator
@@ -67,7 +66,7 @@ int main(int argc, char* argv[])
         x_exact[0] = problem.x0;
 
         // Setting to solver to match the precision parameter p_value[i];
-        solver.set(p_values[j],M);
+        solver_hmm.set(p_values[j],M);
         solver_spectral.set(p_values[j], problem.nf);
 
         // Error due to the estimation of the coefficients
@@ -89,8 +88,8 @@ int main(int argc, char* argv[])
             int seed = (int) abs(1000*distribution(generator));
 
             // Solution of the problem using the HMM method
-            solve_hmm(problem, solver, xt_hmm[i], yInit, fi_hmm, hi_hmm, seed, t[i]);
-            solve_spectral(problem, solver_spectral, xt_spectral[i], fi_spectral, hi_spectral, t[i]);
+            solver_hmm.estimator(problem, xt_hmm[i], yInit, fi_hmm, hi_hmm, seed, t[i]);
+            solver_spectral.estimator(problem, xt_spectral[i], fi_spectral, hi_spectral, t[i]);
 
             // Exact drift and diffusion coefficients
             vector<double> exact_drif = problem.soldrif(xt_hmm[i]);
@@ -145,7 +144,7 @@ int main(int argc, char* argv[])
 
             // Output to terminal
             cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
-            cout << "|----------------- Iteration " << setw(3) <<  i+1 << "/" << sizet-1 << ". Time: " << t[i] << ". Precision parameter: " << solver.p <<". -----------------|" << endl;
+            cout << "|----------------- Iteration " << setw(3) <<  i+1 << "/" << sizet-1 << ". Time: " << t[i] << ". Precision parameter: " << solver_hmm.p <<". -----------------|" << endl;
             cout << "o--------------------------------------------------o--------------------------------------------------o" << endl;
             cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
             cout << "|" << left << setw(50) <<  " 1) The HMM method:" << "|";
@@ -203,7 +202,7 @@ int main(int argc, char* argv[])
             cout << "o--------------------------------------------------o--------------------------------------------------o" << endl;
             cout << endl << endl;
         }
-        writeToFile("time.dat",t); int p_aux = (int) (10*solver.p + 0.0001);
+        writeToFile("time.dat",t); int p_aux = (int) (10*solver_hmm.p + 0.0001);
         writeMatToFile("xt_hmm" + to_string(p_aux) + ".dat", xt_hmm);
         writeMatToFile("xt_spectral" + to_string(p_aux) + ".dat", xt_spectral);
         writeMatToFile("x_exact.dat", x_exact);
