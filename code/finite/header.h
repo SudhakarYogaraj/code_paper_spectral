@@ -101,7 +101,7 @@ class Solver_spectral {
 };
 
 void solve_hmm(Problem &problem, Solver &solver, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
-void solve_spectral(Problem &problem, Solver_spectral &solver, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
+void solve_spectral(Problem &problem, Solver_spectral &solver, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, double t);
 
 // Function to write vector to a file
 void writeToFile(string s, vector<double> x);

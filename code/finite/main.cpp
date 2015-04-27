@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 
             // Solution of the problem using the HMM method
             solve_hmm(problem, solver, xt_hmm[i], yInit, fi_hmm, hi_hmm, seed, t[i]);
-            solve_spectral(problem, solver_spectral, xt_spectral[i], fi_spectral, hi_spectral, seed, t[i]);
+            solve_spectral(problem, solver_spectral, xt_spectral[i], fi_spectral, hi_spectral, t[i]);
 
             // Exact drift and diffusion coefficients
             vector<double> exact_drif = problem.soldrif(xt_hmm[i]);
