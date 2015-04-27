@@ -10,9 +10,10 @@
 #include <algorithm>
 #include <iterator>
 #include <fstream>
+#include <numeric>
 #include <time.h>
 
-#define PI 3.141592653589793238463
+#define PI 3.141592653589793238462643383279502884
 
 // Namespace
 using namespace std;
@@ -140,3 +141,5 @@ int bin(int n, int k);
 
 // Function that associates a multiIndex with a "canonical linear index"
 int canonicalInd(vector<int> alpha, int n, int degree);
+double gauss_hermite_1D(function<double (double)> f, double sigma);
+double gauss_hermite_nD(function<double (vector<double>)> f, vector<double> sigmas);
