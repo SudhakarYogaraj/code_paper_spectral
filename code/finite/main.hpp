@@ -4,6 +4,7 @@
 #include "Solver_spectral.hpp"
 #include "Solver_hmm.hpp"
 #include "Problem.hpp"
+#include "io.hpp"
 
 #include <iostream>
 #include <iomanip>
