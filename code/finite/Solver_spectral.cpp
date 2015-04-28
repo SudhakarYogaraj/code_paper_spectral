@@ -1,4 +1,6 @@
-#include "header.h"
+#include "Solver_spectral.hpp"
+
+using namespace std;
 
 void Solver_spectral::set(double p, int n)
 {

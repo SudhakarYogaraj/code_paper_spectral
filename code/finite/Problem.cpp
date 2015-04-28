@@ -1,4 +1,6 @@
-#include "header.h"
+#include "Problem.hpp"
+
+using namespace std;
 
 void Problem::init() {
     // Final time
