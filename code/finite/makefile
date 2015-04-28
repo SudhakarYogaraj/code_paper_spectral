@@ -1,26 +1,21 @@
-cc     = g++
-target = main.exec
-cflags  = -g -std=c++11 -Wall
+.SUFFIXES:
 
-default : $(target)
+cxx    = g++
+target = multiscale.exec
+cxxflags = -O3 -std=c++11 -Wall
 
-$(target) : main.o Problem.o Solver_hmm.o Solver_spectral.o aux.o
-	$(cc) $(cflags) main.o Problem.o Solver_hmm.o Solver_spectral.o aux.o -o $(target)
+objects = main.o Problem.o Solver_hmm.o Solver_spectral.o aux.o
+$(target) : $(objects)
+	$(cxx) $(cxxflags) $(objects) -o $(target)
 
-Problem.o : Problem.cpp
-	$(cc) $(cflags) -c Problem.cpp
+main.o : Solver_hmm.hpp Solver_spectral.hpp
+Problem.o : aux.hpp 
+Solver_hmm.o : Problem.hpp aux.hpp
+Solver_spectral.o : Problem.hpp aux.hpp
 
-main.o : main.cpp aux.hpp
-	$(cc) $(cflags) -c main.cpp
+%.o: %.cpp %.hpp
+	$(cxx) $(cxxflags) -c $< -o $@
 
-Solver_hmm.o : Solver_hmm.cpp
-	$(cc) $(cflags) -c Solver_hmm.cpp
-
-Solver_spectral.o : Solver_spectral.cpp
-	$(cc) $(cflags) -c Solver_spectral.cpp
-
-aux.o : aux.cpp
-	$(cc) $(cflags) -c aux.cpp
-
+.PHONY: clean
 clean:
-	rm $(target) *.o
+	rm $(target) $(objects)
