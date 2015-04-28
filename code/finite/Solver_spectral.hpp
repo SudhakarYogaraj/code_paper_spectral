@@ -6,6 +6,7 @@
 #include <vector>
 #include "aux.hpp"
 #include "Problem.hpp"
+#include "Gaussian_integrator.hpp"
 
 class Solver_spectral {
     public:

@@ -2,72 +2,6 @@
 
 using namespace std;
 
-static vector<double> nodes = {-6.863345293529891581061, -6.138279220123934620395, -5.533147151567495725118, -4.988918968589943944486, -4.483055357092518341887, -4.003908603861228815228, -3.544443873155349886925, -3.099970529586441748689, -2.667132124535617200571, -2.243391467761504072473, -1.826741143603688038836, -1.415527800198188511941, -1.008338271046723461805, -0.6039210586255523077782, -0.2011285765488714855458, 0.2011285765488714855458, 0.6039210586255523077782, 1.008338271046723461805, 1.415527800198188511941, 1.826741143603688038836, 2.243391467761504072473, 2.667132124535617200571, 3.099970529586441748689, 3.544443873155349886925, 4.003908603861228815228, 4.483055357092518341887, 4.988918968589943944486, 5.533147151567495725118, 6.138279220123934620395, 6.863345293529891581061};
-static vector<double> weights = {2.90825470013122622941E-21, 2.8103336027509037088E-17, 2.87860708054870606219E-14, 8.10618629746304420399E-12, 9.178580424378528209E-10, 5.10852245077594627739E-8, 1.57909488732471028835E-6, 2.9387252289229876415E-5, 3.48310124318685523421E-4, 0.00273792247306765846299, 0.01470382970482668351528, 0.05514417687023425116808, 0.1467358475408900997517, 0.2801309308392126674135, 0.3863948895418138625556, 0.3863948895418138625556, 0.2801309308392126674135, 0.1467358475408900997517, 0.05514417687023425116808, 0.01470382970482668351528, 0.00273792247306765846299, 3.48310124318685523421E-4, 2.9387252289229876415E-5, 1.57909488732471028835E-6, 5.10852245077594627739E-8, 9.178580424378528209E-10, 8.10618629746304420399E-12, 2.87860708054870606219E-14, 2.8103336027509037088E-17, 2.90825470013122622941E-21};
-const string output_path = "/home/urbain/output/";
-
-double gauss_hermite_1D(function<double (double)> f, double sigma) {
-    double result = 0.;
-    double x_aux;
-    for (unsigned int i = 0; i < nodes.size(); ++i) {
-        x_aux = sqrt(2)*sigma*nodes[i];
-        result += weights[i]*f(x_aux);
-    }
-    return result/sqrt(PI);
-}
-
-double gauss_hermite_nD(function<double (vector<double>)> f, vector<double> sigmas) {
-    double result = 0.;
-    int size = sigmas.size();
-    if (size == 1) {
-        auto lambda = [f](double x) -> double {
-            vector<double> aux_vec(1,x);
-            return f(aux_vec);
-        };
-        return gauss_hermite_1D(lambda, sigmas[0]);
-    }
-    else {
-        auto lambda = [f,size,sigmas](vector<double> x) -> double {
-            auto nested_lambda = [f,&x](double y) -> double {
-                x.push_back(y);
-                double result = f(x);
-                x.pop_back();
-                return result;
-            };
-            return gauss_hermite_1D(nested_lambda, sigmas[size-1]);
-        };
-        sigmas.pop_back();
-        return gauss_hermite_nD(lambda, sigmas);
-    }
-    return result;
-}
-
-// Function to write vector to file
-void writeToFile(string s, vector<double> x) {
-    /* std::ofstream output_file(output_path + s); */
-    /* ostream_iterator<double> out_it (output_file,"\n"); */
-    /* copy (x.begin(), x.end(), out_it); */
-}
-
-// Write matrix to a file
-void writeMatToFile(string s, vector< vector<double> > x) {
-    std::ofstream fout(output_path + s);
-    fout.precision(5);
-    fout << scientific;
-
-    if (fout.is_open()) {
-        for (unsigned int i = 0; i < x.size(); i++) {
-            for (unsigned int j = 0; j < x[0].size(); j++) {
-                fout.width(15); fout <<  x[i][j];
-            }
-            fout << endl;
-        }
-    }
-    else {
-        cout << "There was a mistake while writing the output file" << endl;
-        exit(0);
-    }
-}
 
 // Delta function
 double delta(int a, int b) {
@@ -115,46 +49,6 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
         }
     }
     return L;
-}
-
-void printVec (vector<double> x) {
-    stringstream vec;
-    vec << "    ";
-    for (unsigned int i = 0; i < x.size(); i++) {
-        vec << x[i] << "  ";
-    }
-    vec << "\0";
-    cout << "|" << setw(101) << vec.str() << "|" <<  endl;
-}
-
-void print2Vecs (vector<double> x, vector<double> y) {
-    stringstream vec1;
-    vec1 << "    ";
-    for (unsigned int i = 0; i < x.size(); i++) {
-        vec1 << x[i] << "  ";
-    }
-    vec1 << "\0";
-
-    stringstream vec2;
-    vec2 << "    ";
-    for (unsigned int i = 0; i < y.size(); i++) {
-        vec2 << y[i] << "  ";
-    }
-    vec2 << "\0";
-
-    cout << "|" << setw(50) << vec1.str() << "|" << setw(50) << vec2.str() << "|" <<  endl;
-}
-
-void printMat (vector< vector<double> > x) {
-    for (unsigned int i = 0; i < x.size(); i++) {
-        printVec(x[i]);
-    }
-}
-
-void print2Mats (vector< vector<double> > x, vector< vector<double> > y) {
-    for (unsigned int i = 0; i < x.size(); i++) {
-        print2Vecs(x[i], y[i]);
-    }
 }
 
 // Norm vec
