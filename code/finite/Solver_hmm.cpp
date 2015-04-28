@@ -1,5 +1,6 @@
 #include "Solver_hmm.hpp"
 
+
 using namespace std;
 
 void Solver_hmm::set(double p, int M)
