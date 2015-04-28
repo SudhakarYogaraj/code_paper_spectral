@@ -81,7 +81,7 @@ class Solver_hmm {
         // Precision parameter of the solver
         double p;
 
-        void estimator(Problem &problem, vector<double> xt, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
+        void estimator(Problem&, vector<double> x, vector<double>& yInit, vector<double>& fi, vector< vector<double> >& hi, int seed, double t);
         void set(double, int);
 };
 
@@ -97,9 +97,9 @@ class Solver_spectral {
         vector<int> mult2ind_aux;
 
 		void set(double p, int n);
-		int mult2ind(vector<int> alpha);
-		vector<int> ind2mult(int ind);
-        void estimator(Problem &problem, vector<double> xt, vector<double>& fi, vector< vector<double> >& hi, double t);
+		int mult2ind(vector<int>);
+		vector<int> ind2mult(int);
+        void estimator(Problem&, vector<double> x, vector<double>& fi, vector< vector<double> >& hi, double t);
 };
 
 
