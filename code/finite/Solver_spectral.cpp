@@ -9,6 +9,7 @@ void Solver_spectral::set(double p, int n)
     this->degree = 2;
     this->nvars = n;
 
+
     this-> nBasis = bin(this->degree + this->nvars, this->nvars);
     this->ind2mult_aux = vector< vector<int> >(this->nBasis, vector<int>(this->nvars,0));
     this->mult2ind_aux = vector<int>(pow(degree + 1, this->nvars), -1);
@@ -73,18 +74,18 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
                 auto lambda = [&] (vector<double> y) -> double {
                     return problem.dax(x,y)[j][k]*hermiteM(multIndex, y, sigmas);
                 };
-                coefficients_dx[j][k][i] = gauss_hermite_nD(lambda,sigmas);
+                coefficients_dx[j][k][i] = quadnd(lambda,sigmas);
             }
             auto lambda = [&] (vector<double> y) -> double {
                 return problem.a(x,y)[j]*hermiteM(multIndex, y, sigmas);
             };
-            coefficients[j][i] = gauss_hermite_nD(lambda,sigmas);
+            coefficients[j][i] = quadnd(lambda,sigmas);
         }
         for (int j = 0; j < nf; ++j) {
             auto lambda = [&] (vector<double> y) -> double {
                 return problem.fast_drift_h(x,y)[j]*hermiteM(multIndex, y, sigmas);
             };
-            coefficients_h[j][i] = gauss_hermite_nD(lambda,sigmas);
+            coefficients_h[j][i] = quadnd(lambda,sigmas);
         }
     }
 
