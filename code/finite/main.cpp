@@ -38,24 +38,24 @@ int main(int argc, char* argv[])
 
     // Initialization of variables and vectors
     // Size of the time vector for the macro scheme.
-    int sizet = (int) (problem.t_end/Dt) + 1;
+    unsigned int sizet = (int) (problem.t_end/Dt) + 1;
 
     // Vector of times of the macro-simulation
     vector<double> t(sizet,0.);
-    for (int i = 0; i < sizet; i++) {
+    for (unsigned int i = 0; i < sizet; i++) {
         t[i] = i*Dt;
     }
 
     // Vector of random variables used to simulate the brownian
     // motion for the evolution of the slow variable.
     vector< vector<double> > dWs(sizet,vector<double>(problem.d, 0.));
-    for (int i = 0; i < sizet; i++) {
+    for (unsigned int i = 0; i < sizet; i++) {
         for (int j = 0; j < problem.d ; j++) {
             dWs[i][j] = distribution(generator);
         }
     }
 
-    for (int j = 0; j < p_values.size(); ++j) {
+    for (unsigned int j = 0; j < p_values.size(); ++j) {
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.d,0.));
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
         double error_hmm = 0.;
         double error_spectral = 0.;
 
-        for (int i = 0; i < sizet - 1; i++) {
+        for (unsigned int i = 0; i < sizet - 1; i++) {
 
             // Numerical estimation of the drift and diffusion coefficients
             // at time step i (initialized at 0).
@@ -213,12 +213,12 @@ int main(int argc, char* argv[])
     }
 
     cout << endl << "Summary for the hmm method" << endl;
-    for (int i = 0; i < p_values.size(); i++) {
+    for (unsigned int i = 0; i < p_values.size(); i++) {
         cout << "Error for p = " << p_values[i] << ": " << errors_hmm[i] << endl;
     }
 
     cout << endl << "Summary for the spectral method" << endl;
-    for (int i = 0; i < p_values.size(); i++) {
+    for (unsigned int i = 0; i < p_values.size(); i++) {
         cout << "Error for p = " << p_values[i] << ": " << errors_spectral[i] << endl;
     }
     writeToFile("errors_hmm.dat", errors_hmm);

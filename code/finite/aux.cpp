@@ -9,7 +9,7 @@ const string output_path = "/home/urbain/output/";
 double gauss_hermite_1D(function<double (double)> f, double sigma) {
     double result = 0.;
     double x_aux;
-    for (int i = 0; i < nodes.size(); ++i) {
+    for (unsigned int i = 0; i < nodes.size(); ++i) {
         x_aux = sqrt(2)*sigma*nodes[i];
         result += weights[i]*f(x_aux);
     }
@@ -56,8 +56,8 @@ void writeMatToFile(string s, vector< vector<double> > x) {
     fout << scientific;
 
     if (fout.is_open()) {
-        for (int i = 0; i < x.size(); i++) {
-            for (int j = 0; j < x[0].size(); j++) {
+        for (unsigned int i = 0; i < x.size(); i++) {
+            for (unsigned int j = 0; j < x[0].size(); j++) {
                 fout.width(15); fout <<  x[i][j];
             }
             fout << endl;
@@ -120,7 +120,7 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
 void printVec (vector<double> x) {
     stringstream vec;
     vec << "    ";
-    for (int i = 0; i < x.size(); i++) {
+    for (unsigned int i = 0; i < x.size(); i++) {
         vec << x[i] << "  ";
     }
     vec << "\0";
@@ -130,14 +130,14 @@ void printVec (vector<double> x) {
 void print2Vecs (vector<double> x, vector<double> y) {
     stringstream vec1;
     vec1 << "    ";
-    for (int i = 0; i < x.size(); i++) {
+    for (unsigned int i = 0; i < x.size(); i++) {
         vec1 << x[i] << "  ";
     }
     vec1 << "\0";
 
     stringstream vec2;
     vec2 << "    ";
-    for (int i = 0; i < y.size(); i++) {
+    for (unsigned int i = 0; i < y.size(); i++) {
         vec2 << y[i] << "  ";
     }
     vec2 << "\0";
@@ -146,13 +146,13 @@ void print2Vecs (vector<double> x, vector<double> y) {
 }
 
 void printMat (vector< vector<double> > x) {
-    for (int i = 0; i < x.size(); i++) {
+    for (unsigned int i = 0; i < x.size(); i++) {
         printVec(x[i]);
     }
 }
 
 void print2Mats (vector< vector<double> > x, vector< vector<double> > y) {
-    for (int i = 0; i < x.size(); i++) {
+    for (unsigned int i = 0; i < x.size(); i++) {
         print2Vecs(x[i], y[i]);
     }
 }
@@ -160,7 +160,7 @@ void print2Mats (vector< vector<double> > x, vector< vector<double> > y) {
 // Norm vec
 double normVec (vector<double> x) {
     double result = 0.;
-    for (int i = 0; i < x.size(); i++) {
+    for (unsigned int i = 0; i < x.size(); i++) {
         result += x[i]*x[i];
     }
     return sqrt(result);
@@ -169,8 +169,8 @@ double normVec (vector<double> x) {
 // Norm mat
 double normMat (vector< vector<double> > x) {
     double result = 0.;
-    for (int i = 0; i < x.size(); i++) {
-        for (int j = 0; j < x[0].size(); j++) {
+    for (unsigned int i = 0; i < x.size(); i++) {
+        for (unsigned int j = 0; j < x[0].size(); j++) {
             result += x[i][j]*x[i][j];
         }
     }
@@ -235,7 +235,7 @@ double hermite(int n, double x, double sigma) {
 // Multidimensional Hermite
 double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas) {
     double h_eval = 1.;
-    for (int i = 0; i < multIndex.size(); ++i) {
+    for (unsigned int i = 0; i < multIndex.size(); ++i) {
         h_eval *= hermite(multIndex[i],x[i],sigmas[i]);
     }
     return h_eval;
