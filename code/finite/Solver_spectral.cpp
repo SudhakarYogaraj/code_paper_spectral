@@ -55,6 +55,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     int nf     = problem.nf;
     int degree = this->degree;
     int ns     = problem.d;
+    Gaussian_integrator gauss;
 
     // Eigenvalues
     vector<double> sigmas(nf, 0.);
@@ -74,18 +75,18 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
                 auto lambda = [&] (vector<double> y) -> double {
                     return problem.dax(x,y)[j][k]*hermiteM(multIndex, y, sigmas);
                 };
-                coefficients_dx[j][k][i] = quadnd(lambda,sigmas);
+                coefficients_dx[j][k][i] = gauss.quadnd(lambda,sigmas);
             }
             auto lambda = [&] (vector<double> y) -> double {
                 return problem.a(x,y)[j]*hermiteM(multIndex, y, sigmas);
             };
-            coefficients[j][i] = quadnd(lambda,sigmas);
+            coefficients[j][i] = gauss.quadnd(lambda,sigmas);
         }
         for (int j = 0; j < nf; ++j) {
             auto lambda = [&] (vector<double> y) -> double {
                 return problem.fast_drift_h(x,y)[j]*hermiteM(multIndex, y, sigmas);
             };
-            coefficients_h[j][i] = quadnd(lambda,sigmas);
+            coefficients_h[j][i] = gauss.quadnd(lambda,sigmas);
         }
     }
 
