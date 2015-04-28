@@ -1,5 +1,6 @@
-#include "header.h"
+#include "Solver_hmm.hpp"
 
+using namespace std;
 
 void Solver_hmm::set(double p, int M)
 {
@@ -37,7 +38,6 @@ void Solver_hmm::set(double p, int M)
     this->M = M;
 }
 
-// Function implementing the numerical method
 void Solver_hmm::estimator(Problem &problem, \
                vector<double> xt, \
                vector<double>& yInit, \
