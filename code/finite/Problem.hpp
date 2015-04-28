@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <vector>
-#include <algorithm>
 #include "aux.hpp"
 
 class Problem {
