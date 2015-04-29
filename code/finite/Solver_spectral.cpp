@@ -6,7 +6,7 @@ void Solver_spectral::set(double p, int n)
 {
     this->p = p;
     this->n_mcmc = 100000;
-    this->degree = 2;
+    this->degree = 4;
     this->nvars = n;
 
 
@@ -55,7 +55,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     int nf     = problem.nf;
     int degree = this->degree;
     int ns     = problem.d;
-    Gaussian_integrator gauss;
+    Gaussian_integrator gauss = Gaussian_integrator(30);
 
     // Eigenvalues
     vector<double> sigmas(nf, 0.);
@@ -141,7 +141,8 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
             }
         }
     }
-
+    cout << "Drift 1 and 2 spectral" << endl;
+    print2Vecs(F1, F2);
 
     hi = cholesky(symmetric(A0));
     for (int i = 0; i < ns; ++i)

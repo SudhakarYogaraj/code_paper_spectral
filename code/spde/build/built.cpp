@@ -1,7 +1,7 @@
 vector<double> Problem::soldrif(vector<double> x) {
     vector<double> result(this->d,0.);
-    result[0] = x[0]*((x[0]*x[0])*1.188E5+(x[1]*x[1])*1.188E5-7.87E2)*(-7.014590347923681E-7);
-    result[1] = x[1]*5.520482603815937E-4-(x[0]*x[0])*x[1]*(1.0/1.2E1)-(x[1]*x[1]*x[1])*(1.0/1.2E1);
+    result[0] = x[0]*((x[0]*x[0])*2.376E5+(x[1]*x[1])*2.376E5-3.599E3)*(-3.507295173961841E-7);
+    result[1] = x[1]*((x[0]*x[0])*1.188E5+(x[1]*x[1])*1.188E5-2.587E3)*(-7.014590347923681E-7);
     return result;
 }
 
@@ -15,8 +15,8 @@ vector< vector<double> > Problem::soldiff(vector<double> x) {
 
 vector<double> Problem::a(vector<double> x, vector<double> y) {
     vector<double> result(this->d,0.);
-    result[0] = x[0]*y[0]*(-1.0/2.0)-x[1]*y[1]*(1.0/2.0)-y[0]*y[2]*(1.0/2.0)-y[1]*y[3]*(1.0/2.0);
-    result[1] = x[0]*y[1]*(-1.0/2.0)+x[1]*y[0]*(1.0/2.0)-y[0]*y[3]*(1.0/2.0)+y[1]*y[2]*(1.0/2.0);
+    result[0] = x[0]*y[0]*(-1.0/2.0)-x[1]*y[1]*(1.0/2.0)-y[0]*y[2]*(1.0/2.0);
+    result[1] = x[0]*y[1]*(-1.0/2.0)+x[1]*y[0]*(1.0/2.0)+y[1]*y[2]*(1.0/2.0);
     return result;
 }
 
@@ -39,13 +39,11 @@ vector< vector<double> > Problem::dax(vector<double> x, vector<double> y) {
 vector< vector<double> > Problem::day(vector<double> x, vector<double> y) {
     vector< vector<double> > result(this->d,vector<double>(this->nf,0.));
     result[0][0] = x[0]*(-1.0/2.0)-y[2]*(1.0/2.0);
-    result[0][1] = x[1]*(-1.0/2.0)-y[3]*(1.0/2.0);
+    result[0][1] = x[1]*(-1.0/2.0);
     result[0][2] = y[0]*(-1.0/2.0);
-    result[0][3] = y[1]*(-1.0/2.0);
-    result[1][0] = x[1]*(1.0/2.0)-y[3]*(1.0/2.0);
+    result[1][0] = x[1]*(1.0/2.0);
     result[1][1] = x[0]*(-1.0/2.0)+y[2]*(1.0/2.0);
     result[1][2] = y[1]*(1.0/2.0);
-    result[1][3] = y[0]*(-1.0/2.0);
     return result;
 }
 
@@ -54,11 +52,9 @@ vector<double> Problem::drif(vector<double> x, vector<double> y) {
     result[0] = y[0]*-3.0;
     result[1] = y[1]*-3.0;
     result[2] = y[2]*-8.0;
-    result[3] = y[3]*-8.0;
-    result[4] = y[4]*-3.0-x[0]*y[2]-x[1]*y[3]+(x[0]*x[0])*(1.0/2.0)-(x[1]*x[1])*(1.0/2.0);
-    result[5] = y[5]*-3.0+x[0]*x[1]-x[0]*y[3]+x[1]*y[2];
-    result[6] = y[6]*-8.0+x[0]*y[0]*(3.0/2.0)-x[1]*y[1]*(3.0/2.0);
-    result[7] = y[7]*-8.0+x[0]*y[1]*(3.0/2.0)+x[1]*y[0]*(3.0/2.0);
+    result[3] = y[3]*-3.0-x[0]*y[2]+(x[0]*x[0])*(1.0/2.0)-(x[1]*x[1])*(1.0/2.0);
+    result[4] = y[4]*-3.0+x[0]*x[1]+x[1]*y[2];
+    result[5] = y[5]*-8.0+x[0]*y[0]*(3.0/2.0)-x[1]*y[1]*(3.0/2.0);
     return result;
 }
 

@@ -9,7 +9,7 @@ void Problem::init() {
     this->nu = 0.0;
     
     // Number of fast processes
-    this->nf = 4;
+    this->nf = 3;
 
     // Number of slow processes
     this->d = 2;

@@ -114,6 +114,17 @@ int main(int argc, char* argv[])
             exact_drif = problem.soldrif(xt_spectral[i]);
             exact_diff = problem.soldiff(xt_spectral[i]);
 
+            vector<double> drift1 = {xt_spectral[0][i]*2.411265432098765E-3, xt_spectral[1][i]*2.411265432098765E-3};
+            vector<double> drift2 = { xt_spectral[0][i]*((xt_spectral[0][i]*xt_spectral[0][i])*6.6E3+(xt_spectral[1][i]*xt_spectral[1][i])*6.6E3+9.1E1)*(-1.262626262626263E-5), xt_spectral[1][i]*((xt_spectral[0][i]*xt_spectral[0][i])*8.8E3+(xt_spectral[1][i]*xt_spectral[1][i])*8.8E3+6.3E1)*(-9.46969696969697E-6)};
+            cout << "Must be equal" << endl;
+            vector<double> aux(2,0.);
+            aux[0] = drift1[0] + drift2[0];
+            aux[1] = drift1[1] + drift2[1];
+            print2Vecs(aux, exact_drif);
+            print2Vecs(drift1, drift2);
+            exit(0);
+
+
             for (int i1 = 0; i1 < problem.d; i1++) {
                 for (int i2 = 0; i2 < problem.d; i2++) {
                     Ddiff[i1][i2] = hi_spectral[i1][i2] - exact_diff[i1][i2];
@@ -144,6 +155,7 @@ int main(int argc, char* argv[])
                 xt_spectral[i+1][i1] += Dt*fi_spectral[i1];
             }
 
+            
             // Output to terminal
             cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
             cout << "|----------------- Iteration " << setw(3) <<  i+1 << "/" << sizet-1 << ". Time: " << t[i] << ". Precision parameter: " << solver_hmm.p <<". -----------------|" << endl;
@@ -201,7 +213,7 @@ int main(int argc, char* argv[])
             cout << "|" << setw(101) <<  " " << "|" << endl;
             printVec(x_exact[i]);
             cout << "|" << setw(101) <<  " " << "|" << endl;
-            cout << "o--------------------------------------------------o--------------------------------------------------o" << endl;
+            cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
             cout << endl << endl;
         }
         writeToFile("time.dat",t); int p_aux = (int) (10*solver_hmm.p + 0.0001);
