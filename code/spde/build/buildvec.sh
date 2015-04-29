@@ -1,9 +1,9 @@
 set -v
-cd ~/mres/source/program
+cd ~/Dropbox/phd/papers/spectral/code/spde
 cat source.m user_input.m > output.m
 matlab -nodesktop -nosplash -r output
 
-cd ~/mres/source/program/build
+cd ~/Dropbox/phd/papers/spectral/code/spde/build
 rm built.cpp
 
 # Format result[][] = when not actually a matrix

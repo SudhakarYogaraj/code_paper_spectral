@@ -140,8 +140,6 @@ void Solver_hmm::estimator(Problem &problem, \
             fim2[i1] = fim2[i1]/this->n;
             fim[i1] = fim1[i1] + fim2[i1];
         }
-        cout << "First drift : " << fim1[0];
-        cout << "Second drift : " << fim2[0];
 
         // Diffusion term by the HMM
         vector< vector<double> > him(problem.d, vector<double>(problem.d,0.));

@@ -91,11 +91,12 @@ int bin(int n, int k) {
 double hermite(int n, double x, double sigma) {
     double toReturn = 0.;
 
-    // Scaling in case the variance is different from 1.
-    if (abs(sigma) > 1E-16)
+/* FIXME: this is a trick (urbain, Wed 29 Apr 2015 11:29:39 BST) */
+
+    if (abs(sigma) > 1E-12)
         x = x/sigma;
     else {
-        cout << "Please provide a non-negative variance" << endl;
+        cout << "Variance has to be positive, but sigma = " << sigma <<  endl;
         exit(0);
     }
 

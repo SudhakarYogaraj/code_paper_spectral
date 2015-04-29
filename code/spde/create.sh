@@ -1,8 +1,9 @@
+#!/bin/bash
 set -e
 
 ### Building the C++ code
 
-cd ~/mres/source/program/build
+cd ~/Dropbox/phd/papers/spectral/code/spde/build
 
 echo ""
 echo "Run the Matlab symbolic code?"

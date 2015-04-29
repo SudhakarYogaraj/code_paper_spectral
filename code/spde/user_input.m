@@ -36,13 +36,13 @@ end
 
 % Assumed to be constant
 function q = noiseTerm(i)
-    q = 1/i*(i<=5); %(i == 2);
+    q = 1/i;
 end
 
 function initParams()
     global degree; degree = 2;
     global L; L = -pi;
     global R; R = pi;
-    global N; N = 6;
+    global N; N = 5;
     global d; d = 2;
 end

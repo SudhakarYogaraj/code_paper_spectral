@@ -8,6 +8,9 @@
 #include "Problem.hpp"
 #include "Gaussian_integrator.hpp"
 
+/* TODO: Delete this after debugging (urbain, Wed 29 Apr 2015 16:31:21 BST) */
+#include "io.hpp"
+
 class Solver_spectral {
     public:
 
