@@ -114,15 +114,14 @@ int main(int argc, char* argv[])
             exact_drif = problem.soldrif(xt_spectral[i]);
             exact_diff = problem.soldiff(xt_spectral[i]);
 
-            vector<double> drift1 = {xt_spectral[0][i]*2.411265432098765E-3, xt_spectral[1][i]*2.411265432098765E-3};
-            vector<double> drift2 = { xt_spectral[0][i]*((xt_spectral[0][i]*xt_spectral[0][i])*6.6E3+(xt_spectral[1][i]*xt_spectral[1][i])*6.6E3+9.1E1)*(-1.262626262626263E-5), xt_spectral[1][i]*((xt_spectral[0][i]*xt_spectral[0][i])*8.8E3+(xt_spectral[1][i]*xt_spectral[1][i])*8.8E3+6.3E1)*(-9.46969696969697E-6)};
+            vector<double> drift1 = {xt_spectral[i][0]*2.411265432098765E-3, xt_spectral[i][1]*2.411265432098765E-3};
+            vector<double> drift2 = { xt_spectral[i][0]*((xt_spectral[i][0]*xt_spectral[i][0])*6.6E3+(xt_spectral[i][1]*xt_spectral[i][1])*6.6E3+9.1E1)*(-1.262626262626263E-5), xt_spectral[i][1]*((xt_spectral[i][0]*xt_spectral[i][0])*8.8E3+(xt_spectral[i][1]*xt_spectral[i][1])*8.8E3+6.3E1)*(-9.46969696969697E-6)};
             cout << "Must be equal" << endl;
             vector<double> aux(2,0.);
             aux[0] = drift1[0] + drift2[0];
             aux[1] = drift1[1] + drift2[1];
             print2Vecs(aux, exact_drif);
             print2Vecs(drift1, drift2);
-            exit(0);
 
 
             for (int i1 = 0; i1 < problem.d; i1++) {

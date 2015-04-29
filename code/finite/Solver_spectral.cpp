@@ -6,7 +6,7 @@ void Solver_spectral::set(double p, int n)
 {
     this->p = p;
     this->n_mcmc = 100000;
-    this->degree = 4;
+    this->degree = 6;
     this->nvars = n;
 
 
@@ -127,7 +127,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     for (int j = 0; j < nBasis; ++j) {
         for (int k = 0; k < ns; ++k) {
             for (int l = 0; l < ns; ++l)
-                F1[k] += solution_dx[k][l][j]*coefficients[k][j];
+                F1[k] += solution_dx[k][l][j]*coefficients[l][j];
         }
 
         for (int k = 0; k < ns; ++k) {
