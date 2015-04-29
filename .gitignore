@@ -1,7 +1,10 @@
 # Literature pdf files
 figures
 *.exec
+*.o
 *.mat
+*.bak
+*.gen
 *\~
 .dropbox
 Session.vim
