@@ -9,7 +9,7 @@ void Solver_spectral::set(double p, int n)
 {
     this->p = p;
     this->n_mcmc = 100000;
-    this->degree = 4;
+    this->degree = 2;
     this->nvars = n;
 
 

@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
     problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {4.};
+    vector<double> p_values = {2.};
 
     // Vector of the log of the error
     vector<double> errors_hmm(p_values.size(), 0.);
@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     normal_distribution<double> distribution(0.0,1.0);
 
     // Precision of the cout command
-    cout.precision(10);
+    cout.precision(2);
     cout << scientific;
 
     // Macro time-step
@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
             cout << "|" << "    " << setw(46) <<  error_hmm << "|" << "    " << setw(46) << error_spectral <<  "|" <<  endl;
             cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
             cout << "o--------------------------------------------------o--------------------------------------------------o" << endl;
-            cout << "|" << setw(101) <<  "5) Exact solution" << "|" << endl;
+            cout << "|" << setw(101) <<  " 5) Exact solution" << "|" << endl;
             cout << "|" << setw(101) <<  " " << "|" << endl;
             cout << "|" << setw(101) << "   -Drift coefficient" << "|" << endl;
             cout << "|" << setw(101) <<  " " << "|" << endl;

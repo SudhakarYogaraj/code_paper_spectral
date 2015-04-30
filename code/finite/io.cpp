@@ -12,7 +12,7 @@ void writeToFile(string s, vector<double> x) {
 
 void writeMatToFile(string s, vector< vector<double> > x) {
     std::ofstream fout(output_path + s);
-    fout.precision(5);
+    fout.precision(2);
     fout << scientific;
 
     if (fout.is_open()) {
@@ -31,7 +31,7 @@ void writeMatToFile(string s, vector< vector<double> > x) {
 
 void printVec (vector<double> x) {
     stringstream vec;
-    vec.precision(10);
+    vec.precision(2);
     vec << scientific;
     vec << "    ";
     for (unsigned int i = 0; i < x.size(); i++) {
@@ -43,7 +43,7 @@ void printVec (vector<double> x) {
 
 void print2Vecs (vector<double> x, vector<double> y) {
     stringstream vec1;
-    vec1.precision(10);
+    vec1.precision(2);
     vec1 << scientific;
     vec1 << "    ";
     for (unsigned int i = 0; i < x.size(); i++) {
@@ -52,7 +52,7 @@ void print2Vecs (vector<double> x, vector<double> y) {
     vec1 << "\0";
 
     stringstream vec2;
-    vec2.precision(10);
+    vec2.precision(2);
     vec2 << scientific;
     vec2 << "    ";
     for (unsigned int i = 0; i < y.size(); i++) {
