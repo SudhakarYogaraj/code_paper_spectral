@@ -124,18 +124,3 @@ int canonicalInd(vector<int> alpha, int n, int degree) {
     return toReturn;
 }
 
-vector<double> operator-(const vector<double>& v1, const vector<double>& v2) {
-    vector<double> result(v1.size());
-    for (unsigned int i = 0; i < v1.size(); ++i) {
-        result[i] = v1[i] - v2[i];
-    }
-    return result;
-}
-
-vector< vector<double> > operator-(const vector< vector<double> >& v1, const vector< vector<double> >& v2) {
-    vector< vector<double> > result(v1.size());
-    for (unsigned int i = 0; i < v1.size(); ++i) {
-        result[i] = v1[i] - v2[i];
-    }
-    return result;
-}

@@ -2,6 +2,14 @@
 
 using namespace std;
 
+template<class type> vector<type> operator-(const vector<type>& v1, const vector<type>& v2) {
+    vector<type> result(v1.size());
+    for (unsigned int i = 0; i < v1.size(); ++i) {
+        result[i] = v1[i] - v2[i];
+    }
+    return result;
+}
+
 template<class type> double fabs(vector<type> vec) {
     double result = 0.;
     for (unsigned int i = 0; i < vec.size(); ++i) {
