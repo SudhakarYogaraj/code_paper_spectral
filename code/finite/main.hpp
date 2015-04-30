@@ -1,10 +1,10 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "aux.hpp"
+#include "Problem.hpp"
 #include "Solver_spectral.hpp"
 #include "Solver_hmm.hpp"
-#include "Problem.hpp"
+#include "templates.hpp"
 #include "io.hpp"
 
 #include <iostream>

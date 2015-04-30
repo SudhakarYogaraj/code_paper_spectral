@@ -1,5 +1,7 @@
+#include "aux.hpp"
+#include "templates.hpp"
+#include "Problem.hpp"
 #include "Solver_hmm.hpp"
-
 
 using namespace std;
 
@@ -90,24 +92,14 @@ void Solver_hmm::estimator(Problem &problem, \
 
         // First component of each vector
         for (int index = 0; index <= this->np; index++) {
-            for (int i1 = 0; i1 < problem.d; i1++) {
-                for (int i2 = 0; i2 < problem.d; i2++) {
-                    sumsAux1[0][i1][i2] += problem.dax(xt, yAux[index])[i1][i2];
-                }
-                sumsAux2[0][i1] += problem.a(xt, yAux[index])[i1];
-            }
+            sumsAux2[0] = sumsAux2[0] + problem.a(xt, yAux[index]);
+            sumsAux1[0] = sumsAux1[0] + problem.dax(xt, yAux[index]);
         }
-
+        
         // Recursion to obtain the other components
         for (int index = 1; index < this->nt + this->n; index++) {
-            for (int i1 = 0; i1 < problem.d; i1++) {
-                for (int i2 = 0; i2 < problem.d; i2++) {
-                    sumsAux1[index][i1][i2] = sumsAux1[index-1][i1][i2] + problem.dax(xt, \
-                            yAux[index + this->np])[i1][i2] - problem.dax(xt, yAux[index-1])[i1][i2];
-                }
-                sumsAux2[index][i1] = sumsAux2[index-1][i1] + problem.a(xt, \
-                        yAux[index + this->np])[i1] - problem.a(xt, yAux[index-1])[i1];
-            }
+            sumsAux1[index] = sumsAux1[index-1] + problem.dax(xt, yAux[index + this->np]) - problem.dax(xt, yAux[index-1]);
+            sumsAux2[index] = sumsAux2[index-1] + problem.a(xt, yAux[index + this->np]) - problem.a(xt, yAux[index-1]);
         }
 
         // Drift term by the HMM

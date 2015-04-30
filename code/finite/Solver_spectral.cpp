@@ -1,3 +1,6 @@
+#include "aux.hpp"
+#include "Problem.hpp"
+#include "Gaussian_integrator.hpp"
 #include "Solver_spectral.hpp"
 
 using namespace std;
