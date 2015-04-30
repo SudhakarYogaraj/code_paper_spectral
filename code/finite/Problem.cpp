@@ -1,4 +1,5 @@
 #include "Problem.hpp"
+#include "aux.hpp"
 
 using namespace std;
 

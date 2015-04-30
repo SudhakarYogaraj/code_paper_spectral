@@ -8,9 +8,9 @@ objects = main.o Problem.o Solver_hmm.o Solver_spectral.o Gaussian_integrator.o 
 $(target) : $(objects)
 	$(cxx) $(cxxflags) $(objects) -o $(target)
 
-main.o : Problem.hpp Solver_hmm.hpp Solver_spectral.hpp io.hpp
-Problem.o : aux.hpp 
-Solver_hmm.o : Problem.hpp aux.hpp
+main.o : Problem.hpp Solver_hmm.hpp Solver_spectral.hpp templates.hpp io.hpp
+Problem.o : aux.hpp
+Solver_hmm.o : Problem.hpp aux.hpp templates.hpp
 Solver_spectral.o : Problem.hpp Gaussian_integrator.hpp aux.hpp
 
 %.o: %.cpp %.hpp

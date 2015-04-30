@@ -3,8 +3,6 @@
 
 #include <random>
 #include <vector>
-#include "Problem.hpp"
-#include "aux.hpp"
 
 class Solver_hmm {
     public:

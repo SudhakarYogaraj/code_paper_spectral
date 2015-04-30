@@ -2,22 +2,6 @@
 
 using namespace std;
 
-template<class type> vector<type> operator-(const vector<type>& v1, const vector<type>& v2) {
-    vector<type> result(v1.size());
-    for (unsigned int i = 0; i < v1.size(); ++i) {
-        result[i] = v1[i] - v2[i];
-    }
-    return result;
-}
-
-template<class type> double fabs(vector<type> vec) {
-    double result = 0.;
-    for (unsigned int i = 0; i < vec.size(); ++i) {
-        result += fabs(vec[i]);
-    }
-    return result;
-}
-
 int main(int argc, char* argv[])
 {
     // Initialization of the problem
@@ -110,27 +94,21 @@ int main(int argc, char* argv[])
             solver_spectral.estimator(problem, xt_spectral[i], fi_spectral, hi_spectral, t[i]);
 
             // Exact drift and diffusion coefficients
-            vector<double> exact_drif = problem.soldrif(xt_hmm[i]);
-            vector< vector<double> > exact_diff = problem.soldiff(xt_hmm[i]);
-            vector<double> Ddrif(problem.d, 0.);
-            vector< vector<double> > Ddiff(problem.d, vector<double>(problem.d,0.));
-            Ddiff = hi_hmm - exact_diff;
-            Ddrif = fi_hmm - exact_drif;
+            vector<double> Ddrif = (fi_hmm - problem.soldrif(xt_hmm[i]));
+            vector< vector<double> > Ddiff = (hi_hmm - problem.soldiff(xt_hmm[i]));
             error_hmm += 1./sizet*(fabs(Ddrif) + fabs(Ddiff));
-            double errorDrift_hmm = fabs(Ddrif)/fabs(exact_drif);
-            double errorDiff_hmm  = fabs(Ddiff)/fabs(exact_diff);
+            double errorDrift_hmm = fabs(Ddrif);
+            double errorDiff_hmm  = fabs(Ddiff);
 
-            exact_drif = problem.soldrif(xt_spectral[i]);
-            exact_diff = problem.soldiff(xt_spectral[i]);
-            Ddiff = hi_spectral - exact_diff;
-            Ddrif = fi_spectral - exact_drif;
+            Ddrif = fi_spectral - problem.soldrif(xt_spectral[i]);
+            Ddiff = hi_spectral - problem.soldiff(xt_spectral[i]);
             error_spectral += 1./sizet*(fabs(Ddrif) + fabs(Ddiff));
-            double errorDrift_spectral = fabs(Ddrif)/fabs(exact_drif);
-            double errorDiff_spectral  = fabs(Ddiff)/fabs(exact_diff);
+            double errorDrift_spectral = fabs(Ddrif);
+            double errorDiff_spectral  = fabs(Ddiff);
 
             // Computation of the exact coefficients based on the exact solution
-            exact_drif = problem.soldrif(x_exact[i]);
-            exact_diff = problem.soldiff(x_exact[i]);
+            vector<double> exact_drif = problem.soldrif(x_exact[i]);
+            vector< vector<double> > exact_diff = problem.soldiff(x_exact[i]);
 
             x_exact[i+1] = x_exact[i];
             xt_hmm[i+1] = xt_hmm[i];
