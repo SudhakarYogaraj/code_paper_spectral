@@ -53,7 +53,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
 
     int nBasis = this->nBasis;
     int nf     = problem.nf;
-    int degree = this->degree;
+    int degree = 4;
     int ns     = problem.d;
     Gaussian_integrator gauss = Gaussian_integrator(30);
 

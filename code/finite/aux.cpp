@@ -2,7 +2,6 @@
 
 using namespace std;
 
-
 // Delta function
 double delta(int a, int b) {
     if (fabs(b-a) < 0.1)
@@ -50,27 +49,6 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
     }
     return L;
 }
-
-// Norm vec
-double normVec (vector<double> x) {
-    double result = 0.;
-    for (unsigned int i = 0; i < x.size(); i++) {
-        result += x[i]*x[i];
-    }
-    return sqrt(result);
-}
-
-// Norm mat
-double normMat (vector< vector<double> > x) {
-    double result = 0.;
-    for (unsigned int i = 0; i < x.size(); i++) {
-        for (unsigned int j = 0; j < x[0].size(); j++) {
-            result += x[i][j]*x[i][j];
-        }
-    }
-    return sqrt(result);
-}
-
 
 // Binomial coefficients
 int bin(int n, int k) {
@@ -127,6 +105,7 @@ double hermite(int n, double x, double sigma) {
     return toReturn;
 }
 
+
 // Multidimensional Hermite
 double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas) {
     double h_eval = 1.;
@@ -143,4 +122,20 @@ int canonicalInd(vector<int> alpha, int n, int degree) {
         toReturn += alpha[j]*pow(degree + 1, n -j - 1);
     }
     return toReturn;
+}
+
+vector<double> operator-(const vector<double>& v1, const vector<double>& v2) {
+    vector<double> result(v1.size());
+    for (unsigned int i = 0; i < v1.size(); ++i) {
+        result[i] = v1[i] - v2[i];
+    }
+    return result;
+}
+
+vector< vector<double> > operator-(const vector< vector<double> >& v1, const vector< vector<double> >& v2) {
+    vector< vector<double> > result(v1.size());
+    for (unsigned int i = 0; i < v1.size(); ++i) {
+        result[i] = v1[i] - v2[i];
+    }
+    return result;
 }
