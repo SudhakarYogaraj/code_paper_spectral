@@ -2,6 +2,14 @@
 
 using namespace std;
 
+template<class type> double fabs(vector<type> vec) {
+    double result = 0.;
+    for (unsigned int i = 0; i < vec.size(); ++i) {
+        result += fabs(vec[i]);
+    }
+    return result;
+}
+
 int main(int argc, char* argv[])
 {
     // Initialization of the problem
@@ -30,7 +38,7 @@ int main(int argc, char* argv[])
     normal_distribution<double> distribution(0.0,1.0);
 
     // Precision of the cout command
-    cout.precision(2);
+    cout.precision(10);
     cout << scientific;
 
     // Macro time-step
@@ -96,44 +104,21 @@ int main(int argc, char* argv[])
             // Exact drift and diffusion coefficients
             vector<double> exact_drif = problem.soldrif(xt_hmm[i]);
             vector< vector<double> > exact_diff = problem.soldiff(xt_hmm[i]);
-
             vector<double> Ddrif(problem.d, 0.);
             vector< vector<double> > Ddiff(problem.d, vector<double>(problem.d,0.));
-
-            for (int i1 = 0; i1 < problem.d; i1++) {
-                for (int i2 = 0; i2 < problem.d; i2++) {
-                    Ddiff[i1][i2] = hi_hmm[i1][i2] - exact_diff[i1][i2];
-                }
-                Ddrif[i1] = fi_hmm[i1] - exact_drif[i1];
-            }
-
-            error_hmm += 1./sizet*(normVec(Ddrif) + normMat(Ddiff));
-            double errorDrift_hmm = normVec(Ddrif)/normVec(exact_drif);
-            double errorDiff_hmm  = normMat(Ddiff)/normMat(exact_diff);
+            Ddiff = hi_hmm - exact_diff;
+            Ddrif = fi_hmm - exact_drif;
+            error_hmm += 1./sizet*(fabs(Ddrif) + fabs(Ddiff));
+            double errorDrift_hmm = fabs(Ddrif)/fabs(exact_drif);
+            double errorDiff_hmm  = fabs(Ddiff)/fabs(exact_diff);
 
             exact_drif = problem.soldrif(xt_spectral[i]);
             exact_diff = problem.soldiff(xt_spectral[i]);
-
-            vector<double> drift1 = {xt_spectral[i][0]*2.411265432098765E-3, xt_spectral[i][1]*2.411265432098765E-3};
-            vector<double> drift2 = { xt_spectral[i][0]*((xt_spectral[i][0]*xt_spectral[i][0])*6.6E3+(xt_spectral[i][1]*xt_spectral[i][1])*6.6E3+9.1E1)*(-1.262626262626263E-5), xt_spectral[i][1]*((xt_spectral[i][0]*xt_spectral[i][0])*8.8E3+(xt_spectral[i][1]*xt_spectral[i][1])*8.8E3+6.3E1)*(-9.46969696969697E-6)};
-            cout << "Must be equal" << endl;
-            vector<double> aux(2,0.);
-            aux[0] = drift1[0] + drift2[0];
-            aux[1] = drift1[1] + drift2[1];
-            print2Vecs(aux, exact_drif);
-            print2Vecs(drift1, drift2);
-
-
-            for (int i1 = 0; i1 < problem.d; i1++) {
-                for (int i2 = 0; i2 < problem.d; i2++) {
-                    Ddiff[i1][i2] = hi_spectral[i1][i2] - exact_diff[i1][i2];
-                }
-                Ddrif[i1] = fi_spectral[i1] - exact_drif[i1];
-            }
-
-            error_spectral += 1./sizet*(normVec(Ddrif) + normMat(Ddiff));
-            double errorDrift_spectral = normVec(Ddrif)/normVec(exact_drif);
-            double errorDiff_spectral  = normMat(Ddiff)/normMat(exact_diff);
+            Ddiff = hi_spectral - exact_diff;
+            Ddrif = fi_spectral - exact_drif;
+            error_spectral += 1./sizet*(fabs(Ddrif) + fabs(Ddiff));
+            double errorDrift_spectral = fabs(Ddrif)/fabs(exact_drif);
+            double errorDiff_spectral  = fabs(Ddiff)/fabs(exact_diff);
 
             // Computation of the exact coefficients based on the exact solution
             exact_drif = problem.soldrif(x_exact[i]);
@@ -154,7 +139,7 @@ int main(int argc, char* argv[])
                 xt_spectral[i+1][i1] += Dt*fi_spectral[i1];
             }
 
-            
+
             // Output to terminal
             cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
             cout << "|----------------- Iteration " << setw(3) <<  i+1 << "/" << sizet-1 << ". Time: " << t[i] << ". Precision parameter: " << solver_hmm.p <<". -----------------|" << endl;

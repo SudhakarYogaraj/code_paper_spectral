@@ -31,6 +31,8 @@ void writeMatToFile(string s, vector< vector<double> > x) {
 
 void printVec (vector<double> x) {
     stringstream vec;
+    vec.precision(10);
+    vec << scientific;
     vec << "    ";
     for (unsigned int i = 0; i < x.size(); i++) {
         vec << x[i] << "  ";
@@ -41,6 +43,8 @@ void printVec (vector<double> x) {
 
 void print2Vecs (vector<double> x, vector<double> y) {
     stringstream vec1;
+    vec1.precision(10);
+    vec1 << scientific;
     vec1 << "    ";
     for (unsigned int i = 0; i < x.size(); i++) {
         vec1 << x[i] << "  ";
@@ -48,6 +52,8 @@ void print2Vecs (vector<double> x, vector<double> y) {
     vec1 << "\0";
 
     stringstream vec2;
+    vec2.precision(10);
+    vec2 << scientific;
     vec2 << "    ";
     for (unsigned int i = 0; i < y.size(); i++) {
         vec2 << y[i] << "  ";
