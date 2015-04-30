@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 
             x_exact[i+1] = x_exact[i];
             xt_hmm[i+1] = xt_hmm[i];
-            xt_spectral[i+1] = xt_hmm[i];
+            xt_spectral[i+1] = xt_spectral[i];
 
             for (int i1 = 0; i1 < problem.d; i1++) {
                 for (int i2 = 0; i2 < problem.d; i2++) {
@@ -162,6 +162,11 @@ int main(int argc, char* argv[])
             cout << setw(50) <<  "   -Error for diffusion coefficient:" << "|" << endl;
             cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
             cout << "|" << "    " << setw(46) <<  errorDiff_hmm << "|" << "    " << setw(46) << errorDiff_spectral <<  "|" <<  endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
+            cout << "|" << setw(50) << "   -Error for the slow process:" << "|";
+            cout << setw(50) <<  "   -Error for the slow process:" << "|" << endl;
+            cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
+            cout << "|" << "    " << setw(46) <<  fabs(x_exact[i] - xt_hmm[i]) << "|" << "    " << setw(46) << fabs(x_exact[i] - xt_spectral[i]) <<  "|" <<  endl;
             cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
             cout << "|" << setw(50) << "   -Total error up to current iteration:" << "|";
             cout << setw(50) <<  "   -Total error up to current iteration:" << "|" << endl;
