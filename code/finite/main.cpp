@@ -1,5 +1,8 @@
 #include "main.hpp"
 
+/* TODO: Integration with respect to monomials (urbain, Fri 01 May 2015 17:03:41 BST) */
+/* TODO: Matlab code to generate problems (urbain, Fri 01 May 2015 17:04:33 BST) */
+
 using namespace std;
 
 int main(int argc, char* argv[])
