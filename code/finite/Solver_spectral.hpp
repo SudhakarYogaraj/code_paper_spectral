@@ -14,6 +14,7 @@ class Solver_spectral {
         int n_mcmc;
         int degree;
         int nvars;
+        int nNodes;
         double p;
         int nBasis;
         std::vector< std::vector<int> > ind2mult_aux;

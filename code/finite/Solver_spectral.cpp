@@ -10,6 +10,7 @@ void Solver_spectral::set(double p, int n)
     this->p = p;
     this->n_mcmc = 100000;
     this->degree = 15;
+    this->nNodes = 30;
     this->nvars = n;
 
 
@@ -58,7 +59,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     int nf     = problem.nf;
     int degree = 4;
     int ns     = problem.d;
-    Gaussian_integrator gauss = Gaussian_integrator(30);
+    Gaussian_integrator gauss = Gaussian_integrator(this->nNodes);
 
     // Eigenvalues
     vector<double> sigmas(nf, 0.);

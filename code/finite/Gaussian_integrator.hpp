@@ -6,12 +6,13 @@
 #include <functional>
 #include <vector>
 #include <cmath>
+#include <iostream>
 
 class Gaussian_integrator {
     public:
         double quad1d(std::function<double (double)> f, double sigma);
         double quadnd(std::function<double (std::vector<double>)> f, std::vector<double> sigmas);
-        Gaussian_integrator(int nDeg);
+        Gaussian_integrator(int nNodes);
     private:
         std::vector<double> nodes;
         std::vector<double> weights;
