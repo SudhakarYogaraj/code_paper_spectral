@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     normal_distribution<double> distribution(0.0,1.0);
 
     // Precision of the cout command
-    cout.precision(2);
+    cout.precision(6);
     cout << scientific;
 
     // Macro time-step

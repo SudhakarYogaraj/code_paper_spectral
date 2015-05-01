@@ -9,8 +9,8 @@ void Solver_spectral::set(double p, int n)
 {
     this->p = p;
     this->n_mcmc = 100000;
-    this->degree = 8;
-    this->nNodes = 6;
+    this->degree = 4;
+    this->nNodes = 10;
     this->nvars = n;
 
 
@@ -57,7 +57,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
 
     int nBasis = this->nBasis;
     int nf     = problem.nf;
-    int degree = 4;
     int ns     = problem.d;
     Gaussian_integrator gauss = Gaussian_integrator(this->nNodes);
 
@@ -113,13 +112,16 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     // y-Derivatives of the solution
     for (int i = 0; i < nBasis; ++i) {
         vector<int> mult = this->ind2mult(i);
-        if (accumulate (mult.begin(), mult.end(),0) == degree) continue;
+        if (accumulate (mult.begin(), mult.end(),0) == degree) {
+            continue;
+        }
         for (int j = 0; j < nf; ++j) {
             vector<int> newMult = mult;
             newMult[j] ++;
             int newInd = this->mult2ind(newMult);
             for (int k = 0; k < ns; ++k) {
                 solution_dy[k][j][i] = solution[k][newInd]*sqrt(newMult[j])/sigmas[j];
+                /* cout << i << "   " <<  solution_dy[k][j][i] << endl; */
             }
         }
     }
@@ -145,6 +147,9 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
             }
         }
     }
+
+    cout << "drift coefficients spectral" << endl;
+    cout << F1[0] << " " << F2[0] << endl;
 
     hi = cholesky(symmetric(A0));
     for (int i = 0; i < ns; ++i)

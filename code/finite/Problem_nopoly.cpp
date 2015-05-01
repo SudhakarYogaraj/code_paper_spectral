@@ -22,19 +22,21 @@ void Problem::init() {
 // day = cos(x)*(2*cos(y) - 2*y*sin(y) + cos(y))
 // h   = cos(x)*cos(y)
 //
-// drift = -2*sin(x)*cos(x) * int (sin(y) * (2*y*cos(y) + sin(y)) * e^(-y^2)/sqrt(pi) ) 
+// drift = -2*sin(x)*cos(x) * int (sin(y) * (2*y*cos(y) + sin(y)) * e^(-y^2)/sqrt(pi) )
 //         + 2*cos(x)*cos(x) * int (cos(y)*cos(y) * e^(-y^2)/sqrt(pi) )
-// diff  = 2? * cos(x)*cos(x) * int (sin(y) * (2*y*cos(y) + sin(y)) * e^(-y^2)/sqrt(pi) )
+// diff  = SQRT 2? * cos(x)*cos(x) * int (sin(y) * (2*y*cos(y) + sin(y)) * e^(-y^2)/sqrt(pi) )
 vector<double> Problem::soldrif(vector<double> x) {
     vector<double> result(this->d,0.);
     result[0] = -sin(x[0])*cos(x[0])*(1 + exp(-1.0)) + cos(x[0])*cos(x[0])*(1. + exp(-1.));
+    cout << "first part of the drift: " << -sin(x[0])*cos(x[0])*(1 + exp(-1.0)) << endl;
+    cout << "second part of the drift: " << cos(x[0])*cos(x[0])*(1. + exp(-1.)) << endl;
     return result;
 }
 
 // ! Coefficient 2? Seems to have been forgotten in exact solution
 vector< vector<double> > Problem::soldiff(vector<double> x) {
     vector< vector<double> > result(this->d,vector<double>(this->d,0.));
-    result[0][0] = 2*cos(x[0])*cos(x[0])*(1 + exp(-1.0));
+    result[0][0] = sqrt(2*cos(x[0])*cos(x[0])*(1 + exp(-1.0)));
     return result;
 }
 
@@ -45,7 +47,7 @@ vector<double> Problem::a(vector<double> x, vector<double> y) {
     return result;
 }
 
-vector< vector<double> > Problem::dax(vector<double> x, vector<double> y) { 
+vector< vector<double> > Problem::dax(vector<double> x, vector<double> y) {
     vector< vector<double> > result(this->d,vector<double>(this->d,0.));
     result[0][0] = - sin(x[0])*(2*y[0]*cos(y[0]) + sin(y[0]));
     return result;
