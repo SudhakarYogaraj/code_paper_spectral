@@ -9,8 +9,8 @@ void Solver_spectral::set(double p, int n)
 {
     this->p = p;
     this->n_mcmc = 100000;
-    this->degree = 15;
-    this->nNodes = 30;
+    this->degree = 8;
+    this->nNodes = 6;
     this->nvars = n;
 
 
