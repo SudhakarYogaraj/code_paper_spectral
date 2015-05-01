@@ -65,48 +65,158 @@ int bin(int n, int k) {
     return res;
 }
 
-// Normalized Hermite polynomials
-double hermite(int n, double x, double sigma) {
-    double toReturn = 0.;
+int mult2ind(vector<int> m, int d) {
+    int l = m.size() - 1; int i;
+    for(i = l; i > 0 & m[i] == 0; i--);
 
-/* FIXME: this is a trick (urbain, Wed 29 Apr 2015 11:29:39 BST) */
+    if (i == 0 & m[0] == 0)
+        return 0;
 
-    if (abs(sigma) > 1E-12)
-        x = x/sigma;
-    else {
-        cout << "Variance has to be positive, but sigma = " << sigma <<  endl;
-        exit(0);
-    }
-    switch (n) {
-        case 0: toReturn = 1.0; break;
-        case 1: toReturn = x; break;
-        case 2: toReturn = sqrt(2.0)*(x*x-1.0)*(1.0/2.0); break;
-        case 3: toReturn = sqrt(6.0)*x*(x*x-3.0)*(1.0/6.0); break;
-        case 4: toReturn = sqrt(6.0)*((x*x)*-6.0+x*x*x*x+3.0)*(1.0/1.2E1); break;
-        case 5: toReturn = sqrt(3.0E1)*x*((x*x)*-1.0E1+x*x*x*x+1.5E1)*(1.0/6.0E1); break;
-        case 6: toReturn = sqrt(5.0)*((x*x)*4.5E1-(x*x*x*x)*1.5E1+x*x*x*x*x*x-1.5E1)*(1.0/6.0E1); break;
-        case 7: toReturn = sqrt(3.5E1)*x*((x*x)*1.05E2-(x*x*x*x)*2.1E1+x*x*x*x*x*x-1.05E2)*(1.0/4.2E2); break;
-        case 8: toReturn = sqrt(7.0E1)*((x*x)*-4.2E2+(x*x*x*x)*2.1E2-(x*x*x*x*x*x)*2.8E1+x*x*x*x*x*x*x*x+1.05E2)*5.952380952380952E-4; break;
-        case 9: toReturn = sqrt(7.0E1)*x*((x*x)*-1.26E3+(x*x*x*x)*3.78E2-(x*x*x*x*x*x)*3.6E1+x*x*x*x*x*x*x*x+9.45E2)*1.984126984126984E-4; break;
-        case 10: toReturn = sqrt(7.0)*((x*x)*4.725E3-(x*x*x*x)*3.15E3+(x*x*x*x*x*x)*6.3E2-(x*x*x*x*x*x*x*x)*4.5E1+pow(x,1.0E1)-9.45E2)*1.984126984126984E-4; break;
-        case 11: toReturn = sqrt(7.7E1)*x*((x*x)*1.7325E4-(x*x*x*x)*6.93E3+(x*x*x*x*x*x)*9.9E2-(x*x*x*x*x*x*x*x)*5.5E1+pow(x,1.0E1)-1.0395E4)*1.803751803751804E-5; break;
-        case 12: toReturn = sqrt(2.31E2)*((x*x)*-6.237E4+(x*x*x*x)*5.1975E4-(x*x*x*x*x*x)*1.386E4+(x*x*x*x*x*x*x*x)*1.485E3-pow(x,1.0E1)*6.6E1+pow(x,1.2E1)+1.0395E4)*3.006253006253006E-6; break;
-        case 13: toReturn = 5.479963503528103E1*x*((x*x)*-2.7027E5+(x*x*x*x)*1.35135E5-(x*x*x*x*x*x)*2.574E4+(x*x*x*x*x*x*x*x)*2.145E3-pow(x,1.0E1)*7.8E1+pow(x,1.2E1)+1.35135E5)*2.312502312502313E-7; break;
-        case 14: toReturn = sqrt(8.58E2)*((x*x)*9.45945E5-(x*x*x*x)*9.45945E5+(x*x*x*x*x*x)*3.15315E5-(x*x*x*x*x*x*x*x)*4.5045E4+pow(x,1.0E1)*3.003E3-pow(x,1.2E1)*9.1E1+pow(x,1.4E1)-1.35135E5)*1.156251156251156E-7; break;
-        case 15: toReturn = 3.781534080237807E1*x*((x*x)*4.729725E6-(x*x*x*x)*2.837835E6+(x*x*x*x*x*x)*6.75675E5-(x*x*x*x*x*x*x*x)*7.5075E4+pow(x,1.0E1)*4.095E3-pow(x,1.2E1)*1.05E2+pow(x,1.4E1)-2.027025E6)*2.312502312502313E-8; break;
-        default: cout << "Degree too high" << endl; exit(0);
-    }
-    return toReturn;
+    int s = 0;
+    for (int j = 0; j < m.size(); ++j)
+        s += m[j];
+
+    int dr = d - s;
+    int vr = l - i;
+    m[i] = m[i] - 1;
+    return bin(dr + vr + 1, vr) + mult2ind(m, d);
 }
 
-
-// Multidimensional Hermite
-double hermiteM(vector<int> multIndex, vector<double> x, vector<double> sigmas) {
-    double h_eval = 1.;
-    for (unsigned int i = 0; i < multIndex.size(); ++i) {
-        h_eval *= hermite(multIndex[i],x[i],sigmas[i]);
+vector<int> ind2mult(int ind, int d, int n) {
+    vector<int> m(n,0); int s = 0;
+    for (int i = 0; i < ind; ++i) {
+        if (s < d) {
+            m[n-1] ++; s++;
+        } else {
+            int j; for(j = n-1; m[j] == 0; j--);
+            s -= m[j]; m[j] = 0; m[j-1] ++; s ++;
+        }
     }
-    return h_eval;
+    return m;
+}
+
+double ipow(double x, int e) {
+    if(e == 0) return 1;
+    if (e == 1) return x;
+    double aux = ipow(x,e/2);
+    if (e%2 == 0) return aux*aux;
+    return x*aux*aux;
+}
+
+double monomial(vector<int> mult, vector<double> x, vector<double> sigmas) {
+    double result = 1.;
+    for (unsigned int i = 0; i < mult.size(); ++i) {
+        result *= ipow(x[i]/sigmas[i], mult[i]);
+    }
+    return result;
+}
+
+vector< vector<double> > hermiteCoeffs(int degree) {
+
+    vector< vector<double> > coefficients(degree + 1, vector<double>(degree + 1,0.));
+
+    coefficients[0][0] = 1.0;
+    if (degree == 0) return coefficients;
+
+    coefficients[1][0] = 0.0;
+    coefficients[1][1] = 1.0;
+    if (degree == 1) return coefficients;
+
+    coefficients[2][0] = sqrt(2.0)/2.0*(-1.0);
+    coefficients[2][1] = sqrt(2.0)/2.0*( 0.0);
+    coefficients[2][2] = sqrt(2.0)/2.0*( 1.0);
+    if (degree == 2) return coefficients;
+
+    coefficients[3][0] = sqrt(6.0)/6.0*( 0.0);
+    coefficients[3][1] = sqrt(6.0)/6.0*(-3.0);
+    coefficients[3][2] = sqrt(6.0)/6.0*( 0.0);
+    coefficients[3][3] = sqrt(6.0)/6.0*( 1.0);
+    if (degree == 3) return coefficients;
+
+    coefficients[4][0] = sqrt(6.0)/12.0*( 3.0);
+    coefficients[4][1] = sqrt(6.0)/12.0*( 0.0);
+    coefficients[4][2] = sqrt(6.0)/12.0*(-6.0);
+    coefficients[4][3] = sqrt(6.0)/12.0*( 0.0);
+    coefficients[4][4] = sqrt(6.0)/12.0*( 1.0);
+    if (degree == 4) return coefficients;
+
+    coefficients[5][0] = sqrt(30.0)/60.0*(  0.0);
+    coefficients[5][1] = sqrt(30.0)/60.0*( 15.0);
+    coefficients[5][2] = sqrt(30.0)/60.0*(  0.0);
+    coefficients[5][3] = sqrt(30.0)/60.0*(-10.0);
+    coefficients[5][4] = sqrt(30.0)/60.0*(  0.0);
+    coefficients[5][5] = sqrt(30.0)/60.0*(  1.0);
+    if (degree == 5) return coefficients;
+
+    coefficients[6][0] = sqrt(5.0)/60.0*(-15.0);
+    coefficients[6][1] = sqrt(5.0)/60.0*(  0.0);
+    coefficients[6][2] = sqrt(5.0)/60.0*( 45.0);
+    coefficients[6][3] = sqrt(5.0)/60.0*(  0.0);
+    coefficients[6][4] = sqrt(5.0)/60.0*(-15.0);
+    coefficients[6][5] = sqrt(5.0)/60.0*(  0.0);
+    coefficients[6][6] = sqrt(5.0)/60.0*(  1.0);
+    if (degree == 6) return coefficients;
+
+    coefficients[7][0] = sqrt(35.0)/420.0*(   0.0);
+    coefficients[7][1] = sqrt(35.0)/420.0*(-105.0);
+    coefficients[7][2] = sqrt(35.0)/420.0*(   0.0);
+    coefficients[7][3] = sqrt(35.0)/420.0*( 105.0);
+    coefficients[7][4] = sqrt(35.0)/420.0*(   0.0);
+    coefficients[7][5] = sqrt(35.0)/420.0*( -21.0);
+    coefficients[7][6] = sqrt(35.0)/420.0*(   0.0);
+    coefficients[7][7] = sqrt(35.0)/420.0*(   1.0);
+    if (degree == 7) return coefficients;
+
+    coefficients[8][0] = sqrt(70.0)/1680.0*( 105.0);
+    coefficients[8][1] = sqrt(70.0)/1680.0*(   0.0);
+    coefficients[8][2] = sqrt(70.0)/1680.0*(-420.0);
+    coefficients[8][3] = sqrt(70.0)/1680.0*(   0.0);
+    coefficients[8][4] = sqrt(70.0)/1680.0*( 210.0);
+    coefficients[8][5] = sqrt(70.0)/1680.0*(   0.0);
+    coefficients[8][6] = sqrt(70.0)/1680.0*( -28.0);
+    coefficients[8][7] = sqrt(70.0)/1680.0*(   0.0);
+    coefficients[8][8] = sqrt(70.0)/1680.0*(   1.0);
+    if (degree == 8) return coefficients;
+
+    coefficients[9][0] = sqrt(70.0)/5040.0*(    0.0);
+    coefficients[9][1] = sqrt(70.0)/5040.0*(  945.0);
+    coefficients[9][2] = sqrt(70.0)/5040.0*(    0.0);
+    coefficients[9][3] = sqrt(70.0)/5040.0*(-1260.0);
+    coefficients[9][4] = sqrt(70.0)/5040.0*(    0.0);
+    coefficients[9][5] = sqrt(70.0)/5040.0*(  378.0);
+    coefficients[9][6] = sqrt(70.0)/5040.0*(    0.0);
+    coefficients[9][7] = sqrt(70.0)/5040.0*(  -36.0);
+    coefficients[9][8] = sqrt(70.0)/5040.0*(    0.0);
+    coefficients[9][9] = sqrt(70.0)/5040.0*(    1.0);
+    if (degree == 9) return coefficients;
+
+    coefficients[10][0]  = sqrt(7.0)/5040.0*( -945.0);
+    coefficients[10][1]  = sqrt(7.0)/5040.0*(    0.0);
+    coefficients[10][2]  = sqrt(7.0)/5040.0*( 4725.0);
+    coefficients[10][3]  = sqrt(7.0)/5040.0*(    0.0);
+    coefficients[10][4]  = sqrt(7.0)/5040.0*(-3150.0);
+    coefficients[10][5]  = sqrt(7.0)/5040.0*(    0.0);
+    coefficients[10][6]  = sqrt(7.0)/5040.0*(  630.0);
+    coefficients[10][7]  = sqrt(7.0)/5040.0*(    0.0);
+    coefficients[10][8]  = sqrt(7.0)/5040.0*(  -45.0);
+    coefficients[10][9]  = sqrt(7.0)/5040.0*(    0.0);
+    coefficients[10][10] = sqrt(7.0)/5040.0*(    1.0);
+    if (degree == 10) return coefficients;
+
+    cout << "Degree too high" << endl;
+    exit(0);
+}
+
+vector<double> hcoeffs (vector<double> mcoeffs) {
+    vector<double> result(mcoeffs.size(), 0.);
+    int degree = mcoeffs.size() - 1;
+    vector< vector<double> > mat = hermiteCoeffs(degree);
+    for (unsigned int i = 0; i < mcoeffs.size(); ++i) {
+        for (unsigned int j = 0; j <= i; ++j) {
+            result[i] += mat[i][j] * mcoeffs[j];
+        }
+    }
+    return result;
 }
 
 // Canonical integer associated with a multindex
@@ -117,4 +227,3 @@ int canonicalInd(vector<int> alpha, int n, int degree) {
     }
     return toReturn;
 }
-

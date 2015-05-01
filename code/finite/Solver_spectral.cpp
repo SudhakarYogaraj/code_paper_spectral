@@ -9,10 +9,9 @@ void Solver_spectral::set(double p, int n)
 {
     this->p = p;
     this->n_mcmc = 100000;
-    this->degree = 4;
-    this->nNodes = 10;
+    this->degree = 10;
+    this->nNodes = 20;
     this->nvars = n;
-
 
     this-> nBasis = bin(this->degree + this->nvars, this->nvars);
     this->ind2mult_aux = vector< vector<int> >(this->nBasis, vector<int>(this->nvars,0));
@@ -76,22 +75,34 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
         for (int j = 0; j < ns; ++j) {
             for (int k = 0; k < ns; ++k) {
                 auto lambda = [&] (vector<double> y) -> double {
-                    return problem.dax(x,y)[j][k]*hermiteM(multIndex, y, sigmas);
+                    return problem.dax(x,y)[j][k]*monomial(multIndex, y, sigmas);
                 };
                 coefficients_dx[j][k][i] = gauss.quadnd(lambda,sigmas);
             }
             auto lambda = [&] (vector<double> y) -> double {
-                return problem.a(x,y)[j]*hermiteM(multIndex, y, sigmas);
+                return problem.a(x,y)[j]*monomial(multIndex, y, sigmas);
             };
             coefficients[j][i] = gauss.quadnd(lambda,sigmas);
         }
         for (int j = 0; j < nf; ++j) {
             auto lambda = [&] (vector<double> y) -> double {
-                return problem.fast_drift_h(x,y)[j]*hermiteM(multIndex, y, sigmas);
+                return problem.fast_drift_h(x,y)[j]*monomial(multIndex, y, sigmas);
             };
             coefficients_h[j][i] = gauss.quadnd(lambda,sigmas);
         }
     }
+
+    /* for (unsigned int i = 0; i < coefficients[0].size(); ++i) { */
+    /*     cout << coefficients[0][i] << endl; */
+    /* } */
+    coefficients[0] = hcoeffs(coefficients[0]);
+    coefficients_dx[0][0] = hcoeffs(coefficients_dx[0][0]);
+    coefficients_h[0] = hcoeffs(coefficients_h[0]);
+
+    /* for (unsigned int i = 0; i < coefficients[0].size(); ++i) { */
+    /*     cout << coefficients[0][i] << endl; */
+    /* } */
+    /* exit(0); */
 
     // Solution of the Poisson equation
     vector< vector<double> > solution(ns, vector<double>(nBasis,0.));
