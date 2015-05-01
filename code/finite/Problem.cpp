@@ -24,17 +24,17 @@ void Problem::init() {
 //
 // drift = -2*sin(x)*cos(x) * int (sin(y) * (2*y*cos(y) + sin(y)) * e^(-y^2)/sqrt(pi) ) 
 //         + 2*cos(x)*cos(x) * int (cos(y)*cos(y) * e^(-y^2)/sqrt(pi) )
-// diff  = 2? * cos(x)*cos(x) * int (sin(y) * (2*y*cos(y) + sin(y)) * e^(-y^2)/sqrt(pi) )
+// diff  = SQRT 2? * cos(x)*cos(x) * int (sin(y) * (2*y*cos(y) + sin(y)) * e^(-y^2)/sqrt(pi) )
 vector<double> Problem::soldrif(vector<double> x) {
     vector<double> result(this->d,0.);
-    result[0] = -sin(x[0])*cos(x[0])*(1 + exp(-1.0)) + cos(x[0])*cos(x[0])*(1. + exp(-1.));
+    result[0] = -sin(x[0])*cos(x[0])*(1 + exp(-1.0));
     return result;
 }
 
 // ! Coefficient 2? Seems to have been forgotten in exact solution
 vector< vector<double> > Problem::soldiff(vector<double> x) {
     vector< vector<double> > result(this->d,vector<double>(this->d,0.));
-    result[0][0] = 2*cos(x[0])*cos(x[0])*(1 + exp(-1.0));
+    result[0][0] = sqrt(2*cos(x[0])*cos(x[0])*(1 + exp(-1.0)));
     return result;
 }
 
@@ -60,7 +60,7 @@ vector< vector<double> > Problem::day(vector<double> x, vector<double> y) {
 vector<double> Problem::drif(vector<double> x, vector<double> y) {
     vector<double> result(2*this->nf,0.);
     result[0] = -y[0];
-    result[1] = -y[1] + cos(x[0])*cos(y[0]);
+    result[1] = -y[1];
     return result;
 }
 
@@ -72,6 +72,6 @@ vector<double> Problem::diff(vector<double> x, vector<double> y) {
 
 vector<double> Problem::fast_drift_h(vector<double> x, vector<double> y) {
     vector<double> result(this->nf);
-    result[0] = cos(x[0])*cos(y[0]);
+    result[0] = 0.;
     return result;
 }
