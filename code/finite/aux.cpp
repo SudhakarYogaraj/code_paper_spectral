@@ -67,13 +67,13 @@ int bin(int n, int k) {
 
 int mult2ind(vector<int> m, int d) {
     int l = m.size() - 1; int i;
-    for(i = l; i > 0 & m[i] == 0; i--);
+    for(i = l; (i > 0) & (m[i] == 0); i--);
 
-    if (i == 0 & m[0] == 0)
+    if ((i == 0) & (m[0] == 0))
         return 0;
 
     int s = 0;
-    for (int j = 0; j < m.size(); ++j)
+    for (unsigned int j = 0; j < m.size(); ++j)
         s += m[j];
 
     int dr = d - s;
@@ -207,10 +207,27 @@ vector< vector<double> > hermiteCoeffs(int degree) {
     exit(0);
 }
 
-vector<double> hcoeffs (vector<double> mcoeffs) {
+vector<vector<double> > hermiteCoeffs_nd(int d, int n) {
+    int nb = bin(d + n, n);
+    vector< vector<double> > mat1d = hermiteCoeffs(d);
+    vector< vector<double> > matnd(nb, vector<double>(nb,0.));
+    for (int i = 0; i < nb; ++i) {
+        vector<int> m1 = ind2mult(i,d,n);
+        for (int j = 0; j < nb; ++j) {
+        vector<int> m2 = ind2mult(j,d,n);
+            matnd[i][j] = 1.;
+            for (int k = 0; k < n; ++k) {
+                matnd[i][j] *= mat1d[m1[k]][m2[k]];
+            }
+        }
+    }
+    return matnd;
+}
+
+vector<double> hcoeffs (vector<double> mcoeffs, int n) {
     vector<double> result(mcoeffs.size(), 0.);
     int degree = mcoeffs.size() - 1;
-    vector< vector<double> > mat = hermiteCoeffs(degree);
+    vector< vector<double> > mat = hermiteCoeffs_nd(degree, n);
     for (unsigned int i = 0; i < mcoeffs.size(); ++i) {
         for (unsigned int j = 0; j <= i; ++j) {
             result[i] += mat[i][j] * mcoeffs[j];
