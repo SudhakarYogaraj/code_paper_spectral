@@ -10,12 +10,11 @@
 
 class Gaussian_integrator {
     public:
-        double quad1d(std::function<double (double)> f, double sigma);
         double quadnd(std::function<double (std::vector<double>)> f, std::vector<double> sigmas);
-        Gaussian_integrator(int nNodes);
+        Gaussian_integrator(int nNodes, int nVars);
+
     private:
-        std::vector<double> nodes;
+        std::vector< std::vector<double> > nodes;
         std::vector<double> weights;
 };
-
 #endif

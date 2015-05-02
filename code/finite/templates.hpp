@@ -27,4 +27,12 @@ template<class type> double fabs(std::vector<type> vec) {
     return result;
 }
 
+template<class type> std::vector<type> operator*(const std::vector<type>& vec, const double& x) {
+    std::vector<type> result = vec;
+    for (unsigned int i = 0; i < vec.size(); ++i) {
+        result[i] = result[i]*x;
+    }
+    return result;
+}
+
 #endif

@@ -10,7 +10,7 @@ void Solver_spectral::set(double p, int n)
     this->p = p;
     this->n_mcmc = 100000;
     this->degree = 10;
-    this->nNodes = 30;
+    this->nNodes = 20;
     this->nvars = n;
 
     this-> nBasis = bin(this->degree + this->nvars, this->nvars);
@@ -57,7 +57,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     int nBasis = this->nBasis;
     int nf     = problem.nf;
     int ns     = problem.d;
-    Gaussian_integrator gauss = Gaussian_integrator(this->nNodes);
+    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     // Eigenvalues
     vector<double> sigmas(nf, 0.);
@@ -92,17 +92,15 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
         }
     }
 
-    /* for (unsigned int i = 0; i < coefficients[0].size(); ++i) { */
-    /*     cout << coefficients[0][i] << endl; */
-    /* } */
-    coefficients[0] = hcoeffs(coefficients[0],nf);
-    coefficients_dx[0][0] = hcoeffs(coefficients_dx[0][0],nf);
-    coefficients_h[0] = hcoeffs(coefficients_h[0],nf);
-
-    /* for (unsigned int i = 0; i < coefficients[0].size(); ++i) { */
-    /*     cout << coefficients[0][i] << endl; */
-    /* } */
-    /* exit(0); */
+    for (int i = 0; i < ns; ++i) {
+        for (int j = 0; j < ns; ++j) {
+            coefficients_dx[i][j] = hcoeffs(coefficients_dx[i][j],nf,degree);
+        }
+        coefficients[i] = hcoeffs(coefficients[i],nf,degree);
+    }
+    for (int i = 0; i < nf; ++i) {
+        coefficients_h[i] = hcoeffs(coefficients_h[i],nf,degree);
+    }
 
     // Solution of the Poisson equation
     vector< vector<double> > solution(ns, vector<double>(nBasis,0.));

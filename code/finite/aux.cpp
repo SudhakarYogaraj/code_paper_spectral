@@ -224,10 +224,9 @@ vector<vector<double> > hermiteCoeffs_nd(int d, int n) {
     return matnd;
 }
 
-vector<double> hcoeffs (vector<double> mcoeffs, int n) {
+vector<double> hcoeffs (vector<double> mcoeffs, int n, int d) {
     vector<double> result(mcoeffs.size(), 0.);
-    int degree = mcoeffs.size() - 1;
-    vector< vector<double> > mat = hermiteCoeffs_nd(degree, n);
+    vector< vector<double> > mat = hermiteCoeffs_nd(d, n);
     for (unsigned int i = 0; i < mcoeffs.size(); ++i) {
         for (unsigned int j = 0; j <= i; ++j) {
             result[i] += mat[i][j] * mcoeffs[j];
