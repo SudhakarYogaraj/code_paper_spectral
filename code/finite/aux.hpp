@@ -13,6 +13,6 @@ std::vector< std::vector<double> > cholesky(std::vector< std::vector<double> > A
 
 
 double monomial(std::vector<int> mult, std::vector<double> x, std::vector<double> sigmas);
-std::vector<double> hcoeffs (std::vector<double> mcoeffs);
+std::vector<double> hcoeffs (std::vector<double> mcoeffs, int n);
 
 #endif

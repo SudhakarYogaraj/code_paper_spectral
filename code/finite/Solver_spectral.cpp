@@ -10,7 +10,7 @@ void Solver_spectral::set(double p, int n)
     this->p = p;
     this->n_mcmc = 100000;
     this->degree = 10;
-    this->nNodes = 20;
+    this->nNodes = 30;
     this->nvars = n;
 
     this-> nBasis = bin(this->degree + this->nvars, this->nvars);
@@ -95,9 +95,9 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     /* for (unsigned int i = 0; i < coefficients[0].size(); ++i) { */
     /*     cout << coefficients[0][i] << endl; */
     /* } */
-    coefficients[0] = hcoeffs(coefficients[0]);
-    coefficients_dx[0][0] = hcoeffs(coefficients_dx[0][0]);
-    coefficients_h[0] = hcoeffs(coefficients_h[0]);
+    coefficients[0] = hcoeffs(coefficients[0],nf);
+    coefficients_dx[0][0] = hcoeffs(coefficients_dx[0][0],nf);
+    coefficients_h[0] = hcoeffs(coefficients_h[0],nf);
 
     /* for (unsigned int i = 0; i < coefficients[0].size(); ++i) { */
     /*     cout << coefficients[0][i] << endl; */
