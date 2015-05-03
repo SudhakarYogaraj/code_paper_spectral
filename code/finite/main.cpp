@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
     problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {4.};
+    vector<double> p_values = {6.};
 
     // Vector of the log of the error
     vector<double> errors_hmm(p_values.size(), 0.);
@@ -93,8 +93,8 @@ int main(int argc, char* argv[])
             int seed = (int) abs(1000*distribution(generator));
 
             // Solution of the problem using the HMM method
-            solver_hmm.estimator(problem, xt_hmm[i], yInit, fi_hmm, hi_hmm, seed, t[i]);
-            solver_spectral.estimator(problem, xt_spectral[i], fi_spectral, hi_spectral, t[i]);
+            tic(); solver_hmm.estimator(problem, xt_hmm[i], yInit, fi_hmm, hi_hmm, seed, t[i]); toc();
+            tic(); solver_spectral.estimator(problem, xt_spectral[i], fi_spectral, hi_spectral, t[i]); toc();
 
             // Exact drift and diffusion coefficients
             vector<double> Ddrif = (fi_hmm - problem.soldrif(xt_hmm[i]));
