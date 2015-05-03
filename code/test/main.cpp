@@ -28,9 +28,6 @@ double ipow(double x, int e) {
     if (e%2 == 0) return aux*aux;
     return x*aux*aux;
 }
-void tic() {
-    tictoc_stack.push(clock());
-}
 
 int bin(int n, int k) {
     int res = 1;
@@ -78,7 +75,9 @@ vector<int> ind2mult(int ind, int d, int n) {
     return m;
 }
 
-
+void tic() {
+    tictoc_stack.push(clock());
+}
 void toc() {
     std::cout << "Time elapsed: "
         << ((double)(clock() - tictoc_stack.top())) / CLOCKS_PER_SEC
