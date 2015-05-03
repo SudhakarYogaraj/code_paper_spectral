@@ -4,7 +4,7 @@ cxx    = g++
 target = dev.exec
 cxxflags = -O3 -std=c++11 -Wall
 
-objects = main.o Problem.o Solver_hmm.o Solver_spectral.o Gaussian_integrator.o aux.o io.o
+objects = main.o Problem.o Solver_hmm.o Solver_spectral.o Gaussian_integrator.o aux.o io.o tictoc.o
 $(target) : $(objects)
 	$(cxx) $(cxxflags) $(objects) -o $(target)
 
