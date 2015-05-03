@@ -2,6 +2,7 @@
 #include "Problem.hpp"
 #include "Gaussian_integrator.hpp"
 #include "Solver_spectral.hpp"
+#include "templates.hpp"
 
 using namespace std;
 
@@ -9,7 +10,7 @@ void Solver_spectral::set(double p, int n)
 {
     this->p = p;
     this->n_mcmc = 100000;
-    this->degree = 10;
+    this->degree = 8;
     this->nNodes = 20;
     this->nvars = n;
 
@@ -72,23 +73,41 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     vector< vector<double> > coefficients_h(nf, vector<double>(nBasis,0.));
     for (int i = 0; i < nBasis; ++i) {
         vector<int> multIndex = this->ind2mult(i);
+        /* for (int j = 0; j < ns; ++j) { */
+        /*     for (int k = 0; k < ns; ++k) { */
+        /*         auto lambda = [&] (vector<double> y) -> double { */
+        /*             return problem.dax(x,y)[j][k]*monomial(multIndex, y, sigmas); */
+        /*         }; */
+        /*         coefficients_dx[j][k][i] = gauss.quadnd(lambda,sigmas); */
+        /*     } */
+        /*     /1* auto lambda = [&] (vector<double> y) -> double { *1/ */
+        /*     /1*     return problem.a(x,y)[j]*monomial(multIndex, y, sigmas); *1/ */
+        /*     /1* }; *1/ */
+        /*     /1* coefficients[j][i] result = gauss.quadnd(lambda,sigmas,v0); *1/ */
+        /* } */
+        vector<double> v0(ns,0.);
+        vector<double> h0(nf,0.);
+        vector< vector<double> > m0(ns, vector<double> (ns,0.));
+        auto lambda = [&] (vector<double> y) -> vector<double> {
+            return problem.a(x,y)*monomial(multIndex, y, sigmas);
+        };
+        auto lambda_dx = [&] (vector<double> y) -> vector< vector<double> > {
+            return problem.dax(x,y)*monomial(multIndex, y, sigmas);
+        };
+        auto lambda_h = [&] (vector<double> y) -> vector<double> {
+            return problem.fast_drift_h(x,y)*monomial(multIndex, y, sigmas);
+        };
+        vector<double> result = gauss.quadnd(lambda,sigmas,v0);
+        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx,sigmas,m0);
+        vector<double> result_h = gauss.quadnd(lambda_h,sigmas,h0);
         for (int j = 0; j < ns; ++j) {
+            coefficients[j][i] = result[j];
             for (int k = 0; k < ns; ++k) {
-                auto lambda = [&] (vector<double> y) -> double {
-                    return problem.dax(x,y)[j][k]*monomial(multIndex, y, sigmas);
-                };
-                coefficients_dx[j][k][i] = gauss.quadnd(lambda,sigmas);
+                coefficients_dx[j][k][i] = result_dx[j][k];
             }
-            auto lambda = [&] (vector<double> y) -> double {
-                return problem.a(x,y)[j]*monomial(multIndex, y, sigmas);
-            };
-            coefficients[j][i] = gauss.quadnd(lambda,sigmas);
         }
         for (int j = 0; j < nf; ++j) {
-            auto lambda = [&] (vector<double> y) -> double {
-                return problem.fast_drift_h(x,y)[j]*monomial(multIndex, y, sigmas);
-            };
-            coefficients_h[j][i] = gauss.quadnd(lambda,sigmas);
+            coefficients_h[j][i] = result_h[j];
         }
     }
 

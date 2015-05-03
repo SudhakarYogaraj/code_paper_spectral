@@ -48,31 +48,21 @@ Gaussian_integrator::Gaussian_integrator(int nNodes, int nVars) {
         nodes_1d[i + nNodes/2] = -nodes_1d[i];
         weights_1d[i + nNodes/2] = weights_1d[i];
     }
-    /* for (int i = 0; i < nNodes; ++i) { */
-    /*     cout << nodes_1d[i] << endl; */
-    /* } */
 
     int nPoints = pow(nNodes, nVars);
     vector< vector<double> > x(nPoints, vector<double>(nVars,0.));
     vector<double> w(nPoints, 1.);
     for (int i = 0; i < nPoints; ++i) {
         int tmp = i;
-        /* cout << "i " << i << "nvars" << nVars << endl; */
         for (int j = 0; j < nVars; ++j) {
             x[i][j] = nodes_1d[tmp%nNodes];
             w[i] *= weights_1d[tmp%nNodes];
             tmp = tmp/nNodes;
-            cout << tmp << endl;
         }
     }
 
     this->nodes = x;
     this->weights = w;
-
-    /* for (int i = 0; i < nPoints; ++i) { */
-    /*     cout << x[i][0] << " " << x[i][1] <<" " <<  x[i][2] << endl; */
-    /* } */
-    /* exit(0); */
 }
 
 double Gaussian_integrator::quadnd(function<double (vector<double>)> f, vector<double> sigmas) {
