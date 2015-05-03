@@ -35,7 +35,7 @@ vector<double> Problem::a(vector<double> x, vector<double> y) {
     return result;
 }
 
-vector< vector<double> > Problem::dax(vector<double> x, vector<double> y) { 
+vector< vector<double> > Problem::dax(vector<double> x, vector<double> y) {
     vector< vector<double> > result(this->d,vector<double>(this->d,0.));
     result[0][0] = y[0]*(-1.0/2.0);
     result[0][1] = y[1]*(-1.0/2.0);

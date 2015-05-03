@@ -2,6 +2,7 @@
 #include "Problem.hpp"
 #include "Gaussian_integrator.hpp"
 #include "Solver_spectral.hpp"
+#include "templates.hpp"
 
 using namespace std;
 
@@ -9,10 +10,9 @@ void Solver_spectral::set(double p, int n)
 {
     this->p = p;
     this->n_mcmc = 100000;
-    this->degree = 4;
-    this->nNodes = 10;
+    this->degree = 10;
+    this->nNodes = 20;
     this->nvars = n;
-
 
     this-> nBasis = bin(this->degree + this->nvars, this->nvars);
     this->ind2mult_aux = vector< vector<int> >(this->nBasis, vector<int>(this->nvars,0));
@@ -58,7 +58,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     int nBasis = this->nBasis;
     int nf     = problem.nf;
     int ns     = problem.d;
-    Gaussian_integrator gauss = Gaussian_integrator(this->nNodes);
+    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     // Eigenvalues
     vector<double> sigmas(nf, 0.);
@@ -73,24 +73,41 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     vector< vector<double> > coefficients_h(nf, vector<double>(nBasis,0.));
     for (int i = 0; i < nBasis; ++i) {
         vector<int> multIndex = this->ind2mult(i);
+
+        vector<double> v0(ns,0.);
+        vector<double> h0(nf,0.);
+        vector< vector<double> > m0(ns, vector<double> (ns,0.));
+
+        auto lambda = [&] (vector<double> y) -> vector<double> {
+            return problem.a(x,y)*monomial(multIndex, y, sigmas); };
+        auto lambda_dx = [&] (vector<double> y) -> vector< vector<double> > {
+            return problem.dax(x,y)*monomial(multIndex, y, sigmas); };
+        auto lambda_h = [&] (vector<double> y) -> vector<double> {
+            return problem.fast_drift_h(x,y)*monomial(multIndex, y, sigmas); };
+
+        vector<double> result = gauss.quadnd(lambda,sigmas,v0);
+        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx,sigmas,m0);
+        vector<double> result_h = gauss.quadnd(lambda_h,sigmas,h0);
+
         for (int j = 0; j < ns; ++j) {
+            coefficients[j][i] = result[j];
             for (int k = 0; k < ns; ++k) {
-                auto lambda = [&] (vector<double> y) -> double {
-                    return problem.dax(x,y)[j][k]*hermiteM(multIndex, y, sigmas);
-                };
-                coefficients_dx[j][k][i] = gauss.quadnd(lambda,sigmas);
+                coefficients_dx[j][k][i] = result_dx[j][k];
             }
-            auto lambda = [&] (vector<double> y) -> double {
-                return problem.a(x,y)[j]*hermiteM(multIndex, y, sigmas);
-            };
-            coefficients[j][i] = gauss.quadnd(lambda,sigmas);
         }
         for (int j = 0; j < nf; ++j) {
-            auto lambda = [&] (vector<double> y) -> double {
-                return problem.fast_drift_h(x,y)[j]*hermiteM(multIndex, y, sigmas);
-            };
-            coefficients_h[j][i] = gauss.quadnd(lambda,sigmas);
+            coefficients_h[j][i] = result_h[j];
         }
+    }
+
+    for (int i = 0; i < ns; ++i) {
+        for (int j = 0; j < ns; ++j) {
+            coefficients_dx[i][j] = hcoeffs(coefficients_dx[i][j],nf,degree);
+        }
+        coefficients[i] = hcoeffs(coefficients[i],nf,degree);
+    }
+    for (int i = 0; i < nf; ++i) {
+        coefficients_h[i] = hcoeffs(coefficients_h[i],nf,degree);
     }
 
     // Solution of the Poisson equation
@@ -147,9 +164,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
             }
         }
     }
-
-    cout << "drift coefficients spectral" << endl;
-    cout << F1[0] << " " << F2[0] << endl;
 
     hi = cholesky(symmetric(A0));
     for (int i = 0; i < ns; ++i)

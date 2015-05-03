@@ -1,4 +1,5 @@
 #include "Gaussian_integrator.hpp"
+#include "templates.hpp"
 
 using namespace std;
 
@@ -13,67 +14,66 @@ static vector<double> weights_20 = { 4.62243669600610089640e-01,    2.8667550536
 static vector<double> nodes_30 = { 0.2011285765488714855458, 0.6039210586255523077782, 1.008338271046723461805, 1.415527800198188511941, 1.826741143603688038836, 2.243391467761504072473, 2.667132124535617200571, 3.099970529586441748689, 3.544443873155349886925, 4.003908603861228815228, 4.483055357092518341887, 4.988918968589943944486, 5.533147151567495725118, 6.138279220123934620395, 6.863345293529891581061};
 static vector<double> weights_30 = { 0.3863948895418138625556, 0.2801309308392126674135, 0.1467358475408900997517, 0.05514417687023425116808, 0.01470382970482668351528, 0.00273792247306765846299, 3.48310124318685523421E-4, 2.9387252289229876415E-5, 1.57909488732471028835E-6, 5.10852245077594627739E-8, 9.178580424378528209E-10, 8.10618629746304420399E-12, 2.87860708054870606219E-14, 2.8103336027509037088E-17, 2.90825470013122622941E-21};
 
-Gaussian_integrator::Gaussian_integrator(int nNodes) {
+Gaussian_integrator::Gaussian_integrator(int nNodes, int nVars) {
+
+    vector<double> nodes_1d(nNodes);
+    vector<double> weights_1d(nNodes);
+
     switch (nNodes) {
         case 4:
-            this->nodes = nodes_4;
-            this->weights = weights_4;
+            nodes_1d = nodes_4;
+            weights_1d = weights_4;
            break;
         case 6:
-            this->nodes = nodes_6;
-            this->weights = weights_6;
+            nodes_1d = nodes_6;
+            weights_1d = weights_6;
             break;
         case 10:
-            this->nodes = nodes_10;
-            this->weights = weights_10;
+            nodes_1d = nodes_10;
+            weights_1d = weights_10;
             break;
         case 20:
-            this->nodes = nodes_20;
-            this->weights = weights_20;
+            nodes_1d = nodes_20;
+            weights_1d = weights_20;
             break;
         case 30:
-            this->nodes = nodes_30;
-            this->weights = weights_30;
+            nodes_1d = nodes_30;
+            weights_1d = weights_30;
             break;
         default: cout << "Invalid number of nodes for Gauss-hermite integration" << endl;
                  exit(0);
     }
-}
 
-double Gaussian_integrator::quad1d(function<double (double)> f, double sigma) {
-    double result = 0.;
-    double x_aux;
-    for (unsigned int i = 0; i < nodes.size(); ++i) {
-        x_aux = sqrt(2)*sigma*this->nodes[i];
-        result += this->weights[i]*f(x_aux);
-        result += this->weights[i]*f(-x_aux);
+    for (int i = 0; i < nNodes/2; ++i) {
+        nodes_1d[i + nNodes/2] = -nodes_1d[i];
+        weights_1d[i + nNodes/2] = weights_1d[i];
     }
-    return result/sqrt(PI);
+
+    int nPoints = pow(nNodes, nVars);
+    vector< vector<double> > x(nPoints, vector<double>(nVars,0.));
+    vector<double> w(nPoints, 1.);
+    for (int i = 0; i < nPoints; ++i) {
+        int tmp = i;
+        for (int j = 0; j < nVars; ++j) {
+            x[i][j] = nodes_1d[tmp%nNodes];
+            w[i] *= weights_1d[tmp%nNodes];
+            tmp = tmp/nNodes;
+        }
+    }
+
+    this->nodes = x;
+    this->weights = w;
 }
 
 double Gaussian_integrator::quadnd(function<double (vector<double>)> f, vector<double> sigmas) {
     double result = 0.;
-    int size = sigmas.size();
-    if (size == 1) {
-        auto lambda = [f,this](double x) -> double {
-            vector<double> aux_vec(1,x);
-            return f(aux_vec);
-        };
-        return this->quad1d(lambda, sigmas[0]);
+    int nVars = sigmas.size();
+    for (unsigned int i = 0; i < nodes.size(); ++i) {
+        vector<double> x = nodes[i];
+        for (int j = 0; j < nVars; ++j) {
+            x[j] *= sqrt(2)*sigmas[j];
+        }
+        result += weights[i]*f(x);
     }
-    else {
-        auto lambda = [f,size,sigmas,this](vector<double> x) -> double {
-            auto nested_lambda = [f,&x](double y) -> double {
-                x.push_back(y);
-
-                double result = f(x);
-                x.pop_back();
-                return result;
-            };
-            return this->quad1d(nested_lambda, sigmas[size-1]);
-        };
-        sigmas.pop_back();
-        return this->quadnd(lambda, sigmas);
-    }
-    return result;
+    return result/pow(sqrt(PI),nVars);
 }
