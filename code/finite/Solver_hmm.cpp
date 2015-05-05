@@ -95,7 +95,7 @@ void Solver_hmm::estimator(Problem &problem, \
             sumsAux2[0] = sumsAux2[0] + problem.a(xt, yAux[index]);
             sumsAux1[0] = sumsAux1[0] + problem.dax(xt, yAux[index]);
         }
-        
+
         // Recursion to obtain the other components
         for (int index = 1; index < this->nt + this->n; index++) {
             sumsAux1[index] = sumsAux1[index-1] + problem.dax(xt, yAux[index + this->np]) - problem.dax(xt, yAux[index-1]);
