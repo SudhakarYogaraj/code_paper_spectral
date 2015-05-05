@@ -28,8 +28,6 @@ void Problem::init() {
 vector<double> Problem::soldrif(vector<double> x) {
     vector<double> result(this->d,0.);
     result[0] = -sin(x[0])*cos(x[0])*(1 + exp(-1.0)) + cos(x[0])*cos(x[0])*(1. + exp(-1.));
-    cout << "first part of the drift: " << -sin(x[0])*cos(x[0])*(1 + exp(-1.0)) << endl;
-    cout << "second part of the drift: " << cos(x[0])*cos(x[0])*(1. + exp(-1.)) << endl;
     return result;
 }
 

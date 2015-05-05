@@ -203,6 +203,111 @@ vector< vector<double> > hermiteCoeffs(int degree) {
     coefficients[10][10] = sqrt(7.0)/5040.0*(    1.0);
     if (degree == 10) return coefficients;
 
+    coefficients[11][11] = (sqrt(77.))/55440.;
+    coefficients[11][9]  = - (sqrt(77.))/1008.;
+    coefficients[11][7]  =  (sqrt(77.))/56.;
+    coefficients[11][5]  = - (sqrt(77.))/8.;
+    coefficients[11][3]  =  (5.*sqrt(77.))/16.;
+    coefficients[11][1]  = - (3.*sqrt(77.))/16.;
+    if (degree == 11) return coefficients;
+
+    coefficients[12][12] = (sqrt(231.))/332640.;
+    coefficients[12][10] = - (sqrt(231.))/5040.;
+    coefficients[12][8]  =  (sqrt(231.))/224.;
+    coefficients[12][6]  = - (sqrt(231.))/24.;
+    coefficients[12][4]  =  (5.*sqrt(231.))/32.;
+    coefficients[12][2]  = - (3.*sqrt(231.))/16.;
+    coefficients[12][0]  =  sqrt(231.)/32.;
+    if (degree == 12) return coefficients;
+
+    coefficients[13][13] = (sqrt(3003.))/4324320.;
+    coefficients[13][11] = - (sqrt(3003.))/55440.;
+    coefficients[13][9]  =  (sqrt(3003.))/2016.;
+    coefficients[13][7]  = - (sqrt(3003.))/168.;
+    coefficients[13][5]  =  (sqrt(3003.))/32.;
+    coefficients[13][3]  = - (sqrt(3003.))/16.;
+    coefficients[13][1]  =  (sqrt(3003.))/32.;
+    if (degree == 13) return coefficients;
+
+    coefficients[14][14] = (sqrt(858.))/8648640.;
+    coefficients[14][12] = - (sqrt(858.))/95040.;
+    coefficients[14][10] =  (sqrt(858.))/2880.;
+    coefficients[14][8]  = - (sqrt(858.))/192.;
+    coefficients[14][6]  =  (7.*sqrt(858.))/192.;
+    coefficients[14][4]  = - (7.*sqrt(858.))/64.;
+    coefficients[14][2]  =  (7.*sqrt(858.))/64.;
+    coefficients[14][0]  = - sqrt(858.)/64.;
+    if (degree == 14) return coefficients;
+
+    coefficients[15][15] = (sqrt(1430.))/43243200.;
+    coefficients[15][13] = - (sqrt(1430.))/411840.;
+    coefficients[15][11] =  (sqrt(1430.))/10560.;
+    coefficients[15][9]  = - (sqrt(1430.))/576.;
+    coefficients[15][7]  =  (sqrt(1430.))/64.;
+    coefficients[15][5]  = - (21.*sqrt(1430.))/320.;
+    coefficients[15][3]  =  (7.*sqrt(1430.))/64.;
+    coefficients[15][1]  = - (3.*sqrt(1430.))/64.;
+    if (degree == 15) return coefficients;
+
+    coefficients[16][16] = (sqrt(1430.))/172972800.;
+    coefficients[16][14] = - (sqrt(1430.))/1441440.;
+    coefficients[16][12] =  (sqrt(1430.))/31680.;
+    coefficients[16][10] = - (sqrt(1430.))/1440.;
+    coefficients[16][8]  =  (sqrt(1430.))/128.;
+    coefficients[16][6]  = - (7.*sqrt(1430.))/160.;
+    coefficients[16][4]  =  (7.*sqrt(1430.))/64.;
+    coefficients[16][2]  = - (3.*sqrt(1430.))/32.;
+    coefficients[16][0]  =  (3.*sqrt(1430.))/256.;
+    if (degree == 16) return coefficients;
+
+    coefficients[17][17] = (sqrt(24310.))/2940537600.;
+    coefficients[17][15] = - (sqrt(24310.))/21621600.;
+    coefficients[17][13] =  (sqrt(24310.))/411840.;
+    coefficients[17][11] = - (sqrt(24310.))/15840.;
+    coefficients[17][9]  =  (sqrt(24310.))/1152.;
+    coefficients[17][7]  = - (sqrt(24310.))/160.;
+    coefficients[17][5]  =  (7.*sqrt(24310.))/320.;
+    coefficients[17][3]  = - (sqrt(24310.))/32.;
+    coefficients[17][1]  =  (3.*sqrt(24310.))/256.;
+    if (degree == 17) return coefficients;
+
+    coefficients[18][18] = (sqrt(12155.))/8821612800.;
+    coefficients[18][16] = - (sqrt(12155.))/57657600.;
+    coefficients[18][14] =  (sqrt(12155.))/960960.;
+    coefficients[18][12] = - (sqrt(12155.))/31680.;
+    coefficients[18][10] =  (sqrt(12155.))/1920.;
+    coefficients[18][8]  = - (3.*sqrt(12155.))/640.;
+    coefficients[18][6]  =  (7.*sqrt(12155.))/320.;
+    coefficients[18][4]  = - (3.*sqrt(12155.))/64.;
+    coefficients[18][2]  =  (9.*sqrt(12155.))/256.;
+    coefficients[18][0]  = - sqrt(12155.)/256.;
+    if (degree == 18) return coefficients;
+
+    coefficients[19][19] = (sqrt(230945.))/167610643200.;
+    coefficients[19][17] = - (sqrt(230945.))/980179200.;
+    coefficients[19][15] =  (sqrt(230945.))/14414400.;
+    coefficients[19][13] = - (sqrt(230945.))/411840.;
+    coefficients[19][11] =  (sqrt(230945.))/21120.;
+    coefficients[19][9]  = - (sqrt(230945.))/1920.;
+    coefficients[19][7]  =  (sqrt(230945.))/320.;
+    coefficients[19][5]  = - (3.*sqrt(230945.))/320.;
+    coefficients[19][3]  =  (3.*sqrt(230945.))/256.;
+    coefficients[19][1]  = - (sqrt(230945.))/256.;
+    if (degree == 19) return coefficients;
+
+    coefficients[20][20] = (sqrt(46189.))/335221286400.;
+    coefficients[20][18] = - (sqrt(46189.))/1764322560.;
+    coefficients[20][16] =  (sqrt(46189.))/23063040.;
+    coefficients[20][14] = - (sqrt(46189.))/576576.;
+    coefficients[20][12] =  (sqrt(46189.))/25344.;
+    coefficients[20][10] = - (sqrt(46189.))/1920.;
+    coefficients[20][8]  =  (sqrt(46189.))/256.;
+    coefficients[20][6]  = - (sqrt(46189.))/64.;
+    coefficients[20][4]  =  (15.*sqrt(46189.))/512.;
+    coefficients[20][2]  = - (5.*sqrt(46189.))/256.;
+    coefficients[20][0]  =  sqrt(46189.)/512.;
+    if (degree == 20) return coefficients;
+
     cout << "Degree too high" << endl;
     exit(0);
 }
