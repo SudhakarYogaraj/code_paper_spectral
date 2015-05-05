@@ -1,3 +1,4 @@
+#include "structures.hpp"
 #include "aux.hpp"
 #include "templates.hpp"
 #include "Problem.hpp"
@@ -44,10 +45,12 @@ void Solver_hmm::set(double p, int M)
 void Solver_hmm::estimator(Problem &problem, \
                vector<double> xt, \
                vector<double>& yInit, \
-               vector<double>& fi, \
-               vector< vector<double> >& hi, \
+               SDE_coeffs& data, \
                int seed, \
                double t) {
+
+    data.drif = vector<double>(problem.d, 0.);
+    data.diff = vector< vector<double> >(problem.d, vector<double>(problem.d, 0.));
 
     default_random_engine generator;
     normal_distribution<double> distribution(0.0,1.0);
@@ -149,14 +152,14 @@ void Solver_hmm::estimator(Problem &problem, \
         // Incremental mean over the samples
         for (int i1 = 0; i1 < problem.d; i1++) {
             for (int i2 = 0; i2 < problem.d; i2++) {
-                hi[i1][i2] = (hi[i1][i2]*m + him[i1][i2])/(m+1);
+                data.diff[i1][i2] = (data.diff[i1][i2]*m + him[i1][i2])/(m+1);
             }
-            fi[i1] = (fi[i1]*m + fim[i1])/(m+1);
+            data.drif[i1] = (data.drif[i1]*m + fim[i1])/(m+1);
         }
     }
 
     // Approximate diffusion coefficient
-    hi = cholesky(symmetric(hi));
+    data.diff = cholesky(symmetric(data.diff));
 
     // Initial condition for next iteration and storage of y
     yInit = yAux[yAux.size()-1];

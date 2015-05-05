@@ -10,10 +10,8 @@
 
 class Gaussian_integrator {
     public:
-        double quadnd(std::function<double (std::vector<double>)> f, std::vector<double> sigmas);
-
         Gaussian_integrator(int nNodes, int nVars);
-        template<typename T, typename F> std::vector<T> quadnd(F f, std::vector<double> sigmas, std::vector<T> v0) {
+        template<typename T, typename F> std::vector<T> quadnd(F f, const std::vector<double>& sigmas, const std::vector<T>& v0) {
             std::vector<T> result = v0;
             int nVars = sigmas.size();
             for (unsigned int i = 0; i < nodes.size(); ++i) {
