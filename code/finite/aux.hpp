@@ -14,5 +14,7 @@ std::vector< std::vector<double> > cholesky(std::vector< std::vector<double> > A
 
 double monomial(std::vector<int> mult, std::vector<double> x, std::vector<double> sigmas);
 std::vector<double> hcoeffs (std::vector<double> mcoeffs, int n, int d);
+int mult2ind(std::vector<int> m, int d);
+std::vector<int> ind2mult(int ind, int d, int n);
 
 #endif
