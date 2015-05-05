@@ -1,3 +1,4 @@
+#include "structures.hpp"
 #include "aux.hpp"
 #include "Problem.hpp"
 #include "Gaussian_integrator.hpp"
@@ -6,20 +7,17 @@
 
 using namespace std;
 
-void Solver_spectral::set(double p, int n)
+Solver_spectral::Solver_spectral(int degree, int nNodes)
 {
-    this->p = p;
-    this->degree = 10;
-    this->nNodes = 20;
-    this->nvars = n;
-
-    this-> nBasis = bin(this->degree + this->nvars, this->nvars);
+    this->degree = degree;
+    this->nNodes = nNodes;
 }
 
-void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<double>& fi, vector< vector<double> >& hi, double t) {
+void Solver_spectral::estimator(Problem &problem, vector<double> x,  SDE_coeffs& c, double t) {
 
     int nf     = problem.nf;
     int ns     = problem.d;
+    int nb     = bin(degree + nf, nf);
 
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
@@ -31,14 +29,13 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     }
 
     // Expansion of right-hand side of the Poisson equation
-    vector< vector<double> > coefficients(ns, vector<double>(nBasis, 0.));
-    vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nBasis, 0.)));
-    vector< vector<double> > coefficients_h(nf, vector<double>(nBasis,0.));
-    for (int i = 0; i < nBasis; ++i) {
-
-        cout.flush(); cout << "[";
-        int bw = 103; 
-        double progress = ( (double) i) / ( (double) nBasis);
+    vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
+    vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
+    vector< vector<double> > coefficients_h(nf, vector<double>(nb,0.));
+    for (int i = 0; i < nb; ++i) {
+        cout << "[";
+        int bw = 103;
+        double progress = ( (double) i) / ( (double) nb);
         int pos = bw * progress;
         for (int j = 0; j < bw; ++j) {
             if (j < pos) cout << "=";
@@ -77,24 +74,24 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
         for (int j = 0; j < nf; ++j) {
             coefficients_h[j][i] = result_h[j];
         }
+        cout.flush();
     }
-    cout << endl;
 
     for (int i = 0; i < ns; ++i) {
         for (int j = 0; j < ns; ++j) {
-            coefficients_dx[i][j] = hcoeffs(coefficients_dx[i][j],nf,degree);
+            coefficients_dx[i][j] = mon2herm(coefficients_dx[i][j],nf,degree);
         }
-        coefficients[i] = hcoeffs(coefficients[i],nf,degree);
+        coefficients[i] = mon2herm(coefficients[i],nf,degree);
     }
     for (int i = 0; i < nf; ++i) {
-        coefficients_h[i] = hcoeffs(coefficients_h[i],nf,degree);
+        coefficients_h[i] = mon2herm(coefficients_h[i],nf,degree);
     }
 
     // Solution of the Poisson equation
-    vector< vector<double> > solution(ns, vector<double>(nBasis,0.));
-    vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nBasis, 0.)));
-    vector< vector< vector<double> > > solution_dy(ns, vector< vector <double> >(nf, vector<double>(nBasis,0.)));
-    for (int i = 1; i < nBasis; ++i) {
+    vector< vector<double> > solution(ns, vector<double>(nb,0.));
+    vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
+    vector< vector< vector<double> > > solution_dy(ns, vector< vector <double> >(nf, vector<double>(nb,0.)));
+    for (int i = 1; i < nb; ++i) {
         double eig = 0.;
         for (int j = 0; j < nf; ++j) {
             eig += ind2mult(i,degree,nf)[j]*problem.lambdas[j];
@@ -107,7 +104,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     }
 
     // y-Derivatives of the solution
-    for (int i = 0; i < nBasis; ++i) {
+    for (int i = 0; i < nb; ++i) {
         vector<int> mult = ind2mult(i,degree,nf);
         if (accumulate (mult.begin(), mult.end(),0) == degree) {
             continue;
@@ -126,7 +123,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     vector<double> F1(ns, 0.);
     vector<double> F2(ns, 0.);
     vector< vector <double> > A0(ns, vector<double>(ns,0.));
-    for (int j = 0; j < nBasis; ++j) {
+    for (int j = 0; j < nb; ++j) {
         for (int k = 0; k < ns; ++k) {
             for (int l = 0; l < ns; ++l)
                 F1[k] += solution_dx[k][l][j]*coefficients[l][j];
@@ -144,7 +141,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
         }
     }
 
-    hi = cholesky(symmetric(A0));
-    for (int i = 0; i < ns; ++i)
-        fi[i] = F1[i] + F2[i];
+    c.diff = cholesky(symmetric(A0));
+    c.drif = F1 + F2;
 }

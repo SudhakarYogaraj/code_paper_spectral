@@ -1,8 +1,5 @@
 #include "main.hpp"
 
-/* TODO: Integration with respect to monomials (urbain, Fri 01 May 2015 17:03:41 BST) */
-/* TODO: Matlab code to generate problems (urbain, Fri 01 May 2015 17:04:33 BST) */
-
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -12,7 +9,7 @@ int main(int argc, char* argv[])
     problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {3.};
+    vector<double> p_values = {6.};
 
     // Vector of the log of the error
     vector<double> errors_hmm(p_values.size(), 0.);
@@ -26,7 +23,7 @@ int main(int argc, char* argv[])
 
     // Initialization of the solver
     Solver_hmm solver_hmm;
-    Solver_spectral solver_spectral;
+    Solver_spectral solver_spectral = Solver_spectral(20,30);
 
     // Random numbers generator
     default_random_engine generator; generator.seed(seed);
@@ -72,7 +69,6 @@ int main(int argc, char* argv[])
 
         // Setting to solver to match the precision parameter p_value[i];
         solver_hmm.set(p_values[j],M);
-        solver_spectral.set(p_values[j], problem.nf);
 
         // Error due to the estimation of the coefficients
         double error_hmm = 0.;
@@ -80,12 +76,8 @@ int main(int argc, char* argv[])
 
         for (unsigned int i = 0; i < sizet - 1; i++) {
 
-            // Numerical estimation of the drift and diffusion coefficients
-            // at time step i (initialized at 0).
-            vector<double> fi_hmm(problem.d, 0.);
-            vector<double> fi_spectral(problem.d, 0.);
-            vector< vector<double> > hi_hmm(problem.d, vector<double>(problem.d,0.));
-            vector< vector<double> > hi_spectral(problem.d, vector<double>(problem.d,0.));
+            struct SDE_coeffs c_hmm;
+            struct SDE_coeffs c_spectral;
 
             // Initial value for the fast process at each macro time-step
             vector<double> yInit(2*problem.nf, 0.);
@@ -93,18 +85,18 @@ int main(int argc, char* argv[])
             int seed = (int) abs(1000*distribution(generator));
 
             // Solution of the problem using the HMM method
-            tic(); solver_hmm.estimator(problem, xt_hmm[i], yInit, fi_hmm, hi_hmm, seed, t[i]); toc();
-            tic(); solver_spectral.estimator(problem, xt_spectral[i], fi_spectral, hi_spectral, t[i]); toc();
+            tic(); solver_hmm.estimator(problem, xt_hmm[i], yInit, c_hmm, seed, t[i]); toc();
+            tic(); solver_spectral.estimator(problem, xt_spectral[i], c_spectral, t[i]); toc();
 
             // Exact drift and diffusion coefficients
-            vector<double> Ddrif = (fi_hmm - problem.soldrif(xt_hmm[i]));
-            vector< vector<double> > Ddiff = (hi_hmm - problem.soldiff(xt_hmm[i]));
+            vector<double> Ddrif = (c_hmm.drif - problem.soldrif(xt_hmm[i]));
+            vector< vector<double> > Ddiff = (c_hmm.diff - problem.soldiff(xt_hmm[i]));
             error_hmm += 1./sizet*(fabs(Ddrif) + fabs(Ddiff));
             double errorDrift_hmm = fabs(Ddrif);
             double errorDiff_hmm  = fabs(Ddiff);
 
-            Ddrif = fi_spectral - problem.soldrif(xt_spectral[i]);
-            Ddiff = hi_spectral - problem.soldiff(xt_spectral[i]);
+            Ddrif = c_spectral.drif - problem.soldrif(xt_spectral[i]);
+            Ddiff = c_spectral.diff - problem.soldiff(xt_spectral[i]);
             error_spectral += 1./sizet*(fabs(Ddrif) + fabs(Ddiff));
             double errorDrift_spectral = fabs(Ddrif);
             double errorDiff_spectral  = fabs(Ddiff);
@@ -120,12 +112,12 @@ int main(int argc, char* argv[])
             for (int i1 = 0; i1 < problem.d; i1++) {
                 for (int i2 = 0; i2 < problem.d; i2++) {
                     x_exact[i+1][i1] += exact_diff[i1][i2]*sqrt(Dt)*dWs[i][i2];
-                    xt_hmm[i+1][i1] += hi_hmm[i1][i2]*sqrt(Dt)*dWs[i][i2];
-                    xt_spectral[i+1][i1] += hi_spectral[i1][i2]*sqrt(Dt)*dWs[i][i2];
+                    xt_hmm[i+1][i1] += c_hmm.diff[i1][i2]*sqrt(Dt)*dWs[i][i2];
+                    xt_spectral[i+1][i1] += c_spectral.diff[i1][i2]*sqrt(Dt)*dWs[i][i2];
                 }
                 x_exact[i+1][i1] += Dt*exact_drif[i1];
-                xt_hmm[i+1][i1] += Dt*fi_hmm[i1];
-                xt_spectral[i+1][i1] += Dt*fi_spectral[i1];
+                xt_hmm[i+1][i1] += Dt*c_hmm.drif[i1];
+                xt_spectral[i+1][i1] += Dt*c_spectral.drif[i1];
             }
 
 
@@ -140,12 +132,12 @@ int main(int argc, char* argv[])
             cout << "|" << setw(50) << "   -Drift coefficient:" << "|";
             cout << setw(50) <<  "   -Drift coefficient:" << "|" << endl;
             cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
-            print2Vecs(fi_hmm, fi_spectral);
+            print2Vecs(c_hmm.drif, c_spectral.drif);
             cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
             cout << "|" << setw(50) << "   -Diffusion coefficient:" << "|";
             cout << setw(50) <<  "   -Diffusion coefficient:" << "|" << endl;
             cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
-            print2Mats(hi_hmm, hi_spectral);
+            print2Mats(c_hmm.diff, c_spectral.diff);
             cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
             cout << "|" << setw(50) <<  "   -Value of the slow variable x:" << "|";
             cout << setw(50) <<  "   -Value of the slow variable x:" << "|" << endl;
