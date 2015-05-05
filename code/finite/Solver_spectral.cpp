@@ -9,55 +9,18 @@ using namespace std;
 void Solver_spectral::set(double p, int n)
 {
     this->p = p;
-    this->n_mcmc = 100000;
-    this->degree = 15;
+    this->degree = 10;
     this->nNodes = 20;
     this->nvars = n;
 
     this-> nBasis = bin(this->degree + this->nvars, this->nvars);
-    this->ind2mult_aux = vector< vector<int> >(this->nBasis, vector<int>(this->nvars,0));
-    this->mult2ind_aux = vector<int>(pow(degree + 1, this->nvars), -1);
-
-    vector<int> currentMult(nvars,0);
-    for (int i = 1; i < nBasis; ++i) {
-        int sum = 0;
-        for (int j = 0; j < nvars; ++j) {
-            sum += currentMult[j];
-        }
-        if (sum < this->degree) {
-            currentMult[nvars-1] ++;
-        } else {
-            int auxIndex = nvars - 1;
-            while (currentMult[auxIndex] == 0) {
-                auxIndex --;
-            }
-            currentMult[auxIndex] = 0;
-            currentMult[auxIndex-1] = currentMult[auxIndex-1] + 1;
-        }
-        for (int j = 0; j < nvars; ++j) {
-            ind2mult_aux[i][j] = currentMult[j];
-        }
-        mult2ind_aux[canonicalInd(currentMult, nvars, this->degree)] = i;
-    }
-}
-
-int Solver_spectral::mult2ind(vector<int> alpha) {
-    int canonicalInd = 0.;
-    for (int j = 0; j < this->nvars; ++j) {
-        canonicalInd += alpha[j]*pow(this->degree + 1, (this->nvars - 1) -j);
-    }
-    return this->mult2ind_aux[canonicalInd];
-}
-
-vector<int> Solver_spectral::ind2mult(int ind) {
-    return ind2mult_aux[ind];
 }
 
 void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<double>& fi, vector< vector<double> >& hi, double t) {
 
-    int nBasis = this->nBasis;
     int nf     = problem.nf;
     int ns     = problem.d;
+
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     // Eigenvalues
@@ -72,7 +35,23 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nBasis, 0.)));
     vector< vector<double> > coefficients_h(nf, vector<double>(nBasis,0.));
     for (int i = 0; i < nBasis; ++i) {
-        vector<int> multIndex = this->ind2mult(i);
+
+        cout.flush(); cout << "[";
+        int bw = 103; 
+        double progress = ( (double) i) / ( (double) nBasis);
+        int pos = bw * progress;
+        for (int j = 0; j < bw; ++j) {
+            if (j < pos) cout << "=";
+            else if (j == pos) cout << ">";
+            else cout << " ";
+        }
+        cout << "] " << int(progress * 100.0) << " %\r";
+
+        vector<int> multIndex = ind2mult(i, degree, nf);
+
+        /* vector<int> mult = ind2mult(i, degree, nf); */
+        /* cout << mult[0] << " " <<  mult[1] << " " << mult[2] << endl;; */
+        /* cout << mult2ind(mult, degree) << endl;; */
 
         vector<double> v0(ns,0.);
         vector<double> h0(nf,0.);
@@ -99,6 +78,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
             coefficients_h[j][i] = result_h[j];
         }
     }
+    cout << endl;
 
     for (int i = 0; i < ns; ++i) {
         for (int j = 0; j < ns; ++j) {
@@ -117,7 +97,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
     for (int i = 1; i < nBasis; ++i) {
         double eig = 0.;
         for (int j = 0; j < nf; ++j) {
-            eig += this->ind2mult(i)[j]*problem.lambdas[j];
+            eig += ind2mult(i,degree,nf)[j]*problem.lambdas[j];
         }
         for (int j = 0; j < ns; ++j) {
             solution[j][i] = coefficients[j][i]/eig;
@@ -128,17 +108,16 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x, vector<doubl
 
     // y-Derivatives of the solution
     for (int i = 0; i < nBasis; ++i) {
-        vector<int> mult = this->ind2mult(i);
+        vector<int> mult = ind2mult(i,degree,nf);
         if (accumulate (mult.begin(), mult.end(),0) == degree) {
             continue;
         }
         for (int j = 0; j < nf; ++j) {
             vector<int> newMult = mult;
             newMult[j] ++;
-            int newInd = this->mult2ind(newMult);
+            int newInd = mult2ind(newMult, degree);
             for (int k = 0; k < ns; ++k) {
                 solution_dy[k][j][i] = solution[k][newInd]*sqrt(newMult[j])/sigmas[j];
-                /* cout << i << "   " <<  solution_dy[k][j][i] << endl; */
             }
         }
     }

@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
     problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {6.};
+    vector<double> p_values = {3.};
 
     // Vector of the log of the error
     vector<double> errors_hmm(p_values.size(), 0.);

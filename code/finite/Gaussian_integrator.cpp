@@ -64,16 +64,3 @@ Gaussian_integrator::Gaussian_integrator(int nNodes, int nVars) {
     this->nodes = x;
     this->weights = w;
 }
-
-double Gaussian_integrator::quadnd(function<double (vector<double>)> f, vector<double> sigmas) {
-    double result = 0.;
-    int nVars = sigmas.size();
-    for (unsigned int i = 0; i < nodes.size(); ++i) {
-        vector<double> x = nodes[i];
-        for (int j = 0; j < nVars; ++j) {
-            x[j] *= sqrt(2)*sigmas[j];
-        }
-        result += weights[i]*f(x);
-    }
-    return result/pow(sqrt(PI),nVars);
-}
