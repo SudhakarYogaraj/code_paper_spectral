@@ -13,12 +13,13 @@ Solver_spectral::Solver_spectral(int degree, int nNodes)
     this->nNodes = nNodes;
 }
 
-void Solver_spectral::estimator(Problem &problem, vector<double> x,  SDE_coeffs& c, double t) {
+void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_coeffs>& c, double t) {
 
     int nf     = problem.nf;
     int ns     = problem.d;
     int nb     = bin(degree + nf, nf);
 
+    c = vector<SDE_coeffs> (nb);
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     // Eigenvalues
@@ -139,8 +140,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  SDE_coeffs&
                 A0[k][l] += 2*solution[k][j]*coefficients[l][j];
             }
         }
+        c[j].diff =  cholesky(symmetric(A0));
+        c[j].drif = F1 + F2;
     }
-
-    c.diff = cholesky(symmetric(A0));
-    c.drif = F1 + F2;
 }
