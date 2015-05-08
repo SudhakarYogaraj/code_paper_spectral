@@ -13,6 +13,6 @@ class Solver_spectral {
         int nNodes;
 
         Solver_spectral(int degree, int nNodes);
-        void estimator(Problem&, std::vector<double> x, SDE_coeffs& , double t);
+        void estimator(Problem&, std::vector<double> x, std::vector<SDE_coeffs>& , double t);
 };
 #endif

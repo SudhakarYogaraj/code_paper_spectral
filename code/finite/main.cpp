@@ -1,5 +1,8 @@
 #include "main.hpp"
 
+/* TODO: Adapt to general gradient structure (urbain, Fri 08 May 2015 16:28:45 BST) */
+
+
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -9,7 +12,7 @@ int main(int argc, char* argv[])
     problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {6.};
+    vector<double> p_values = {3.};
 
     // Vector of the log of the error
     vector<double> errors_hmm(p_values.size(), 0.);
@@ -21,9 +24,6 @@ int main(int argc, char* argv[])
     // Random variable for generator
     int seed = time(NULL);
 
-    // Initialization of the solver
-    Solver_hmm solver_hmm;
-    Solver_spectral solver_spectral = Solver_spectral(20,30);
 
     // Random numbers generator
     default_random_engine generator; generator.seed(seed);
@@ -55,6 +55,9 @@ int main(int argc, char* argv[])
         }
     }
 
+    Solver_hmm solver_hmm;
+    Solver_spectral solver_spectral = Solver_spectral(20,30);
+
     for (unsigned int j = 0; j < p_values.size(); ++j) {
 
         // Approximate and exact solutions
@@ -78,6 +81,7 @@ int main(int argc, char* argv[])
 
             struct SDE_coeffs c_hmm;
             struct SDE_coeffs c_spectral;
+            vector<SDE_coeffs> vec_spectral;
 
             // Initial value for the fast process at each macro time-step
             vector<double> yInit(2*problem.nf, 0.);
@@ -86,7 +90,8 @@ int main(int argc, char* argv[])
 
             // Solution of the problem using the HMM method
             tic(); solver_hmm.estimator(problem, xt_hmm[i], yInit, c_hmm, seed, t[i]); toc();
-            tic(); solver_spectral.estimator(problem, xt_spectral[i], c_spectral, t[i]); toc();
+            tic(); solver_spectral.estimator(problem, xt_spectral[i], vec_spectral, t[i]); toc();
+            c_spectral = vec_spectral.back();
 
             // Exact drift and diffusion coefficients
             vector<double> Ddrif = (c_hmm.drif - problem.soldrif(xt_hmm[i]));
@@ -94,6 +99,15 @@ int main(int argc, char* argv[])
             error_hmm += 1./sizet*(fabs(Ddrif) + fabs(Ddiff));
             double errorDrift_hmm = fabs(Ddrif);
             double errorDiff_hmm  = fabs(Ddiff);
+
+            for (unsigned int m = 0; m < vec_spectral.size(); ++m) {
+                Ddrif = vec_spectral[m].drif - problem.soldrif(xt_spectral[i]);
+                Ddiff = vec_spectral[m].diff - problem.soldiff(xt_spectral[i]);
+                double errorDrift_spectral = fabs(Ddrif);
+                double errorDiff_spectral  = fabs(Ddiff);
+                cout << errorDrift_spectral << endl;
+                cout << errorDiff_spectral << endl;
+            }
 
             Ddrif = c_spectral.drif - problem.soldrif(xt_spectral[i]);
             Ddiff = c_spectral.diff - problem.soldiff(xt_spectral[i]);
@@ -119,7 +133,6 @@ int main(int argc, char* argv[])
                 xt_hmm[i+1][i1] += Dt*c_hmm.drif[i1];
                 xt_spectral[i+1][i1] += Dt*c_spectral.drif[i1];
             }
-
 
             // Output to terminal
             cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
