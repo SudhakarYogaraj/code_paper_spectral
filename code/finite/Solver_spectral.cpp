@@ -1,3 +1,7 @@
+/* TODO: Linear system solution (urbain, Sat 09 May 2015 14:32:40 BST) */
+/* TODO: Integration over infinite domain: which variance for gaussian(urbain, Sat 09 May 2015 14:33:06 BST) */
+/* TODO: Convergence of hermite functions? (urbain, Sat 09 May 2015 14:33:28 BST) */
+
 #include "structures.hpp"
 #include "aux.hpp"
 #include "Problem.hpp"
@@ -25,8 +29,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     // Eigenvalues
     vector<double> sigmas(nf, 0.);
     for (int i = 0; i < nf; ++i) {
-        double aux = problem.betas[i];
-        sigmas[i] = sqrt(0.5*aux*aux/problem.lambdas[i]);
+        sigmas[i] = problem.betas[i]*sqrt(0.5/problem.lambdas[i]);
     }
 
     // Expansion of right-hand side of the Poisson equation
@@ -34,27 +37,28 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector< vector<double> > coefficients_h(nf, vector<double>(nb,0.));
     for (int i = 0; i < nb; ++i) {
-        cout << "[";
-        int bw = 103;
-        double progress = ( (double) i) / ( (double) nb);
-        int pos = bw * progress;
-        for (int j = 0; j < bw; ++j) {
-            if (j < pos) cout << "=";
-            else if (j == pos) cout << ">";
-            else cout << " ";
-        }
-        cout << "] " << int(progress * 100.0) << " %\r";
+
+        /* Graphical progression bar. */
+        /* cout << "["; */
+        /* int bw = 103; */
+        /* double progress = ( (double) i) / ( (double) nb); */
+        /* int pos = bw * progress; */
+        /* for (int j = 0; j < bw; ++j) { */
+        /*     if (j < pos) cout << "="; */
+        /*     else if (j == pos) cout << ">"; */
+        /*     else cout << " "; */
+        /* } */
+        /* cout << "] " << int(progress * 100.0) << " %\r"; */
 
         vector<int> multIndex = ind2mult(i, degree, nf);
-
-        /* vector<int> mult = ind2mult(i, degree, nf); */
-        /* cout << mult[0] << " " <<  mult[1] << " " << mult[2] << endl;; */
-        /* cout << mult2ind(mult, degree) << endl;; */
 
         vector<double> v0(ns,0.);
         vector<double> h0(nf,0.);
         vector< vector<double> > m0(ns, vector<double> (ns,0.));
 
+        auto lambda_aux = [&] (vector<double> y) -> vector<double> {
+            /* return problem.a(x,y)*sqrt(problem.rho(x,y))*monomial(multIndex, y, sigmas)*sqrt(gaussian(y,sigmas)); }; */
+            return problem.a(x,y)*monomial(multIndex, y, sigmas)*problem.rho(x,y); };
         auto lambda = [&] (vector<double> y) -> vector<double> {
             return problem.a(x,y)*monomial(multIndex, y, sigmas); };
         auto lambda_dx = [&] (vector<double> y) -> vector< vector<double> > {
@@ -63,8 +67,15 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             return problem.fast_drift_h(x,y)*monomial(multIndex, y, sigmas); };
 
         vector<double> result = gauss.quadnd(lambda,sigmas,v0);
+        vector<double> result_aux = gauss.flatquadnd(lambda_aux,sigmas,v0);
         vector< vector<double> > result_dx = gauss.quadnd(lambda_dx,sigmas,m0);
         vector<double> result_h = gauss.quadnd(lambda_h,sigmas,h0);
+
+        /* FIXME: To delete (urbain, Mon 11 May 2015 14:01:10 BST) */
+        for (unsigned int i = 0; i < result_aux.size(); ++i) {
+            cout << "result_aux " << result_aux[i] << endl;
+            cout << "result " << result[i] << endl;
+        }
 
         for (int j = 0; j < ns; ++j) {
             coefficients[j][i] = result[j];

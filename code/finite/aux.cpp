@@ -2,6 +2,16 @@
 
 using namespace std;
 
+// Standard normal gaussian
+double gaussian(vector<double> y, vector<double> sigmas) {
+    double result = 1.;
+    for (unsigned int i = 0; i < y.size(); ++i) {
+        double s = sigmas[i];
+        result *= exp(-y[i]*y[i]/(2*s*s))/(sqrt(2*PI)*s);
+    }
+    return result;
+}
+
 // Symmetric part of a matrix
 vector< vector<double> > symmetric(vector< vector<double> > A) {
     int n = A.size();
@@ -100,7 +110,6 @@ double monomial(vector<int> mult, vector<double> x, vector<double> sigmas) {
     }
     return result;
 }
-
 vector< vector<double> > hermiteCoeffs(int degree) {
 
     vector< vector<double> > coefficients(degree + 1, vector<double>(degree + 1,0.));
