@@ -1,6 +1,8 @@
 #ifndef PROBLEM_H
 #define PROBLEM_H
 
+#define PI 3.141592653589793238462643383279502884
+
 #include <cmath>
 #include <vector>
 
@@ -18,6 +20,12 @@ class Problem {
 
         // Initial condition for the slow process
         std::vector<double> x0;
+
+        // Potential for gradient structure
+        double potential(std::vector<double> x, std::vector<double> y);
+        std::vector<double> grad(std::vector<double> x, std::vector<double> y);
+        double linearTerm(std::vector<double> x, std::vector<double> y);
+        double rho(std::vector<double> x, std::vector<double> y);
 
         // Drift coefficient of the slow process
         std::vector<double> a(std::vector<double> x, std::vector<double> y); // f0 in Pavliotis-Stuart

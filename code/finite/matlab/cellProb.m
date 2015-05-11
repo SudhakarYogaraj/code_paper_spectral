@@ -15,7 +15,7 @@ syms pi real positive;
 %% Hermite basis of polynomials
 
 % Maximal degree
-N = 10; 
+N = 20; 
 
 % Weight function
 rho = sqrt(lambda/((sym(pi))*q^2))*exp(-lambda*y^2/q^2);
@@ -60,7 +60,7 @@ basis = simplify(B*mon_y);
 eps = .05;
 
 % 1/eps drift term of the slow process
-fy = sin(y);
+fy = 1/sqrt(rho)*exp(-abs(y));
 fx = cos(x);
 f  = fx*fy;
 
@@ -96,6 +96,7 @@ n = 3; fd = diff(fy,y,n);
 
 % Numerical (non-symbolic) functions
 f_n   = matlabFunction(fy);
+f_nrho   = matlabFunction(simplify(fy*rho));
 rho_n = matlabFunction(rho);
 fd_n  = matlabFunction(fd);
 
@@ -116,7 +117,7 @@ switch method
     case 'NUMERICAL'
         for i = 2:length(index);
             basis_i = matlabFunction(basis(i));
-            I_c = @(s) basis_i(s).*rho_n(s).*f_n(s);
+            I_c = @(s) basis_i(s).*f_nrho(s);
             c(i) = integral(I_c,-inf,inf)             
         end
         
