@@ -8,6 +8,7 @@
 #include "Gaussian_integrator.hpp"
 #include "Solver_spectral.hpp"
 #include "templates.hpp"
+#include <iomanip>
 
 using namespace std;
 
@@ -34,9 +35,10 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
 
     // Variance parameter for hermite functions
     vector<double> sigmas_hf(1, 1./sqrt(2.));
+    /* vector<double> sigmas_hf(1, 0.7 ); */
 
     // Variance parameter for integration
-    vector<double> sigmas_quad(1, 0.8);
+    vector<double> sigmas_quad(1, 1./sqrt(2.));
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
@@ -99,22 +101,49 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector< vector< vector<double> > > solution_dy(ns, vector< vector <double> >(nf, vector<double>(nb,0.)));
-    // Construction of the matrix
+
+
+    // weights(i,j) = int (phi_i, e^(-V) )
+    vector<double> weights(nb, 0.);
+    for (int i = 0; i < nb; ++i) {
+        vector<int> m = ind2mult(i, degree, nf);
+        auto lambda = [&] (vector<double> y) -> double {
+            return monomial(m, y, sigmas_hf) * sqrt(problem.rho(x,y) * gaussian(y,sigmas_hf)); };
+        weights[i] = gauss.flatquadnd(lambda, sigmas_hf);
+    }
+
+    // mat(i,j) = int ( L phi_i, phi_j)
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nf; ++j) {
             mat[i][i] += m1[j]/(sigmas_hf[j]*sigmas_hf[j]);
         }
-        /* for (int j = 0; j < nb; ++j) { */
-        /*     vector<int> m2 = ind2mult(j, degree, nf); */
-        /*     auto lambda = [&] (vector<double> y) -> double { */
-        /*         return monomial(m1, y, sigmas_hf) * monomial(m2, y, sigmas_hf) * gaussian(y,sigmas_hf) * problem.rho(x,y); }; */
-        /*     mat[i][j] = gauss.flatquadnd(lambda, sigmas); */
-        /*     /1* cout << mat[i][j] << endl; *1/ */
-        /* } */
+        for (int j = 0; j < nb; ++j) {
+            vector<int> m2 = ind2mult(j, degree, nf);
+            auto lambda = [&] (vector<double> y) -> double {
+                double tmp = 1/(2*pow(sigmas_hf[0], 2)) - pow(y[0], 2)/(4*pow(sigmas_hf[0], 4));
+                return (problem.linearTerm(x,y) - tmp) * monomial(m1, y, sigmas_hf) * monomial(m2, y, sigmas_hf) * gaussian(y,sigmas_hf); };
+            mat[i][j] += gauss.flatquadnd(lambda, sigmas_hf);
+        }
     }
     mat[0][0] = 1.;
+
+    // print
+    for (int i = 0; i < nb; ++i) {
+        for (int j = 0; j < nb; ++j) {
+            cout << setw(10) <<  mat[i][j] << " " ;
+        }
+        cout << endl;
+    }
+
+    /* vector< vector<double> > A(nb, vector<double>(nb, 0.)); */
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     for (int j = 0; j < nb; ++j) { */
+    /*         A[i][j] = mat[i][j] - 2*weights[i]/weights[0]*mat[i][0] + weights[i]*weights[i]/(weights[0]*weights[0])*mat[0][0]; */
+    /*     } */
+    /* } */
+
     for (int i = 0; i < ns; ++i) {
         solution[i] = solve(mat, coefficients[i]);
         for (int j = 0; j < ns; ++j) {
