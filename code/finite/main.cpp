@@ -2,7 +2,6 @@
 
 /* TODO: Adapt to general gradient structure (urbain, Fri 08 May 2015 16:28:45 BST) */
 
-
 using namespace std;
 
 int main(int argc, char* argv[])

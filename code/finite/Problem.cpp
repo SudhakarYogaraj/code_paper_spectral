@@ -34,6 +34,7 @@ double Problem::linearTerm(vector<double> x, vector<double> y){
     return result;
 }
 
+// divide factor 2
 // rho = e^(-x^2)/sqrt(pi);
 // phi = 2*cos(x)*sin(y)
 // dphix = -2*sin(x)*sin(y)
