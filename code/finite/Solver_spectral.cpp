@@ -38,7 +38,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector<double> > coefficients_h(nf, vector<double>(nb,0.));
     for (int i = 0; i < nb; ++i) {
 
-        /* Graphical progression bar. */
+        // Graphical progression bar.
         /* cout << "["; */
         /* int bw = 103; */
         /* double progress = ( (double) i) / ( (double) nb); */
@@ -56,26 +56,21 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         vector<double> h0(nf,0.);
         vector< vector<double> > m0(ns, vector<double> (ns,0.));
 
-        auto lambda_aux = [&] (vector<double> y) -> vector<double> {
-            /* return problem.a(x,y)*sqrt(problem.rho(x,y))*monomial(multIndex, y, sigmas)*sqrt(gaussian(y,sigmas)); }; */
-            return problem.a(x,y)*monomial(multIndex, y, sigmas)*problem.rho(x,y); };
         auto lambda = [&] (vector<double> y) -> vector<double> {
-            return problem.a(x,y)*monomial(multIndex, y, sigmas); };
+            return problem.a(x,y)*monomial(multIndex, y, sigmas)*sqrt(problem.rho(x,y)*gaussian(y,sigmas)); };
         auto lambda_dx = [&] (vector<double> y) -> vector< vector<double> > {
-            return problem.dax(x,y)*monomial(multIndex, y, sigmas); };
+            return problem.dax(x,y)*monomial(multIndex, y, sigmas)*sqrt(problem.rho(x,y)*gaussian(y,sigmas)); };
         auto lambda_h = [&] (vector<double> y) -> vector<double> {
-            return problem.fast_drift_h(x,y)*monomial(multIndex, y, sigmas); };
+            return problem.fast_drift_h(x,y)*monomial(multIndex, y, sigmas)*sqrt(problem.rho(x,y)*gaussian(y,sigmas)); };
 
-        vector<double> result = gauss.quadnd(lambda,sigmas,v0);
-        vector<double> result_aux = gauss.flatquadnd(lambda_aux,sigmas,v0);
-        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx,sigmas,m0);
-        vector<double> result_h = gauss.quadnd(lambda_h,sigmas,h0);
+        vector<double> result = gauss.flatquadnd(lambda,sigmas,v0);
+        vector< vector<double> > result_dx = gauss.flatquadnd(lambda_dx,sigmas,m0);
+        vector<double> result_h = gauss.flatquadnd(lambda_h,sigmas,h0);
 
-        /* FIXME: To delete (urbain, Mon 11 May 2015 14:01:10 BST) */
-        for (unsigned int i = 0; i < result_aux.size(); ++i) {
-            cout << "result_aux " << result_aux[i] << endl;
-            cout << "result " << result[i] << endl;
-        }
+        /* /1* FIXME: To delete (urbain, Mon 11 May 2015 14:01:10 BST) *1/ */
+        /* for (unsigned int i = 0; i < result_aux.size(); ++i) { */
+        /*     cout << "result " << result[i] << endl; */
+        /* } */
 
         for (int j = 0; j < ns; ++j) {
             coefficients[j][i] = result[j];
@@ -97,6 +92,24 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     }
     for (int i = 0; i < nf; ++i) {
         coefficients_h[i] = mon2herm(coefficients_h[i],nf,degree);
+    }
+
+    /* /1* FIXME: To delete (urbain, Mon 11 May 2015 14:01:10 BST) *1/ */
+    /* for (unsigned int j = 0; j < coefficients[0].size(); ++j) { */
+    /*     cout << "coefficients " << coefficients[0][j] << endl; */
+    /* } */
+
+    // Construction of the matrix
+    vector< vector<double> > mat(nb, vector<double>(nb, 0.));
+    for (int i = 0; i < nb; ++i) {
+        vector<int> m1 = ind2mult(i, degree, nf);
+        for (int j = 0; j < nb; ++j) {
+            vector<int> m2 = ind2mult(j, degree, nf);
+            auto lambda = [&] (vector<double> y) -> double {
+                return monomial(m1, y, sigmas) * monomial(m2, y, sigmas) * gaussian(y,sigmas) * problem.rho(x,y); };
+            mat[i][j] = gauss.flatquadnd(lambda, sigmas);
+            /* cout << mat[i][j] << endl; */
+        }
     }
 
     // Solution of the Poisson equation

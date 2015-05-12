@@ -11,6 +11,7 @@
 class Gaussian_integrator {
     public:
         Gaussian_integrator(int nNodes, int nVars);
+        double flatquadnd(std::function<double(std::vector<double>)> f, const std::vector<double>& sigmas);
         template<typename T, typename F> std::vector<T> quadnd(F f, const std::vector<double>& sigmas, const std::vector<T>& v0) {
             std::vector<T> result = v0;
             int nVars = sigmas.size();
