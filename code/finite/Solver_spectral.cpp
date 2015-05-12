@@ -32,6 +32,12 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         sigmas[i] = problem.betas[i]*sqrt(0.5/problem.lambdas[i]);
     }
 
+    // Variance parameter for hermite functions
+    vector<double> sigmas_hf(1, 1./sqrt(2.));
+
+    // Variance parameter for integration
+    vector<double> sigmas_quad(1, 0.8);
+
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
@@ -57,20 +63,15 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         vector< vector<double> > m0(ns, vector<double> (ns,0.));
 
         auto lambda = [&] (vector<double> y) -> vector<double> {
-            return problem.a(x,y)*monomial(multIndex, y, sigmas)*sqrt(problem.rho(x,y)*gaussian(y,sigmas)); };
+            return problem.a(x,y)*monomial(multIndex, y, sigmas_hf)*sqrt(problem.rho(x,y)*gaussian(y,sigmas_hf)); };
         auto lambda_dx = [&] (vector<double> y) -> vector< vector<double> > {
-            return problem.dax(x,y)*monomial(multIndex, y, sigmas)*sqrt(problem.rho(x,y)*gaussian(y,sigmas)); };
+            return problem.dax(x,y)*monomial(multIndex, y, sigmas_hf)*sqrt(problem.rho(x,y)*gaussian(y,sigmas_hf)); };
         auto lambda_h = [&] (vector<double> y) -> vector<double> {
-            return problem.fast_drift_h(x,y)*monomial(multIndex, y, sigmas)*sqrt(problem.rho(x,y)*gaussian(y,sigmas)); };
+            return problem.fast_drift_h(x,y)*monomial(multIndex, y, sigmas_hf)*sqrt(problem.rho(x,y)*gaussian(y,sigmas_hf)); };
 
-        vector<double> result = gauss.flatquadnd(lambda,sigmas,v0);
-        vector< vector<double> > result_dx = gauss.flatquadnd(lambda_dx,sigmas,m0);
-        vector<double> result_h = gauss.flatquadnd(lambda_h,sigmas,h0);
-
-        /* /1* FIXME: To delete (urbain, Mon 11 May 2015 14:01:10 BST) *1/ */
-        /* for (unsigned int i = 0; i < result_aux.size(); ++i) { */
-        /*     cout << "result " << result[i] << endl; */
-        /* } */
+        vector<double> result = gauss.flatquadnd(lambda, sigmas_quad, v0);
+        vector< vector<double> > result_dx = gauss.flatquadnd(lambda_dx, sigmas_quad, m0);
+        vector<double> result_h = gauss.flatquadnd(lambda_h, sigmas_quad, h0);
 
         for (int j = 0; j < ns; ++j) {
             coefficients[j][i] = result[j];
@@ -94,37 +95,30 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         coefficients_h[i] = mon2herm(coefficients_h[i],nf,degree);
     }
 
-    /* /1* FIXME: To delete (urbain, Mon 11 May 2015 14:01:10 BST) *1/ */
-    /* for (unsigned int j = 0; j < coefficients[0].size(); ++j) { */
-    /*     cout << "coefficients " << coefficients[0][j] << endl; */
-    /* } */
-
-    // Construction of the matrix
-    vector< vector<double> > mat(nb, vector<double>(nb, 0.));
-    for (int i = 0; i < nb; ++i) {
-        vector<int> m1 = ind2mult(i, degree, nf);
-        for (int j = 0; j < nb; ++j) {
-            vector<int> m2 = ind2mult(j, degree, nf);
-            auto lambda = [&] (vector<double> y) -> double {
-                return monomial(m1, y, sigmas) * monomial(m2, y, sigmas) * gaussian(y,sigmas) * problem.rho(x,y); };
-            mat[i][j] = gauss.flatquadnd(lambda, sigmas);
-            /* cout << mat[i][j] << endl; */
-        }
-    }
-
     // Solution of the Poisson equation
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector< vector< vector<double> > > solution_dy(ns, vector< vector <double> >(nf, vector<double>(nb,0.)));
-    for (int i = 1; i < nb; ++i) {
-        double eig = 0.;
+    // Construction of the matrix
+    vector< vector<double> > mat(nb, vector<double>(nb, 0.));
+    for (int i = 0; i < nb; ++i) {
+        vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nf; ++j) {
-            eig += ind2mult(i,degree,nf)[j]*problem.lambdas[j];
+            mat[i][i] += m1[j]/(sigmas_hf[j]*sigmas_hf[j]);
         }
+        /* for (int j = 0; j < nb; ++j) { */
+        /*     vector<int> m2 = ind2mult(j, degree, nf); */
+        /*     auto lambda = [&] (vector<double> y) -> double { */
+        /*         return monomial(m1, y, sigmas_hf) * monomial(m2, y, sigmas_hf) * gaussian(y,sigmas_hf) * problem.rho(x,y); }; */
+        /*     mat[i][j] = gauss.flatquadnd(lambda, sigmas); */
+        /*     /1* cout << mat[i][j] << endl; *1/ */
+        /* } */
+    }
+    mat[0][0] = 1.;
+    for (int i = 0; i < ns; ++i) {
+        solution[i] = solve(mat, coefficients[i]);
         for (int j = 0; j < ns; ++j) {
-            solution[j][i] = coefficients[j][i]/eig;
-            for (int k = 0; k < ns; ++k)
-                solution_dx[j][k][i] = coefficients_dx[j][k][i]/eig;
+            solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
         }
     }
 

@@ -120,23 +120,23 @@ vector<double> usolve(vector< vector<double> > U, vector<double> b) {
     return result;
 }
 
-/* void printMat(vector< vector<double> > a) { */
-/*     int n = a.size(); */
-/*     for (int i = 0; i < n; ++i) { */
-/*         for (int j = 0; j < n; ++j) { */
-/*             cout << a[i][j] << " "; */
-/*         } */
-/*         cout << endl; */
-/*     } */
-/* } */
+void niceMat(vector< vector<double> > a) {
+    int n = a.size();
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            cout << a[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
 
-/* void printVec(vector<double> a) { */
-/*     int n = a.size(); */
-/*     for (int i = 0; i < n; ++i) { */
-/*             cout << a[i] << " "; */
-/*             cout << endl; */
-/*     } */
-/* } */
+void niceVec(vector<double> a) {
+    int n = a.size();
+    for (int i = 0; i < n; ++i) {
+            cout << a[i] << " ";
+            cout << endl;
+    }
+}
 
 vector<double> solve(vector< vector<double> > A, vector<double> b) {
     vector<double> result = b;
@@ -193,6 +193,14 @@ double monomial(vector<int> mult, vector<double> x, vector<double> sigmas) {
     double result = 1.;
     for (unsigned int i = 0; i < mult.size(); ++i) {
         result *= ipow(x[i]/sigmas[i], mult[i]);
+    }
+    return result;
+}
+
+double monomial(vector<int> mult, vector<double> x) {
+    double result = 1.;
+    for (unsigned int i = 0; i < mult.size(); ++i) {
+        result *= ipow(x[i], mult[i]);
     }
     return result;
 }
