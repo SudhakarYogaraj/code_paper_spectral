@@ -18,6 +18,67 @@ Solver_spectral::Solver_spectral(int degree, int nNodes)
     this->nNodes = nNodes;
 }
 
+/* vector<double> hermite_transform(function<double(vector<double>)> f, vector<double> sigmas) */
+/* } */
+
+vector<double> aux( vector< vector<double> > mat, vector<double> coefficients, vector<double> weights) {
+
+    /* FIXME: bad conditioning (urbain, Tue 12 May 2015 18:53:50 BST) */
+
+    int nb = mat.size();
+
+    for (int i = 0; i < nb; ++i) {
+        cout << weights[i] << endl;
+    }
+
+    vector< vector<double> > system_mat(nb, vector<double>(nb, 0.));
+    for (int i = 1; i < nb; ++i) {
+        for (int j = 1; j < nb; ++j) {
+            system_mat[i][j] = mat[i][j] - 2*weights[i]/weights[0]*mat[i][0] + weights[i]*weights[i]/(weights[0]*weights[0])*mat[0][0];
+        }
+    }
+    system_mat[0][0] = 1.;
+
+
+/*     // print */
+/*     for (int i = 0; i < nb; ++i) { */
+/*         for (int j = 0; j < nb; ++j) { */
+/*             cout << setw(10) <<  mat[i][j] << " " ; */
+/*         } */
+/*         cout << endl; */
+/*     } */
+/*     cout << "*** " << endl; */
+
+    /* // print */
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     for (int j = 0; j < nb; ++j) { */
+    /*         cout << setw(10) <<  system_mat[i][j] - mat[i][j] << " " ; */
+    /*     } */
+    /*     cout << endl; */
+    /* } */
+
+
+    vector<double> system_rhs(nb, 0.);
+    for (int i = 0; i < nb; ++i) {
+        system_rhs[i] = coefficients[i] - weights[i]/weights[0] * coefficients[0];
+    }
+
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     cout << coefficients[i] << endl; */
+    /* } */
+    /* cout << " --- " << endl; */
+
+    for (int i = 0; i < nb; ++i) {
+        cout << system_rhs[i] << endl;
+    }
+
+    vector<double> result = solve(system_mat, system_rhs);
+    for (int i = 1; i < nb; ++i) {
+        result[0] += weights[i]/weights[0] * result[i];
+    }
+    return result;
+}
+
 void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_coeffs>& c, double t) {
 
     int nf     = problem.nf;
@@ -34,8 +95,8 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     }
 
     // Variance parameter for hermite functions
-    vector<double> sigmas_hf(1, 1./sqrt(2.));
-    /* vector<double> sigmas_hf(1, 0.7 ); */
+    /* vector<double> sigmas_hf(1, 1./sqrt(2.)); */
+    vector<double> sigmas_hf(1, 0.7 );
 
     // Variance parameter for integration
     vector<double> sigmas_quad(1, 1./sqrt(2.));
@@ -127,27 +188,29 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             mat[i][j] += gauss.flatquadnd(lambda, sigmas_hf);
         }
     }
-    mat[0][0] = 1.;
 
     // print
-    for (int i = 0; i < nb; ++i) {
-        for (int j = 0; j < nb; ++j) {
-            cout << setw(10) <<  mat[i][j] << " " ;
-        }
-        cout << endl;
-    }
-
-    /* vector< vector<double> > A(nb, vector<double>(nb, 0.)); */
     /* for (int i = 0; i < nb; ++i) { */
     /*     for (int j = 0; j < nb; ++j) { */
-    /*         A[i][j] = mat[i][j] - 2*weights[i]/weights[0]*mat[i][0] + weights[i]*weights[i]/(weights[0]*weights[0])*mat[0][0]; */
+    /*         cout << setw(10) <<  mat[i][j] << " " ; */
     /*     } */
+    /*     cout << endl; */
     /* } */
 
     for (int i = 0; i < ns; ++i) {
-        solution[i] = solve(mat, coefficients[i]);
+        /* vector<double> tmp = aux(mat, coefficients[i], weights); */
+        /* mat[0][0] = 1.0; solution[i] = solve(mat, coefficients[i]); */
+        /* cout << " ***" << endl; */
+        /* for (int j = 0; j < nb; ++j) { */
+        /*     cout << solution[0][j] - tmp[j] << endl; */
+        /* } */
+        /* cout << " ***" << endl; */
+        /* for (int j = 0; j < nb; ++j) { */
+        /*     cout << solution[0][j] << endl; */
+        /* } */
+        solution[i] = aux(mat, coefficients[i], weights);
         for (int j = 0; j < ns; ++j) {
-            solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
+            solution_dx[i][j] = aux(mat, coefficients_dx[i][j], weights);
         }
     }
 
