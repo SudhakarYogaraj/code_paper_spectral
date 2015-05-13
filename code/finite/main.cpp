@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
     }
 
     Solver_hmm solver_hmm;
-    Solver_spectral solver_spectral = Solver_spectral(8,30,problem.nf);
+    Solver_spectral solver_spectral = Solver_spectral(15,30,problem.nf);
 
     for (unsigned int j = 0; j < p_values.size(); ++j) {
 
@@ -99,12 +99,13 @@ int main(int argc, char* argv[])
             double errorDrift_hmm = fabs(Ddrif);
             double errorDiff_hmm  = fabs(Ddiff);
 
+            cout << "----" << endl;
             for (unsigned int m = 0; m < vec_spectral.size(); ++m) {
                 Ddrif = vec_spectral[m].drif - problem.soldrif(xt_spectral[i]);
                 Ddiff = vec_spectral[m].diff - problem.soldiff(xt_spectral[i]);
-                double errorDrift_spectral = fabs(Ddrif);
+                /* double errorDrift_spectral = fabs(Ddrif); */
                 double errorDiff_spectral  = fabs(Ddiff);
-                cout << errorDrift_spectral << endl;
+                /* cout << errorDrift_spectral << endl; */
                 cout << errorDiff_spectral << endl;
             }
 
