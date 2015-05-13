@@ -38,61 +38,80 @@ double Solver_spectral::basis(vector<int> mult, vector<double> x, vector<double>
     return result;
 }
 
-vector<double> aux( vector< vector<double> > mat, vector<double> coefficients, vector<double> weights) {
+// Re-express the matrix and right-hand side of the system in the basis
+// psi_i = phi_i - (i != 0)*(wi/w0)*phi_0.
+// + reduction of the dimension.
+vector<double> aux(vector< vector<double> > mat, vector<double> rhs, vector<double> w) {
 
-    /* FIXME: bad conditioning (urbain, Tue 12 May 2015 18:53:50 BST) */
+    /* FIXME: mat[0][0] negative -> not positive definite (urbain, Wed 13 May 2015 20:16:36 BST) */
+
+    double centering = 0.;
+    for (unsigned int i = 0; i < rhs.size(); ++i) {
+        centering += w[i] * rhs[i];
+    }
+    cout << "Centering condition: " << centering << endl;
+    if ( fabs(centering) > 1e-8 ) {
+        cout << "Centering condition not respected" << endl; exit(0);
+    }
 
     int nb = mat.size();
 
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     cout << weights[i] << endl; */
-    /* } */
+    vector< vector<double> > centered_mat(nb, vector<double>(nb, 0.));
+    vector<double> centered_rhs(nb, 0.);
 
-    vector< vector<double> > system_mat(nb, vector<double>(nb, 0.));
+    centered_mat[0][0] = 1.;
     for (int i = 1; i < nb; ++i) {
         for (int j = 1; j < nb; ++j) {
-            system_mat[i][j] = mat[i][j] - weights[i]/weights[0]*mat[i][0] - weights[j]/weights[0]*mat[j][0] + weights[i]*weights[j]/(weights[0]*weights[0])*mat[0][0];
+            centered_mat[i][j] = mat[i][j]
+                - w[i]/w[0] * mat[i][0] \
+                - w[j]/w[0] * mat[j][0] \
+                + w[i]/w[0] * w[j]/w[0] * mat[0][0];
         }
+        centered_mat[0][i] = 0.;
+        centered_mat[i][0] = 0.;
+        centered_rhs[i] = rhs[i] - w[i]/w[0] * rhs[0];
     }
-    system_mat[0][0] = 1.;
+    /* centered_mat = mat; */
+    /* centered_rhs = rhs; */
 
-
-    /*     // print */
-    for (int i = 0; i < nb; ++i) {
-        for (int j = 0; j < nb; ++j) {
-            cout << setw(10) <<  mat[i][j] << " " ;
-        }
-        cout << endl;
-    }
-    cout << "*** " << endl;
-
-    /* // print */
-    for (int i = 0; i < nb; ++i) {
-        for (int j = 0; j < nb; ++j) {
-            cout << setw(10) <<  system_mat[i][j] << " " ;
-        }
-        cout << endl;
-    }
-
-
-    vector<double> system_rhs(nb, 0.);
-    for (int i = 0; i < nb; ++i) {
-        system_rhs[i] = coefficients[i] - weights[i]/weights[0] * coefficients[0];
+    vector<double> result = solve(centered_mat, centered_rhs);
+    for (int i = 1; i < nb; ++i) {
+        result[0] -= w[i]/w[0] * result[i];
     }
 
     /* for (int i = 0; i < nb; ++i) { */
-    /*     cout << coefficients[i] << endl; */
+    /*     cout << w[i] << " * "; */
+    /* } cout << endl; */
+    /*     // print */
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     for (int j = 0; j < nb; ++j) { */
+    /*         cout << setw(10) <<  mat[i][j] << " " ; */
+    /*     } */
+    /*     cout << endl; */
+    /* } */
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     for (int j = 0; j < nb; ++j) { */
+    /*         cout << setw(10) <<  centered_mat[i][j] - mat[i][j] << " " ; */
+    /*     } */
+    /*     cout << endl; */
+    /* } */
+    /* cout << "*** " << endl; */
+    /* // print */
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     for (int j = 0; j < nb; ++j) { */
+    /*         cout << setw(10) <<  centered_mat[i][j] << " " ; */
+    /*     } */
+    /*     cout << endl; */
+    /* } */
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     cout << rhs[i] << endl; */
     /* } */
     /* cout << " --- " << endl; */
-
     /* for (int i = 0; i < nb; ++i) { */
-    /*     cout << system_rhs[i] << endl; */
+    /*     cout << result[i] << endl; */
     /* } */
+    /* exit(0); */
 
-    vector<double> result = solve(system_mat, system_rhs);
-    for (int i = 1; i < nb; ++i) {
-        result[0] += weights[i]/weights[0] * result[i];
-    }
     return result;
 }
 
@@ -105,18 +124,9 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     c = vector<SDE_coeffs> (nb);
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
-    // Eigenvalues
-    vector<double> sigmas(nf, 0.);
-    for (int i = 0; i < nf; ++i) {
-        sigmas[i] = problem.betas[i]*sqrt(0.5/problem.lambdas[i]);
-    }
-
-    // Variance parameter for hermite functions
-    /* vector<double> sigmas_hf(1, 1./sqrt(2.)); */
-    vector<double> sigmas_hf(1, 1./sqrt(2.));
-
-    // Variance parameter for integration
-    vector<double> sigmas_quad(1, 1./sqrt(2.));
+    /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
+    vector<double> sigmas_hf(1, 0.707 );
+    vector<double> sigmas_quad(1, 1./sqrt(2.) );
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
@@ -165,15 +175,15 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         cout.flush();
     }
 
-    /* for (int i = 0; i < ns; ++i) { */
-    /*     for (int j = 0; j < ns; ++j) { */
-    /*         coefficients_dx[i][j] = mon2herm(coefficients_dx[i][j],nf,degree); */
-    /*     } */
-    /*     coefficients[i] = mon2herm(coefficients[i],nf,degree); */
-    /* } */
-    /* for (int i = 0; i < nf; ++i) { */
-    /*     coefficients_h[i] = mon2herm(coefficients_h[i],nf,degree); */
-    /* } */
+/*     for (int i = 0; i < ns; ++i) { */
+/*         for (int j = 0; j < ns; ++j) { */
+/*             coefficients_dx[i][j] = mon2herm(coefficients_dx[i][j],nf,degree); */
+/*         } */
+/*         coefficients[i] = mon2herm(coefficients[i],nf,degree); */
+/*     } */
+/*     for (int i = 0; i < nf; ++i) { */
+/*         coefficients_h[i] = mon2herm(coefficients_h[i],nf,degree); */
+/*     } */
 
     // Solution of the Poisson equation
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
@@ -201,7 +211,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             vector<int> m2 = ind2mult(j, degree, nf);
             auto lambda = [&] (vector<double> y) -> double {
                 double tmp = 1/(2*pow(sigmas_hf[0], 2)) - pow(y[0], 2)/(4*pow(sigmas_hf[0], 4));
-                return (problem.linearTerm(x,y) - tmp) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf) * gaussian(y,sigmas_hf); };
+                return (tmp - problem.linearTerm(x,y)) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf) * gaussian(y,sigmas_hf); };
             mat[i][j] += gauss.flatquadnd(lambda, sigmas_hf);
         }
     }
@@ -243,7 +253,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             newMult[j] ++;
             int newInd = mult2ind(newMult, degree);
             for (int k = 0; k < ns; ++k) {
-                solution_dy[k][j][i] = solution[k][newInd]*sqrt(newMult[j])/sigmas[j];
+                solution_dy[k][j][i] = solution[k][newInd]*sqrt(newMult[j])/sigmas_hf[j];
             }
         }
     }
