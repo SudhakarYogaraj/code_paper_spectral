@@ -75,36 +75,12 @@ vector<double> aux(vector< vector<double> > mat, vector<double> rhs, vector<doub
         centered_rhs[i] = rhs[i] - w[i]/w[0] * rhs[0];
     }
 
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     for (int j = 0; j < nb; ++j) { */
-    /*         cout << setw(10) << mat[i][j] << " , "; */
-    /*     } */
-    /*     cout << endl; */
-    /* } */
-    /* cout << endl << endl; */
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     for (int j = 0; j < nb; ++j) { */
-    /*         cout << setw(10) << centered_mat[i][j] << " , "; */
-    /*     } */
-    /*     cout << endl; */
-    /* } */
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     cout << centered_rhs[i] << endl; */
-    /* } */
-
     vector<double> result = solve(centered_mat, centered_rhs);
     for (int i = 1; i < nb; ++i) {
         result[0] -= w[i]/w[0] * result[i];
     }
 
-    /* cout << "result" << endl; */
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     cout << result[i] << endl; */
-    /* } */
-    /* exit(0); */
-
     return solve(mat, rhs);
-    /* return result; */
 }
 
 void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_coeffs>& c, double t) {
