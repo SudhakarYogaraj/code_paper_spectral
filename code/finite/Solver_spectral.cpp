@@ -4,6 +4,8 @@
 /* TODO: adapt to multidimensional (urbain, Wed 20 May 2015 18:28:17 BST) */
 /* TODO: add monomial support (urbain, Wed 20 May 2015 20:32:49 BST) */
 /* FIXME: Error is very small when only 1 drift term (urbain, Wed 13 May 2015 21:01:14 BST) */
+/* TODO: Problem with exact sigma (urbain, Wed 20 May 2015 21:00:20 BST) */
+
 
 #include "structures.hpp"
 #include "aux.hpp"
@@ -18,7 +20,6 @@ using namespace std;
 double Solver_spectral::basis(vector<int> mult, vector<double> x, vector<double> sigmas) {
 
     double result;
-    int monomial = 0;
 
     if (monomial) {
         result = 1.;
@@ -90,30 +91,34 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         coefficients_h[i] = result_h;
     }
 
-/*     for (int i = 0; i < ns; ++i) { */
-/*         for (int j = 0; j < ns; ++j) { */
-/*             coefficients_dx[i][j] = mon2herm(coefficients_dx[i][j],nf,degree); */
-/*         } */
-/*         coefficients[i] = mon2herm(coefficients[i],nf,degree); */
-/*     } */
-/*     for (int i = 0; i < nf; ++i) { */
-/*         coefficients_h[i] = mon2herm(coefficients_h[i],nf,degree); */
-/*     } */
+    for (int i = 0; i < ns; ++i) {
+        for (int j = 0; j < ns; ++j) {
+            coefficients_dx[i][j] = basis2herm(coefficients_dx[i][j],nf,degree);
+        }
+        coefficients[i] = basis2herm(coefficients[i],nf,degree);
+    }
+    coefficients_h = basis2herm(coefficients_h,nf,degree);
 
     // Solution of the Poisson equation
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
 
-    // weights(i,j) = int (phi_i, e^(-V) )
-    vector<double> weights(nb, 0.);
+    // mat(i,j) = int ( L phi_i, phi_j)
+    vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
-        vector<int> m = ind2mult(i, degree, nf);
-        auto lambda = [&] (vector<double> y) -> double {
-            return basis(m, y, sigmas_hf) * sqrt(problem.rho(x,y) * gaussian(y,sigmas_hf)); };
-        weights[i] = gauss.flatquadnd(lambda, sigmas_hf);
+        vector<int> m1 = ind2mult(i, degree, nf);
+        /* for (int j = 0; j < nf; ++j) { */
+        /*     tmp_mat[i][i] += m1[j]/(sigmas_hf[j]*sigmas_hf[j]); */
+        /* } */
+        for (int j = 0; j < nb; ++j) {
+            vector<int> m2 = ind2mult(j, degree, nf);
+            auto lambda = [&] (vector<double> y) -> double {
+                double tmp = 1/(2*pow(sigmas_hf[0], 2)) - pow(y[0], 2)/(4*pow(sigmas_hf[0], 4));
+                return (tmp - problem.linearTerm(x,y)) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf); };
+            tmp_mat[i][j] += gauss.quadnd(lambda, sigmas_hf);
+        }
     }
 
-    // mat(i,j) = int ( L phi_i, phi_j)
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
@@ -121,16 +126,17 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             mat[i][i] += m1[j]/(sigmas_hf[j]*sigmas_hf[j]);
         }
         for (int j = 0; j < nb; ++j) {
-            vector<int> m2 = ind2mult(j, degree, nf);
-            auto lambda = [&] (vector<double> y) -> double {
-                double tmp = 1/(2*pow(sigmas_hf[0], 2)) - pow(y[0], 2)/(4*pow(sigmas_hf[0], 4));
-                return (tmp - problem.linearTerm(x,y)) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf); };
-            mat[i][j] += gauss.quadnd(lambda, sigmas_hf);
+            for (int k = 0; k < nb; ++k) {
+                for (int l = 0; l < nb; ++l) {
+                    mat[i][j] += herm_to_basis[i][k]*herm_to_basis[j][l]*tmp_mat[k][l];
+                }
+            }
         }
     }
 
-    for (int i = 0; i < ns; ++i) {
+    /* mat = tmp_mat; */
 
+    for (int i = 0; i < ns; ++i) {
         solution[i] = solve(mat, coefficients[i]);
         for (int j = 0; j < ns; ++j) {
             solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
@@ -373,6 +379,18 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
 
     this->hermiteCoeffs_1d = mat1d;
     this->hermiteCoeffs_nd = matnd;
+
+    if ( monomial ) {
+        this->herm_to_basis = this->hermiteCoeffs_nd;
+    }
+    else {
+        this->herm_to_basis = vector< vector<double> > (nb, vector<double>(nb,0.));
+        for (int i = 0; i < nb; ++i) {
+            for (int j = 0; j < nb; ++j) {
+                this->herm_to_basis[i][j] = (i == j);
+            }
+        }
+    }
 }
 
 int Solver_spectral::mult2ind(vector<int> m, int d) {
@@ -405,11 +423,11 @@ vector<int> Solver_spectral::ind2mult(int ind, int d, int n) {
     return m;
 }
 
-vector<double> Solver_spectral::mon2herm (vector<double> mcoeffs, int n, int d) {
-    vector<double> result(mcoeffs.size(), 0.);
-    for (unsigned int i = 0; i < mcoeffs.size(); ++i) {
+vector<double> Solver_spectral::basis2herm (vector<double> bcoeffs, int n, int d) {
+    vector<double> result(bcoeffs.size(), 0.);
+    for (unsigned int i = 0; i < bcoeffs.size(); ++i) {
         for (unsigned int j = 0; j <= i; ++j) {
-            result[i] += hermiteCoeffs_nd[i][j] * mcoeffs[j];
+            result[i] += herm_to_basis[i][j] * bcoeffs[j];
         }
     }
     return result;
