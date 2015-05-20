@@ -1,6 +1,7 @@
-/* TODO: Linear system solution (urbain, Sat 09 May 2015 14:32:40 BST) */
-/* TODO: Integration over infinite domain: which variance for gaussian(urbain, Sat 09 May 2015 14:33:06 BST) */
+/* TODO: analysis of method (not clear wether 0th hermite function has to be included (urbain, Wed 13 May 2015 20:51:51 BST) */
+/* TODO: Integration over infinite domain: which variance for gaussian (urbain, Sat 09 May 2015 14:33:06 BST) */
 /* TODO: Convergence of hermite functions? (urbain, Sat 09 May 2015 14:33:28 BST) */
+/* FIXME: Error is very small when only 1 drift term (urbain, Wed 13 May 2015 21:01:14 BST) */
 
 #include "structures.hpp"
 #include "aux.hpp"
@@ -43,7 +44,7 @@ double Solver_spectral::basis(vector<int> mult, vector<double> x, vector<double>
 // + reduction of the dimension.
 vector<double> aux(vector< vector<double> > mat, vector<double> rhs, vector<double> w) {
 
-    /* FIXME: mat[0][0] negative -> not positive definite (urbain, Wed 13 May 2015 20:16:36 BST) */
+    /* FIXME: for monomials, diagonal wrong! (urbain, Wed 13 May 2015 20:50:39 BST) */
 
     double centering = 0.;
     for (unsigned int i = 0; i < rhs.size(); ++i) {
@@ -82,31 +83,31 @@ vector<double> aux(vector< vector<double> > mat, vector<double> rhs, vector<doub
     /* for (int i = 0; i < nb; ++i) { */
     /*     cout << w[i] << " * "; */
     /* } cout << endl; */
-    /*     // print */
+    // print
     /* for (int i = 0; i < nb; ++i) { */
     /*     for (int j = 0; j < nb; ++j) { */
     /*         cout << setw(10) <<  mat[i][j] << " " ; */
     /*     } */
     /*     cout << endl; */
     /* } */
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     for (int j = 0; j < nb; ++j) { */
-    /*         cout << setw(10) <<  centered_mat[i][j] - mat[i][j] << " " ; */
-    /*     } */
-    /*     cout << endl; */
-    /* } */
-    /* cout << "*** " << endl; */
-    /* // print */
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     for (int j = 0; j < nb; ++j) { */
-    /*         cout << setw(10) <<  centered_mat[i][j] << " " ; */
-    /*     } */
-    /*     cout << endl; */
-    /* } */
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     cout << rhs[i] << endl; */
-    /* } */
-    /* cout << " --- " << endl; */
+    /* /1* for (int i = 0; i < nb; ++i) { *1/ */
+    /* /1*     for (int j = 0; j < nb; ++j) { *1/ */
+    /* /1*         cout << setw(10) <<  centered_mat[i][j] - mat[i][j] << " " ; *1/ */
+    /* /1*     } *1/ */
+    /* /1*     cout << endl; *1/ */
+    /* /1* } *1/ */
+    /* /1* cout << "*** " << endl; *1/ */
+    /* /1* // print *1/ */
+    /* /1* for (int i = 0; i < nb; ++i) { *1/ */
+    /* /1*     for (int j = 0; j < nb; ++j) { *1/ */
+    /* /1*         cout << setw(10) <<  centered_mat[i][j] << " " ; *1/ */
+    /* /1*     } *1/ */
+    /* /1*     cout << endl; *1/ */
+    /* /1* } *1/ */
+    /* /1* for (int i = 0; i < nb; ++i) { *1/ */
+    /* /1*     cout << rhs[i] << endl; *1/ */
+    /* /1* } *1/ */
+    /* /1* cout << " --- " << endl; *1/ */
     /* for (int i = 0; i < nb; ++i) { */
     /*     cout << result[i] << endl; */
     /* } */
@@ -125,7 +126,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf(1, 0.707 );
+    vector<double> sigmas_hf(1, 0.9 );
     vector<double> sigmas_quad(1, 1./sqrt(2.) );
 
     // Expansion of right-hand side of the Poisson equation
@@ -243,6 +244,8 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     }
 
     // y-Derivatives of the solution
+    /* FIXME: Wrong formulation of this term in L^2 (urbain, Wed 13 May 2015 21:02:14 BST) */
+
     for (int i = 0; i < nb; ++i) {
         vector<int> mult = ind2mult(i,degree,nf);
         if (accumulate (mult.begin(), mult.end(),0) == degree) {
@@ -278,13 +281,22 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
                 A0[k][l] += 2*solution[k][j]*coefficients[l][j];
             }
         }
+        /* for (unsigned int i = 0; i < solution_dx[0][0].size(); ++i) { */
+        /*     cout << solution_dx[0][0][i] << endl; */
+        /*     cout << coefficients[0][i] << endl; */
+        /*     cout << solution_dy[0][0][i] << endl; */
+        /* } */
+        /* FIXME: nan appearing (urbain, Tue 19 May 2015 16:59:01 BST) */
+
+        cout << A0[0][0] << endl;
         c[j].diff =  cholesky(symmetric(A0));
         c[j].drif = F1 + F2;
+        cout << c[j].diff[0][0] << endl;
+        exit(0);
     }
 }
 
-Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars)
-{
+Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
     this->degree = degree;
     this->nNodes = nNodes;
 

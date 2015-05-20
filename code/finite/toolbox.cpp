@@ -62,7 +62,12 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
                 sum += L[i][k]*L[j][k];
             }
             if (i == j) {
-                L[i][i] = sqrt(A[i][i]-sum);
+                if (A[i][i] - sum) {
+                    cout << "Warning: matrix is not positive definite" << endl;
+                }
+                else {
+                    L[i][i] = sqrt(A[i][i]-sum);
+                }
             }
             else {
                 if(fabs(L[j][j])>1e-14) {
