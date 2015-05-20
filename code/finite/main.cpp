@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
     }
 
     Solver_hmm solver_hmm;
-    Solver_spectral solver_spectral = Solver_spectral(20,100,problem.nf);
+    Solver_spectral solver_spectral = Solver_spectral(10, 10, problem.nf);
 
     for (unsigned int j = 0; j < p_values.size(); ++j) {
 
@@ -202,8 +202,6 @@ int main(int argc, char* argv[])
             cout << "|" << setw(101) <<  " " << "|" << endl;
             cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
             cout << endl << endl;
-
-            exit(0);
         }
         writeToFile("time.dat",t); int p_aux = (int) (10*solver_hmm.p + 0.0001);
         writeMatToFile("xt_hmm" + to_string(p_aux) + ".dat", xt_hmm);
