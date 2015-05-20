@@ -73,35 +73,36 @@ vector<double> aux(vector< vector<double> > mat, vector<double> rhs, vector<doub
         centered_rhs[i] = rhs[i] - w[i]/w[0] * rhs[0];
     }
 
-    for (int i = 0; i < nb; ++i) {
-        for (int j = 0; j < nb; ++j) {
-            cout << setw(10) << mat[i][j] << " , ";
-        }
-        cout << endl;
-    }
-    cout << endl << endl;
-    for (int i = 0; i < nb; ++i) {
-        for (int j = 0; j < nb; ++j) {
-            cout << setw(10) << centered_mat[i][j] << " , ";
-        }
-        cout << endl;
-    }
-    for (int i = 0; i < nb; ++i) {
-        cout << centered_rhs[i] << endl;
-    }
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     for (int j = 0; j < nb; ++j) { */
+    /*         cout << setw(10) << mat[i][j] << " , "; */
+    /*     } */
+    /*     cout << endl; */
+    /* } */
+    /* cout << endl << endl; */
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     for (int j = 0; j < nb; ++j) { */
+    /*         cout << setw(10) << centered_mat[i][j] << " , "; */
+    /*     } */
+    /*     cout << endl; */
+    /* } */
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     cout << centered_rhs[i] << endl; */
+    /* } */
 
     vector<double> result = solve(centered_mat, centered_rhs);
     for (int i = 1; i < nb; ++i) {
         result[0] -= w[i]/w[0] * result[i];
     }
 
-    cout << "result" << endl;
-    for (int i = 0; i < nb; ++i) {
-        cout << result[i] << endl;
-    }
-    exit(0);
+    /* cout << "result" << endl; */
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     cout << result[i] << endl; */
+    /* } */
+    /* exit(0); */
 
-    return result;
+    return solve(mat, rhs);
+    /* return result; */
 }
 
 void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_coeffs>& c, double t) {
@@ -114,7 +115,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf(1, 0.5);
+    vector<double> sigmas_hf(1, 0.4);
     /* vector<double> sigmas_quad(1, 1./sqrt(2.) ); */
 
     // Expansion of right-hand side of the Poisson equation
@@ -243,18 +244,9 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
                 A0[k][l] += 2*solution[k][j]*coefficients[l][j];
             }
         }
-        /* for (unsigned int i = 0; i < solution_dx[0][0].size(); ++i) { */
-        /*     cout << solution_dx[0][0][i] << endl; */
-        /*     cout << coefficients[0][i] << endl; */
-        /*     cout << solution_dy[0][0][i] << endl; */
-        /* } */
-        /* FIXME: nan appearing (urbain, Tue 19 May 2015 16:59:01 BST) */
 
         c[j].diff =  cholesky(symmetric(A0));
         c[j].drif = F1 + F2;
-        /* cout << c[j].drif[0] << endl; */
-        if (j > 0)
-            cout << c[j].diff[0][0] - c[j-1].diff[0][0] << endl;
     }
 }
 
