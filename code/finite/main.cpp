@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
     }
 
     Solver_hmm solver_hmm;
-    Solver_spectral solver_spectral = Solver_spectral(20,30,problem.nf);
+    Solver_spectral solver_spectral = Solver_spectral(8,100,problem.nf);
 
     for (unsigned int j = 0; j < p_values.size(); ++j) {
 
@@ -103,12 +103,11 @@ int main(int argc, char* argv[])
             for (unsigned int m = 0; m < vec_spectral.size(); ++m) {
                 Ddrif = vec_spectral[m].drif - problem.soldrif(xt_spectral[i]);
                 Ddiff = vec_spectral[m].diff - problem.soldiff(xt_spectral[i]);
-                /* double errorDrift_spectral = fabs(Ddrif); */
+                double errorDrift_spectral = fabs(Ddrif);
                 double errorDiff_spectral  = fabs(Ddiff);
-                /* cout << errorDrift_spectral << endl; */
+                cout << errorDrift_spectral << endl;
                 cout << errorDiff_spectral << endl;
             }
-            exit(0);
 
             Ddrif = c_spectral.drif - problem.soldrif(xt_spectral[i]);
             Ddiff = c_spectral.diff - problem.soldiff(xt_spectral[i]);
@@ -199,6 +198,8 @@ int main(int argc, char* argv[])
             cout << "|" << setw(101) <<  " " << "|" << endl;
             cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
             cout << endl << endl;
+
+            exit(0);
         }
         writeToFile("time.dat",t); int p_aux = (int) (10*solver_hmm.p + 0.0001);
         writeMatToFile("xt_hmm" + to_string(p_aux) + ".dat", xt_hmm);
