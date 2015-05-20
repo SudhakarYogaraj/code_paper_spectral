@@ -2,7 +2,7 @@
 /* TODO: Integration over infinite domain: which variance for gaussian (urbain, Sat 09 May 2015 14:33:06 BST) */
 /* TODO: Convergence of hermite functions? (urbain, Sat 09 May 2015 14:33:28 BST) */
 /* TODO: adapt to multidimensional (urbain, Wed 20 May 2015 18:28:17 BST) */
-/* TODO: add h term (urbain, Wed 20 May 2015 18:28:18 BST) */
+/* TODO: add monomial support (urbain, Wed 20 May 2015 20:32:49 BST) */
 /* FIXME: Error is very small when only 1 drift term (urbain, Wed 13 May 2015 21:01:14 BST) */
 
 #include "structures.hpp"
@@ -39,48 +39,6 @@ double Solver_spectral::basis(vector<int> mult, vector<double> x, vector<double>
         }
     }
     return result;
-}
-
-// Re-express the matrix and right-hand side of the system in the basis
-// psi_i = phi_i - (i != 0)*(wi/w0)*phi_0.
-// + reduction of the dimension.
-vector<double> aux(vector< vector<double> > mat, vector<double> rhs, vector<double> w) {
-
-    /* FIXME: for monomials, diagonal wrong! (urbain, Wed 13 May 2015 20:50:39 BST) */
-
-    double centering = 0.;
-    for (unsigned int i = 0; i < rhs.size(); ++i) {
-        centering += w[i] * rhs[i];
-    }
-    cout << "Centering condition: " << centering << endl;
-    if ( fabs(centering) > 1e-8 ) {
-        cout << "Centering condition not respected" << endl; exit(0);
-    }
-
-    int nb = mat.size();
-
-    vector< vector<double> > centered_mat(nb, vector<double>(nb, 0.));
-    vector<double> centered_rhs(nb, 0.);
-
-    centered_mat[0][0] = 1.;
-    for (int i = 1; i < nb; ++i) {
-        for (int j = 1; j < nb; ++j) {
-            centered_mat[i][j] = mat[i][j]
-                - w[i]/w[0] * mat[i][0] \
-                - w[j]/w[0] * mat[j][0] \
-                + w[i]/w[0] * w[j]/w[0] * mat[0][0];
-        }
-        centered_mat[0][i] = 0.;
-        centered_mat[i][0] = 0.;
-        centered_rhs[i] = rhs[i] - w[i]/w[0] * rhs[0];
-    }
-
-    vector<double> result = solve(centered_mat, centered_rhs);
-    for (int i = 1; i < nb; ++i) {
-        result[0] -= w[i]/w[0] * result[i];
-    }
-
-    return solve(mat, rhs);
 }
 
 void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_coeffs>& c, double t) {
@@ -173,9 +131,9 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
 
     for (int i = 0; i < ns; ++i) {
 
-        solution[i] = aux(mat, coefficients[i], weights);
+        solution[i] = solve(mat, coefficients[i]);
         for (int j = 0; j < ns; ++j) {
-            solution_dx[i][j] = aux(mat, coefficients_dx[i][j], weights);
+            solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
         }
     }
 
