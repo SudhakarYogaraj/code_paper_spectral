@@ -34,6 +34,29 @@ double Problem::linearTerm(vector<double> x, vector<double> y){
     return result;
 }
 
+vector<double> Problem::fast_drift_h(vector<double> x, vector<double> y) {
+    vector<double> result(this->nf);
+    result[0] = cos(x[0])*cos(y[0]);
+    return result;
+}
+
+vector< vector<double> > Problem::grad_h(vector<double> x, vector<double> y) {
+    vector< vector<double> > result(this->nf, vector<double>(this->nf, 0.));
+    result[0][0] = -cos(x[0])*sin(y[0]);
+    return result;
+}
+
+double Problem::stardiv_h(vector<double> x, vector<double> y) {
+    double result = 0.;
+    vector<double> fast_h = this->fast_drift_h(x,y);
+    vector<double> gradient_v = this->grad(x,y);
+    vector< vector<double> > gradient_h = this->grad_h(x,y);
+    for (int i = 0; i < this->nf; ++i) {
+        result += gradient_v[i] * fast_h[i] - gradient_h[i][i];
+    }
+    return result;
+}
+
 // divide factor 2
 // rho = e^(-x^2)/sqrt(pi);
 // phi = 2*cos(x)*sin(y)
@@ -49,7 +72,8 @@ double Problem::linearTerm(vector<double> x, vector<double> y){
 // diff  = SQRT 2? * cos(x)*cos(x) * int (sin(y) * (2*y*cos(y) + sin(y)) * e^(-y^2)/sqrt(pi) )
 vector<double> Problem::soldrif(vector<double> x) {
     vector<double> result(this->d,0.);
-    result[0] = -sin(x[0])*cos(x[0])*(1 + exp(-1.0))/2.; //+ cos(x[0])*cos(x[0])*(1. + exp(-1.))/2.;
+    cout << "drift second term " <<  cos(x[0])*cos(x[0])*(1. + exp(-1.))/2. << endl;
+    result[0] = -sin(x[0])*cos(x[0])*(1 + exp(-1.0))/2. + cos(x[0])*cos(x[0])*(1. + exp(-1.))/2.;
     return result;
 }
 
@@ -89,11 +113,5 @@ vector<double> Problem::drif(vector<double> x, vector<double> y) {
 vector<double> Problem::diff(vector<double> x, vector<double> y) {
     vector<double> result(2*nf,0.);
     result[0] = 1.0;
-    return result;
-}
-
-vector<double> Problem::fast_drift_h(vector<double> x, vector<double> y) {
-    vector<double> result(this->nf);
-    result[0] = 0.; //cos(x[0])*cos(y[0]);
     return result;
 }

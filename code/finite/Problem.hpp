@@ -37,6 +37,8 @@ class Problem {
         // FOR SPECTRAL
         // Non-leading order part of drift in the fast process
         std::vector<double>  fast_drift_h(std::vector<double> x, std::vector<double> y);
+        std::vector< std::vector<double> > grad_h(std::vector<double> x, std::vector<double> y);
+        double stardiv_h(std::vector<double> x, std::vector<double> y);
         std::vector<double> lambdas;
         std::vector<double> betas;
 

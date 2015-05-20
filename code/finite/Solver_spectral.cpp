@@ -1,6 +1,8 @@
 /* TODO: analysis of method (not clear wether 0th hermite function has to be included (urbain, Wed 13 May 2015 20:51:51 BST) */
 /* TODO: Integration over infinite domain: which variance for gaussian (urbain, Sat 09 May 2015 14:33:06 BST) */
 /* TODO: Convergence of hermite functions? (urbain, Sat 09 May 2015 14:33:28 BST) */
+/* TODO: adapt to multidimensional (urbain, Wed 20 May 2015 18:28:17 BST) */
+/* TODO: add h term (urbain, Wed 20 May 2015 18:28:18 BST) */
 /* FIXME: Error is very small when only 1 drift term (urbain, Wed 13 May 2015 21:01:14 BST) */
 
 #include "structures.hpp"
@@ -115,27 +117,25 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf(1, 0.4);
-    /* vector<double> sigmas_quad(1, 1./sqrt(2.) ); */
+    vector<double> sigmas_hf(1, 0.5);
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
-    vector< vector<double> > coefficients_h(nf, vector<double>(nb,0.));
+    vector<double> coefficients_h(nb, 0.);
     for (int i = 0; i < nb; ++i) {
 
         vector<int> multIndex = ind2mult(i, degree, nf);
 
         vector<double> v0(ns,0.);
-        vector<double> h0(nf,0.);
         vector< vector<double> > m0(ns, vector<double> (ns,0.));
 
         auto lambda = [&] (vector<double> y) -> vector<double> {
             return problem.a(x,y) * basis(multIndex, y, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(y,sigmas_hf) ); };
         auto lambda_dx = [&] (vector<double> y) -> vector< vector<double> > {
             return problem.dax(x,y) * basis(multIndex, y, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(y,sigmas_hf) ); };
-        auto lambda_h = [&] (vector<double> y) -> vector<double> {
-            return problem.fast_drift_h(x,y)*basis(multIndex, y, sigmas_hf)*sqrt(problem.rho(x,y)*gaussian(y,sigmas_hf)); };
+        auto lambda_h = [&] (vector<double> y) -> double {
+            return problem.stardiv_h(x,y) * basis(multIndex, y, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(y,sigmas_hf) ); };
 
         /* auto test = [&] (vector<double> y) -> vector<double> { vector<double> toreturn = {problem.rho(x,y)/gaussian(y,sigmas_hf)}; return toreturn;}; */
         /* vector<double> test_0(1,0.); */
@@ -145,7 +145,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
 
         vector<double> result = gauss.quadnd(lambda, sigmas_hf, v0);
         vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, sigmas_hf, m0);
-        vector<double> result_h = gauss.flatquadnd(lambda_h, sigmas_hf, h0);
+        double result_h = gauss.quadnd(lambda_h, sigmas_hf);
 
         for (int j = 0; j < ns; ++j) {
             coefficients[j][i] = result[j];
@@ -153,9 +153,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
                 coefficients_dx[j][k][i] = result_dx[j][k];
             }
         }
-        for (int j = 0; j < nf; ++j) {
-            coefficients_h[j][i] = result_h[j];
-        }
+        coefficients_h[i] = result_h;
     }
 
 /*     for (int i = 0; i < ns; ++i) { */
@@ -171,7 +169,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     // Solution of the Poisson equation
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
-    vector< vector< vector<double> > > solution_dy(ns, vector< vector <double> >(nf, vector<double>(nb,0.)));
 
     // weights(i,j) = int (phi_i, e^(-V) )
     vector<double> weights(nb, 0.);
@@ -206,24 +203,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         }
     }
 
-    // y-Derivatives of the solution
-    /* FIXME: Wrong formulation of this term in L^2 (urbain, Wed 13 May 2015 21:02:14 BST) */
-
-    for (int i = 0; i < nb; ++i) {
-        vector<int> mult = ind2mult(i,degree,nf);
-        if (accumulate (mult.begin(), mult.end(),0) == degree) {
-            continue;
-        }
-        for (int j = 0; j < nf; ++j) {
-            vector<int> newMult = mult;
-            newMult[j] ++;
-            int newInd = mult2ind(newMult, degree);
-            for (int k = 0; k < ns; ++k) {
-                solution_dy[k][j][i] = solution[k][newInd]*sqrt(newMult[j])/sigmas_hf[j];
-            }
-        }
-    }
-
     // Calculation of the coefficients of the simplified equation
     vector<double> F1(ns, 0.);
     vector<double> F2(ns, 0.);
@@ -235,9 +214,10 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         }
 
         for (int k = 0; k < ns; ++k) {
-            for (int l = 0; l < nf; ++l)
-                F2[k] += solution_dy[k][l][j]*coefficients_h[l][j];
+                F2[k] += solution[k][j]*coefficients_h[j];
         }
+
+        cout << F2[0] << endl;
 
         for (int k = 0; k < ns; ++k) {
             for (int l = 0; l < ns; ++l) {
