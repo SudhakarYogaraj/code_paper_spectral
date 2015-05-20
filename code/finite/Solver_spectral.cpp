@@ -72,46 +72,34 @@ vector<double> aux(vector< vector<double> > mat, vector<double> rhs, vector<doub
         centered_mat[i][0] = 0.;
         centered_rhs[i] = rhs[i] - w[i]/w[0] * rhs[0];
     }
-    /* centered_mat = mat; */
-    /* centered_rhs = rhs; */
+
+    for (int i = 0; i < nb; ++i) {
+        for (int j = 0; j < nb; ++j) {
+            cout << setw(10) << mat[i][j] << " , ";
+        }
+        cout << endl;
+    }
+    cout << endl << endl;
+    for (int i = 0; i < nb; ++i) {
+        for (int j = 0; j < nb; ++j) {
+            cout << setw(10) << centered_mat[i][j] << " , ";
+        }
+        cout << endl;
+    }
+    for (int i = 0; i < nb; ++i) {
+        cout << centered_rhs[i] << endl;
+    }
 
     vector<double> result = solve(centered_mat, centered_rhs);
     for (int i = 1; i < nb; ++i) {
         result[0] -= w[i]/w[0] * result[i];
     }
 
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     cout << w[i] << " * "; */
-    /* } cout << endl; */
-    // print
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     for (int j = 0; j < nb; ++j) { */
-    /*         cout << setw(10) <<  mat[i][j] << " " ; */
-    /*     } */
-    /*     cout << endl; */
-    /* } */
-    /* /1* for (int i = 0; i < nb; ++i) { *1/ */
-    /* /1*     for (int j = 0; j < nb; ++j) { *1/ */
-    /* /1*         cout << setw(10) <<  centered_mat[i][j] - mat[i][j] << " " ; *1/ */
-    /* /1*     } *1/ */
-    /* /1*     cout << endl; *1/ */
-    /* /1* } *1/ */
-    /* /1* cout << "*** " << endl; *1/ */
-    /* /1* // print *1/ */
-    /* /1* for (int i = 0; i < nb; ++i) { *1/ */
-    /* /1*     for (int j = 0; j < nb; ++j) { *1/ */
-    /* /1*         cout << setw(10) <<  centered_mat[i][j] << " " ; *1/ */
-    /* /1*     } *1/ */
-    /* /1*     cout << endl; *1/ */
-    /* /1* } *1/ */
-    /* /1* for (int i = 0; i < nb; ++i) { *1/ */
-    /* /1*     cout << rhs[i] << endl; *1/ */
-    /* /1* } *1/ */
-    /* /1* cout << " --- " << endl; *1/ */
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     cout << result[i] << endl; */
-    /* } */
-    /* exit(0); */
+    cout << "result" << endl;
+    for (int i = 0; i < nb; ++i) {
+        cout << result[i] << endl;
+    }
+    exit(0);
 
     return result;
 }
@@ -126,26 +114,14 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf(1, 0.9 );
-    vector<double> sigmas_quad(1, 1./sqrt(2.) );
+    vector<double> sigmas_hf(1, 0.5);
+    /* vector<double> sigmas_quad(1, 1./sqrt(2.) ); */
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector< vector<double> > coefficients_h(nf, vector<double>(nb,0.));
     for (int i = 0; i < nb; ++i) {
-
-        // Graphical progression bar.
-        /* cout << "["; */
-        /* int bw = 103; */
-        /* double progress = ( (double) i) / ( (double) nb); */
-        /* int pos = bw * progress; */
-        /* for (int j = 0; j < bw; ++j) { */
-        /*     if (j < pos) cout << "="; */
-        /*     else if (j == pos) cout << ">"; */
-        /*     else cout << " "; */
-        /* } */
-        /* cout << "] " << int(progress * 100.0) << " %\r"; */
 
         vector<int> multIndex = ind2mult(i, degree, nf);
 
@@ -154,15 +130,21 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         vector< vector<double> > m0(ns, vector<double> (ns,0.));
 
         auto lambda = [&] (vector<double> y) -> vector<double> {
-            return problem.a(x,y)*basis(multIndex, y, sigmas_hf)*sqrt(problem.rho(x,y)*gaussian(y,sigmas_hf)); };
+            return problem.a(x,y) * basis(multIndex, y, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(y,sigmas_hf) ); };
         auto lambda_dx = [&] (vector<double> y) -> vector< vector<double> > {
-            return problem.dax(x,y)*basis(multIndex, y, sigmas_hf)*sqrt(problem.rho(x,y)*gaussian(y,sigmas_hf)); };
+            return problem.dax(x,y) * basis(multIndex, y, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(y,sigmas_hf) ); };
         auto lambda_h = [&] (vector<double> y) -> vector<double> {
             return problem.fast_drift_h(x,y)*basis(multIndex, y, sigmas_hf)*sqrt(problem.rho(x,y)*gaussian(y,sigmas_hf)); };
 
-        vector<double> result = gauss.flatquadnd(lambda, sigmas_quad, v0);
-        vector< vector<double> > result_dx = gauss.flatquadnd(lambda_dx, sigmas_quad, m0);
-        vector<double> result_h = gauss.flatquadnd(lambda_h, sigmas_quad, h0);
+        /* auto test = [&] (vector<double> y) -> vector<double> { vector<double> toreturn = {problem.rho(x,y)/gaussian(y,sigmas_hf)}; return toreturn;}; */
+        /* vector<double> test_0(1,0.); */
+        /* vector<double> test_result = gauss.quadnd(test, sigmas_hf, test_0); */
+        /* cout << "integration of the density " << test_result[0] -1. << endl; */
+        /* exit(0); */
+
+        vector<double> result = gauss.quadnd(lambda, sigmas_hf, v0);
+        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, sigmas_hf, m0);
+        vector<double> result_h = gauss.flatquadnd(lambda_h, sigmas_hf, h0);
 
         for (int j = 0; j < ns; ++j) {
             coefficients[j][i] = result[j];
@@ -173,7 +155,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         for (int j = 0; j < nf; ++j) {
             coefficients_h[j][i] = result_h[j];
         }
-        cout.flush();
     }
 
 /*     for (int i = 0; i < ns; ++i) { */
@@ -190,7 +171,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector< vector< vector<double> > > solution_dy(ns, vector< vector <double> >(nf, vector<double>(nb,0.)));
-
 
     // weights(i,j) = int (phi_i, e^(-V) )
     vector<double> weights(nb, 0.);
@@ -212,31 +192,13 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             vector<int> m2 = ind2mult(j, degree, nf);
             auto lambda = [&] (vector<double> y) -> double {
                 double tmp = 1/(2*pow(sigmas_hf[0], 2)) - pow(y[0], 2)/(4*pow(sigmas_hf[0], 4));
-                return (tmp - problem.linearTerm(x,y)) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf) * gaussian(y,sigmas_hf); };
-            mat[i][j] += gauss.flatquadnd(lambda, sigmas_hf);
+                return (tmp - problem.linearTerm(x,y)) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf); };
+            mat[i][j] += gauss.quadnd(lambda, sigmas_hf);
         }
     }
 
-    // print
-    /* for (int i = 0; i < nb; ++i) { */
-    /*     for (int j = 0; j < nb; ++j) { */
-    /*         cout << setw(10) <<  mat[i][j] << " " ; */
-    /*     } */
-    /*     cout << endl; */
-    /* } */
-
     for (int i = 0; i < ns; ++i) {
-        /* vector<double> tmp = aux(mat, coefficients[i], weights); */
-        /* mat[0][0] = 1.0; solution[i] = solve(mat, coefficients[i]); */
-        /* cout << " ***" << endl; */
-        /* for (int j = 0; j < nb; ++j) { */
-        /*     cout << solution[0][j] - tmp[j] << endl; */
-        /* } */
-        /* cout << " ***" << endl; */
-        /* for (int j = 0; j < nb; ++j) { */
-        /*     cout << solution[0][j] << endl; */
-        /* } */
-        /* exit(0); */
+
         solution[i] = aux(mat, coefficients[i], weights);
         for (int j = 0; j < ns; ++j) {
             solution_dx[i][j] = aux(mat, coefficients_dx[i][j], weights);
@@ -288,11 +250,11 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         /* } */
         /* FIXME: nan appearing (urbain, Tue 19 May 2015 16:59:01 BST) */
 
-        cout << A0[0][0] << endl;
         c[j].diff =  cholesky(symmetric(A0));
         c[j].drif = F1 + F2;
-        cout << c[j].diff[0][0] << endl;
-        exit(0);
+        /* cout << c[j].drif[0] << endl; */
+        if (j > 0)
+            cout << c[j].diff[0][0] - c[j-1].diff[0][0] << endl;
     }
 }
 
