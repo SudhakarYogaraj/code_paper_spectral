@@ -24,7 +24,7 @@ double Problem::rho(vector<double> x, vector<double> y) {
 
 vector<double> Problem::grad(vector<double> x, vector<double> y){
     vector<double> result(this->nf);
-    result[0] = -2.*y[0];
+    result[0] = 2.*y[0];
     return result;
 }
 
