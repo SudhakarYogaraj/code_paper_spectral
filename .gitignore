@@ -5,6 +5,7 @@ figures
 *.mat
 *.bak
 *.gen
+tmp/
 *\~
 .dropbox
 Session.vim

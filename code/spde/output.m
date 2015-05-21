@@ -321,7 +321,7 @@ function output()
         h1
         h2
     end
-    
+
     h = simplify(h1+h2);
 
     g = 0.5*(g+transpose(g));
@@ -463,7 +463,7 @@ function nonlin = F(f)
     nonlin = 0.5*diff(f^2);
 end
 
-% Differential operator associated with the equation. 
+% Differential operator associated with the equation.
 function Au = oper(u)
     %Au = -diff(u,4) -diff(u,2);
     Au = diff(u,2) + u;
@@ -473,11 +473,11 @@ end
 function f = eigfun(i,x)
     global pi;
     if mod(i,2) == 0;
-        f = cos(i/2*x)*sqrt(1/pi);    
+        f = cos(i/2*x)*sqrt(1/pi);
     else
         f = sin((i+1)/2*x)*sqrt(1/pi);
     end
-   
+
     % f = sin(i*x)*sqrt(2/pi);
 end
 
@@ -488,7 +488,7 @@ function f = expa(i,x)
     else
         f = sin((i+1)/2*x);
     end
-    
+
     % f = sin(i*x);
 end
 
