@@ -3,7 +3,7 @@
 
 #define PI 3.141592653589793238462643383279502884
 
-#include <cmath>
+#include <math.h>
 #include <vector>
 
 class Problem {
@@ -22,6 +22,8 @@ class Problem {
         std::vector<double> x0;
 
         // Potential for gradient structure
+        std::vector<double> phi(std::vector<double> x, std::vector<double> y);
+        std::vector< std::vector<double> > phi_x(std::vector<double> x, std::vector<double> y);
         double potential(std::vector<double> x, std::vector<double> y);
         std::vector<double> grad(std::vector<double> x, std::vector<double> y);
         double linearTerm(std::vector<double> x, std::vector<double> y);
@@ -41,6 +43,7 @@ class Problem {
         double stardiv_h(std::vector<double> x, std::vector<double> y);
         std::vector<double> lambdas;
         std::vector<double> betas;
+        std::vector<double> sigmas;
 
         // FOR HMM
         // Drift and diffusion terms of the fast system, in its transformed

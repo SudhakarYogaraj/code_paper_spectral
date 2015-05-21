@@ -7,6 +7,8 @@
 class Solver_hmm {
     public:
 
+        Solver_hmm(double p, int M);
+
         // Macro and micro time-steps
         double macro_dt;
         double micro_dt;
@@ -24,6 +26,5 @@ class Solver_hmm {
         double p;
 
         void estimator(Problem&, std::vector<double> x, std::vector<double>& yInit, SDE_coeffs&, int seed, double t);
-        void set(double, int);
 };
 #endif

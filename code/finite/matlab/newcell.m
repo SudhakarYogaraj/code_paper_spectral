@@ -5,100 +5,69 @@ format longEng
 % Symbolic variables
 syms y x pi;
 
-% Right hand side
-f = cos(1.2) * (2*y*cos(y) + sin(y));
-
 % Potential
-V = y*y + log(pi)/2.
+v = y*y + log(pi)/2.
+
+% Derivative of the potential
+vy = diff(v,y);
 
 % Associated invariant measure
-rho = exp(-V)
+rho = exp(-v)
 
-% Standard gaussian used for basis
-sigma = 0.5; %1/sqrt(2.);
-gaussian = 1/sqrt(2*sym(pi)*sigma^2) * exp(-y^2/(2*sigma^2))
+% Coefficient of the BM
+s = sqrt(2); S = 2;
 
-% --
-s = sqrt(2);
-S = 2;
+% Generator in weighted space
+Lw = @(f) 0.5 * diff( S * rho * diff(f,y) , y) / rho;
 
-% Maximal degree
-N = 8;
+% Solution of the cell problem
+g = cos(x) * sin(y);
 
-% Usual basis of polynomials
-mon_y = sym(zeros(N + 1,1));
-for i = 0:N; mon_y(i+1) = y^i; end       
+% Associated rhs
+f = - Lw(g)
 
-% Gram matrix
-G = int(mon_y*transpose(mon_y)*gaussian,y,-inf,inf);
+% x-derivative of rhs
+fx = diff(f,x)
 
-% Cholesky decomposition
-U = chol(G,'upper','nocheck'); 
+% non-leading order drift of fast process
+h = cos(x) * cos(y);
 
-% Change of basis matrix
-B = transpose(inv(U));
-
-% First eigenfunctions of the generator of the OU process with 
-% parameters lambda(i) and q(i))
-basis = simplify(B*mon_y)
-
-% Check of the orthogonality
-% simplify(int(basis(:,i)*transpose(basis(:,i))*rho,y,-inf,inf));
+% derivative of h
+hy = diff(h,y);
 
 % Linear term
-lin = 1/4*S*diff(V,y,2) - 1/8*S*(diff(V,y)^2)
-linn = matlabFunction(lin);
+lin = 1/4*S*diff(v,y,2) - 1/8*S*(diff(v,y)^2)
 
-% Generator
-L = @(f) -0.5*S*diff(f,y,2) - lin*f;
+% Standard deviation of approximating gaussian
+sigma = 1.2;
 
-coefficients = zeros(N+1, 1);
-for i = 0:N
-    toint = simplify(f*sqrt(rho)*basis(i+1)*sqrt(gaussian));
-    coefficients(i + 1) = integral(matlabFunction(toint), -inf, inf)
-end
+% Approximating gaussian
+gaussian = 1/sqrt(2*sym(pi)*sigma^2) * exp(-y^2/(2*sigma^2))
 
-mat = zeros(N + 1, N + 1);
-mat2 = zeros(N + 1, N + 1);
-for i = 0:N
-    for j = 0:N
-        toint = (1/(2*sigma^2) - y^2/(4*sigma^4) - lin) * basis(i+1) * basis(j+1) * gaussian;
-        matfunc = matlabFunction(simplify(toint));
-        mat(i+1, j+1) = integral( matfunc, -inf, inf)
-        
-        %mat(i+1 , j+1) = double( int ( toint, -inf, inf) )
-        toint = simplify( L(basis(i+1)*sqrt(gaussian)) * basis(j+1) * sqrt(gaussian) );
-        matfunc = matlabFunction(toint);
-        mat2(i+1 , j+1) = integral ( matfunc, -inf, inf)
-    end
-    mat(i+1,i+1) = mat(i+1,i+1) + i/(sigma^2);
+% Output to files
+f1 = fopen('tmp/v.gen','w');
+f2 = fopen('tmp/vy.gen','w');
+f3 = fopen('tmp/g.gen','w');
+f4 = fopen('tmp/f.gen','w');
+f5 = fopen('tmp/fx.gen','w');
+f6 = fopen('tmp/h.gen','w');
+f7 = fopen('tmp/hy.gen','w');
+f8 = fopen('tmp/lin.gen','w');
 
-end
+fprintf(f1, ccode(v));
+fprintf(f2, ccode(vy));
+fprintf(f3, ccode(g));
+fprintf(f4, ccode(f));
+fprintf(f5, ccode(fx));
+fprintf(f6, ccode(h));
+fprintf(f7, ccode(hy));
+fprintf(f8, ccode(lin));
 
-w = zeros(1, N+1);
-for i = 0:N
-    toint = matlabFunction( simplify(basis(i + 1) * sqrt(rho) * sqrt(gaussian)) );
-    w(i+1) = integral( toint, -inf, inf);
-end
-
-A = 0*mat;
-b = 0*coefficients;
-A(1,1) = 1.;
-for i = 2:N+1
-    for j = 2:N+1
-        A(i,j) = mat(i,j) - w(i)/w(1) * mat(i,1) - w(j)/w(1) * mat(j,1)    + w(i)/w(1) * w(j)/w(1) * mat(1,1);
-        A(1,i) = 0.;
-        A(i,1) = 0.;
-        b(i) = coefficients(i) - w(i)/w(1) * coefficients(1);
-    end
-end
-
-sol = A\b;
-result = sol;
-for i = 2:N+1
-    result(1) = result(1) - w(i)/w(1) * sol(i)
-end
-
-end
-
-
+fclose(f1); system('echo -e "" >> tmp/v.gen','w');
+fclose(f2); system('echo -e "" >> tmp/vy.gen','w');
+fclose(f3); system('echo -e "" >> tmp/g.gen','w');
+fclose(f4); system('echo -e "" >> tmp/f.gen','w');
+fclose(f5); system('echo -e "" >> tmp/fx.gen','w');
+fclose(f6); system('echo -e "" >> tmp/h.gen','w');
+fclose(f7); system('echo -e "" >> tmp/hy.gen','w');
+fclose(f8); system('echo -e "" >> tmp/lin.gen','w');

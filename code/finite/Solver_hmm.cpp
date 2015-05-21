@@ -6,8 +6,7 @@
 
 using namespace std;
 
-void Solver_hmm::set(double p, int M)
-{
+Solver_hmm::Solver_hmm(double p, int M) {
     // Precision parameter
     this->p = p;
 
