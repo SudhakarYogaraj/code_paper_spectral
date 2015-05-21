@@ -1,6 +1,6 @@
 #include "main.hpp"
 
-/* TODO: Adapt to general gradient structure (urbain, Fri 08 May 2015 16:28:45 BST) */
+/* TODO: Test gradient structures in several dimensions (urbain, Thu 21 May 2015 12:12:14 BST) */
 
 using namespace std;
 
@@ -11,21 +11,14 @@ int main(int argc, char* argv[])
     problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {4.};
+    vector<double> p_values = {3.};
 
     // Vector of the log of the error
     vector<double> errors_hmm(p_values.size(), 0.);
     vector<double> errors_spectral(p_values.size(), 0.);
 
-    // Number of replicas of the fast process
-    int M = 1;
-
-    // Random variable for generator
-    int seed = time(NULL);
-
-
     // Random numbers generator
-    default_random_engine generator; generator.seed(seed);
+    default_random_engine generator; generator.seed(time(NULL));
     normal_distribution<double> distribution(0.0,1.0);
 
     // Precision of the cout command
@@ -54,10 +47,11 @@ int main(int argc, char* argv[])
         }
     }
 
-    Solver_hmm solver_hmm;
-    Solver_spectral solver_spectral = Solver_spectral(20, 100, problem.nf, "MONOMIAL");
-
     for (unsigned int j = 0; j < p_values.size(); ++j) {
+
+        Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
+        /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
+        Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "HERMITE");
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.d,0.));
@@ -68,9 +62,6 @@ int main(int argc, char* argv[])
         xt_hmm[0] = problem.x0;
         xt_spectral[0] = problem.x0;
         x_exact[0] = problem.x0;
-
-        // Setting to solver to match the precision parameter p_value[i];
-        solver_hmm.set(p_values[j],M);
 
         // Error due to the estimation of the coefficients
         double error_hmm = 0.;
