@@ -6,13 +6,15 @@ format longEng
 syms y x pi;
 
 % Potential
-v = y*y + log(pi)/2.
+v = y^4/4 - y^2/2; %y*y + log(pi)/2.
 
 % Derivative of the potential
 vy = diff(v,y);
 
 % Associated invariant measure
 rho = exp(-v)
+rho_n = matlabFunction(rho);
+rho = rho/integral(rho_n, -inf, inf);
 
 % Coefficient of the BM
 s = sqrt(2); S = 2;
@@ -24,10 +26,10 @@ Lw = @(f) 0.5 * diff( S * rho * diff(f,y) , y) / rho;
 g = cos(x) * sin(y);
 
 % Associated rhs
-f = - Lw(g)
+f = - simplify(Lw(g))
 
 % x-derivative of rhs
-fx = diff(f,x)
+fx = simplify(diff(f,x))
 
 % non-leading order drift of fast process
 h = cos(x) * cos(y);
@@ -36,7 +38,7 @@ h = cos(x) * cos(y);
 hy = diff(h,y);
 
 % Linear term
-lin = 1/4*S*diff(v,y,2) - 1/8*S*(diff(v,y)^2)
+lin = simplify(1/4*S*diff(v,y,2) - 1/8*S*(diff(v,y)^2))
 
 % Standard deviation of approximating gaussian
 sigma = 1.2;

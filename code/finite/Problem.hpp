@@ -5,6 +5,7 @@
 
 #include <math.h>
 #include <vector>
+#include <iostream>
 
 class Problem {
     public:

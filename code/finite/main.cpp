@@ -114,6 +114,9 @@ int main(int argc, char* argv[])
             vector<double> exact_drif = problem.soldrif(x_exact[i]);
             vector< vector<double> > exact_diff = problem.soldiff(x_exact[i]);
 
+            cout << exact_drif[0] << endl;
+            /* exit(0); */
+
             x_exact[i+1] = x_exact[i];
             xt_hmm[i+1] = xt_hmm[i];
             xt_spectral[i+1] = xt_spectral[i];
