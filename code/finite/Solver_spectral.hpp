@@ -2,8 +2,10 @@
 #define SOLVER_SPECTRAL_H
 
 #include <numeric>
+#include <string>
 #include <functional>
 #include <vector>
+#include <assert.h>
 
 class Solver_spectral {
     public:
@@ -12,7 +14,7 @@ class Solver_spectral {
         int degree;
         int nNodes;
 
-        Solver_spectral(int degree, int nNodes, int n_vars);
+        Solver_spectral(int degree, int nNodes, int n_vars, std::string poly_basis);
         void estimator(Problem&, std::vector<double> x, std::vector<SDE_coeffs>& , double t);
 
     private:
@@ -36,7 +38,7 @@ class Solver_spectral {
         // Auxiliary function to convert linear indices to multi-indices.
         std::vector<int> ind2mult(int ind, int d, int n);
 
-        //
-        int monomial = 1;
+        // basis of polynomials to use
+        std::string poly_basis;
 };
 #endif

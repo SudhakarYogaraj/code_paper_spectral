@@ -72,7 +72,7 @@ double Problem::stardiv_h(vector<double> x, vector<double> y) {
 // diff  = SQRT 2? * cos(x)*cos(x) * int (sin(y) * (2*y*cos(y) + sin(y)) * e^(-y^2)/sqrt(pi) )
 vector<double> Problem::soldrif(vector<double> x) {
     vector<double> result(this->d,0.);
-    cout << "drift second term " <<  cos(x[0])*cos(x[0])*(1. + exp(-1.))/2. << endl;
+    /* cout << "drift second term " <<  cos(x[0])*cos(x[0])*(1. + exp(-1.))/2. << endl; */
     result[0] = -sin(x[0])*cos(x[0])*(1 + exp(-1.0))/2. + cos(x[0])*cos(x[0])*(1. + exp(-1.))/2.;
     return result;
 }
@@ -105,13 +105,13 @@ vector< vector<double> > Problem::day(vector<double> x, vector<double> y) {
 
 vector<double> Problem::drif(vector<double> x, vector<double> y) {
     vector<double> result(2*this->nf,0.);
-    result[0] = -y[0];
-    result[1] = -y[1] + cos(x[0])*cos(y[0]);
+    result[0] = -2*y[0];
+    result[1] = -2*y[1] + cos(x[0])*cos(y[0]);
     return result;
 }
 
 vector<double> Problem::diff(vector<double> x, vector<double> y) {
     vector<double> result(2*nf,0.);
-    result[0] = 1.0;
+    result[0] = sqrt(2.);
     return result;
 }

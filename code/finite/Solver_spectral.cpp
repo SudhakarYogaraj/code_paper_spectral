@@ -13,22 +13,20 @@
 #include "Gaussian_integrator.hpp"
 #include "Solver_spectral.hpp"
 #include "templates.hpp"
-#include <iomanip>
 
 using namespace std;
 
 double Solver_spectral::basis(vector<int> mult, vector<double> x, vector<double> sigmas) {
+    assert(poly_basis == "MONOMIAL" || poly_basis == "HERMITE");
+    double result = 0.;
 
-    double result;
-
-    if (monomial) {
+    if (poly_basis == "MONOMIAL") {
         result = 1.;
         for (unsigned int i = 0; i < mult.size(); ++i) {
             result *= ipow(x[i]/sigmas[i], mult[i]);
         }
     }
-
-    if (!monomial) {
+    else if (poly_basis == "HERMITE") {
         result = 1.;
         for (unsigned int i = 0; i < mult.size(); ++i) {
             double result_i = 0.;
@@ -71,12 +69,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             return problem.dax(x,y) * basis(multIndex, y, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(y,sigmas_hf) ); };
         auto lambda_h = [&] (vector<double> y) -> double {
             return problem.stardiv_h(x,y) * basis(multIndex, y, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(y,sigmas_hf) ); };
-
-        /* auto test = [&] (vector<double> y) -> vector<double> { vector<double> toreturn = {problem.rho(x,y)/gaussian(y,sigmas_hf)}; return toreturn;}; */
-        /* vector<double> test_0(1,0.); */
-        /* vector<double> test_result = gauss.quadnd(test, sigmas_hf, test_0); */
-        /* cout << "integration of the density " << test_result[0] -1. << endl; */
-        /* exit(0); */
 
         vector<double> result = gauss.quadnd(lambda, sigmas_hf, v0);
         vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, sigmas_hf, m0);
@@ -157,8 +149,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
                 F2[k] += solution[k][j]*coefficients_h[j];
         }
 
-        cout << F2[0] << endl;
-
         for (int k = 0; k < ns; ++k) {
             for (int l = 0; l < ns; ++l) {
                 A0[k][l] += 2*solution[k][j]*coefficients[l][j];
@@ -170,9 +160,10 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     }
 }
 
-Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
+Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars, string string_basis) {
     this->degree = degree;
     this->nNodes = nNodes;
+    this->poly_basis = string_basis;
 
     vector< vector<double> > mat1d(degree + 1, vector<double>(degree + 1,0.));
 
@@ -380,16 +371,20 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
     this->hermiteCoeffs_1d = mat1d;
     this->hermiteCoeffs_nd = matnd;
 
-    if ( monomial ) {
+    if ( poly_basis == "MONOMIAL" ) {
         this->herm_to_basis = this->hermiteCoeffs_nd;
     }
-    else {
+    else if ( poly_basis == "HERMITE" ) {
         this->herm_to_basis = vector< vector<double> > (nb, vector<double>(nb,0.));
         for (int i = 0; i < nb; ++i) {
             for (int j = 0; j < nb; ++j) {
                 this->herm_to_basis[i][j] = (i == j);
             }
         }
+    }
+    else {
+        cout << "Invalid basis of polynomials. " << endl;
+        exit(0);
     }
 }
 
