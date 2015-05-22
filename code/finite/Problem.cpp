@@ -1,7 +1,7 @@
 #include "Problem.hpp"
 #include "templates.hpp"
 #include "Gaussian_integrator.hpp"
-#include "aux.hpp"
+#include "toolbox.hpp"
 
 using namespace std;
 

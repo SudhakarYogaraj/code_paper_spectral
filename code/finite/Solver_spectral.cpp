@@ -8,7 +8,7 @@
 
 
 #include "structures.hpp"
-#include "aux.hpp"
+#include "toolbox.hpp"
 #include "Problem.hpp"
 #include "Gaussian_integrator.hpp"
 #include "Solver_spectral.hpp"
