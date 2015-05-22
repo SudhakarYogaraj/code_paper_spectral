@@ -1,6 +1,7 @@
 #include "main.hpp"
 
 /* TODO: Test gradient structures in several dimensions (urbain, Thu 21 May 2015 12:12:14 BST) */
+/* TODO: automatic problem generation for hmm (urbain, Thu 21 May 2015 18:23:04 BST) */
 
 using namespace std;
 

@@ -1,5 +1,5 @@
 #include "structures.hpp"
-#include "aux.hpp"
+#include "toolbox.hpp"
 #include "templates.hpp"
 #include "Problem.hpp"
 #include "Solver_hmm.hpp"

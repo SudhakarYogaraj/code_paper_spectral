@@ -7,6 +7,7 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include "templates.hpp"
 
 class Gaussian_integrator {
     public:
