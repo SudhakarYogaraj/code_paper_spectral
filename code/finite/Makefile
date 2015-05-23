@@ -1,10 +1,13 @@
 .SUFFIXES:
+.PHONY: all clean problem
 
 CXX    = clang++
-target = dev.exec
 CXXFLAGS = -O3 -std=c++11 -Wall
-
+target = dev.exec
 objects = main.o Problem.o Solver_hmm.o Solver_spectral.o Gaussian_integrator.o toolbox.o io.o tictoc.o
+
+default : $(target)
+
 $(target) : $(objects)
 	$(CXX) $(CXXFLAGS) $(objects) -o $(target)
 
@@ -16,6 +19,8 @@ Solver_spectral.o : Problem.hpp Gaussian_integrator.hpp toolbox.hpp structures.h
 %.o: %.cpp %.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-.PHONY: clean
+problem:
+	cd matlab && $(MAKE)
+
 clean:
 	rm -f $(target) $(objects)

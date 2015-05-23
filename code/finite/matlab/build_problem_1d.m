@@ -5,8 +5,19 @@ format longEng
 % Symbolic variables
 syms y x pi;
 
+%% USER INPUT %%
+
 % Potential
-v = y^4/4 - y^2/2; %y*y + log(pi)/2.
+% v = y^4/4 - y^2/2;
+v = y*y + log(pi)/2.
+
+% Coefficient of the BM
+s = sqrt(2);
+
+%% END OF USER INPUT %%
+
+% Square of covariant matrix
+S = s*s
 
 % Derivative of the potential
 vy = diff(v,y);
@@ -16,8 +27,6 @@ rho = exp(-v)
 rho_n = matlabFunction(rho);
 rho = rho/integral(rho_n, -inf, inf);
 
-% Coefficient of the BM
-s = sqrt(2); S = 2;
 
 % Generator in weighted space
 Lw = @(f) 0.5 * diff( S * rho * diff(f,y) , y) / rho;
@@ -25,11 +34,14 @@ Lw = @(f) 0.5 * diff( S * rho * diff(f,y) , y) / rho;
 % Solution of the cell problem
 g = cos(x) * sin(y);
 
+% Differential of g
+gx = diff(g,x);
+
 % Associated rhs
-f = - simplify(Lw(g))
+f = - simplify( Lw(g) )
 
 % x-derivative of rhs
-fx = simplify(diff(f,x))
+fx = simplify( diff(f,x) )
 
 % non-leading order drift of fast process
 h = cos(x) * cos(y);
@@ -38,7 +50,7 @@ h = cos(x) * cos(y);
 hy = diff(h,y);
 
 % Linear term
-lin = simplify(1/4*S*diff(v,y,2) - 1/8*S*(diff(v,y)^2))
+lin = simplify( 1/4*S*diff(v,y,2) - 1/8*S*(diff(v,y)^2) )
 
 % Standard deviation of approximating gaussian
 sigma = 1.2;
@@ -46,8 +58,11 @@ sigma = 1.2;
 % Approximating gaussian
 gaussian = 1/sqrt(2*sym(pi)*sigma^2) * exp(-y^2/(2*sigma^2))
 
+%% Generation of files for C++ program %%
+
 % Output to files
-f1 = fopen('tmp/tv.gen','w');
+f0 = fopen('tmp/gx.gen','w');
+f1 = fopen('tmp/v.gen','w');
 f2 = fopen('tmp/vy.gen','w');
 f3 = fopen('tmp/g.gen','w');
 f4 = fopen('tmp/f.gen','w');
@@ -57,6 +72,7 @@ f7 = fopen('tmp/hy.gen','w');
 f8 = fopen('tmp/lin.gen','w');
 f9 = fopen('tmp/rho.gen','w');
 
+fprintf(f0, ccode(gx));
 fprintf(f1, ccode(v));
 fprintf(f2, ccode(vy));
 fprintf(f3, ccode(g));
@@ -67,6 +83,7 @@ fprintf(f7, ccode(hy));
 fprintf(f8, ccode(lin));
 fprintf(f9, ccode(rho));
 
+fclose(f0); system('echo -e "" >> tmp/gx.gen');
 fclose(f1); system('echo -e "" >> tmp/v.gen');
 fclose(f2); system('echo -e "" >> tmp/vy.gen');
 fclose(f3); system('echo -e "" >> tmp/g.gen');
