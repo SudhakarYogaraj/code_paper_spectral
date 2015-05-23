@@ -32,12 +32,6 @@ double Problem::stardiv_h(vector<double> x, vector<double> y) {
     return result;
 }
 
-vector< vector<double> > Problem::phi_x(vector<double> x, vector<double> y) {
-    vector< vector<double> > result(this->d,vector<double>(this->d,0.));
-    result[0][0] = -sin(x[0])*sin(y[0]);
-    return result;
-}
-
 vector<double> Problem::soldrif(vector<double> x) {
     vector<double> result(this->d,0.);
     Gaussian_integrator gauss = Gaussian_integrator(100,this->nf);
