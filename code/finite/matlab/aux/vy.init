@@ -1,0 +1,3 @@
+
+vector<double> Problem::grad(vector<double> x, vector<double> y){
+    vector<double> result(this->nf);
