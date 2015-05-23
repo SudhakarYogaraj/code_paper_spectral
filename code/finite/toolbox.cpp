@@ -64,6 +64,7 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
             if (i == j) {
                 if (A[i][i] - sum < 0) {
                     cout << "Warning: matrix is not positive definite" << endl;
+                    exit(0);
                 }
                 else {
                     L[i][i] = sqrt(A[i][i]-sum);
