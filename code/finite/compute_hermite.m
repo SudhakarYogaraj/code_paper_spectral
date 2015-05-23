@@ -1,7 +1,7 @@
 function compute_hermite()
 
     % Maximal degree
-    N = 30;
+    N = 40;
 
     % Symbolic variables for the computation
     syms x; syms pi;

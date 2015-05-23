@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
         /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
-        Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "HERMITE");
+        Solver_spectral solver_spectral = Solver_spectral(28, 30, problem.nf, "MONOMIAL");
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.d,0.));
@@ -197,6 +197,7 @@ int main(int argc, char* argv[])
             cout << "|" << setw(101) <<  " " << "|" << endl;
             cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
             cout << endl << endl;
+            exit(0);
         }
         writeToFile("time.dat",t); int p_aux = (int) (10*solver_hmm.p + 0.0001);
         writeMatToFile("xt_hmm" + to_string(p_aux) + ".dat", xt_hmm);
