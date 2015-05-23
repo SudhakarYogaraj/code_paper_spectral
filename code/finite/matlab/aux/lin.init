@@ -1,0 +1,3 @@
+
+double Problem::linearTerm(vector<double> x, vector<double> y){
+    double result;
