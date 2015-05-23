@@ -63,10 +63,14 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
             }
             if (i == j) {
                 if (A[i][i] - sum < 0) {
-                    cout << "Warning: matrix is not positive definite" << endl;
-                    exit(0);
+                    cout << "Warning: matrix is not positive definite: (" << A[i][i] - sum << ")." << endl;
+                    if (A[i][i] - sum < -1e-12) {
+                        cout << "Error occured during Cholesky factorization of line " << i << "." << endl;
+                        exit(0);
+                    }
                 }
                 else {
+                    cout << i << ". " << A[i][i] - sum << endl;
                     L[i][i] = sqrt(A[i][i]-sum);
                 }
             }
@@ -146,6 +150,15 @@ void niceVec(vector<double> a) {
 
 vector<double> solve(vector< vector<double> > A, vector<double> b) {
     vector<double> result = b;
+    vector< vector<double> > At = transpose(A);
+    for (unsigned int i = 0; i < A.size(); ++i) {
+        for (unsigned int j = 0; j < A.size(); j++) {
+            if ( fabs(A[i][j] - A[j][i]) > 1e-10) {
+                cout << "Matrix must be symmetric, but A[" << i << "][" << j << "] - A[" << j << "][" << i << "] = " << A[i][j] - A[j][i] << "." << endl;
+                exit(0);
+            }
+        }
+    }
     vector< vector<double> > L = cholesky(A);
     vector< vector<double> > U = transpose(L);
     result = lsolve(L, result);

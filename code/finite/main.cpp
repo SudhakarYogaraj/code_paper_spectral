@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
         /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
-        Solver_spectral solver_spectral = Solver_spectral(28, 30, problem.nf, "MONOMIAL");
+        Solver_spectral solver_spectral = Solver_spectral(10, 30, problem.nf, "HERMITE");
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.d,0.));

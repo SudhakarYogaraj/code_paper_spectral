@@ -51,7 +51,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf(1, 0.7);
+    vector<double> sigmas_hf(1, 2.);
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
@@ -123,22 +123,21 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         }
     }
 
+    for (unsigned int iii = 0; iii < mat.size(); ++iii) {
+        cout << setw(12) << mat[iii][0];
+        for (unsigned int jjj = 1; jjj < mat.size(); ++jjj) {
+            cout << ", ";
+            cout << setw(12) << mat[iii][jjj];
+        }
+        cout << endl;
+    }
+
     for (int i = 0; i < ns; ++i) {
         solution[i] = solve(mat, coefficients[i]);
         for (int j = 0; j < ns; ++j) {
             solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
         }
-    }    
-
-/*     for (unsigned int iii = 0; iii < mat.size(); ++iii) { */
-/*         cout << setw(12) << mat[iii][0]; */
-/*         for (unsigned int jjj = 1; jjj < mat.size(); ++jjj) { */
-/*             cout << ", "; */
-/*             cout << setw(12) << mat[iii][jjj]; */
-/*         } */
-/*         cout << endl; */
-/*     } */
-/*     exit(0); */
+    }
 
     // Calculation of the coefficients of the simplified equation
     vector<double> F1(ns, 0.);
