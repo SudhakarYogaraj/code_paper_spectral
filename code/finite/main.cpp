@@ -91,19 +91,19 @@ int main(int argc, char* argv[])
             double errorDrift_hmm = fabs(Ddrif);
             double errorDiff_hmm  = fabs(Ddiff);
 
-            /* cout << "--Drift--" << endl; */
-            /* for (unsigned int m = 0; m < vec_spectral.size(); ++m) { */
-            /*     Ddrif = vec_spectral[m].drif - problem.soldrif(xt_spectral[i]); */
-            /*     double errorDrift_spectral = fabs(Ddrif); */
-            /*     /1* cout << errorDrift_spectral << endl; *1/ */
-            /* } */
-            /* cout << "--Diffusion--" << endl; */
-            /* for (unsigned int m = 0; m < vec_spectral.size(); ++m) { */
-            /*     Ddiff = vec_spectral[m].diff - problem.soldiff(xt_spectral[i]); */
-            /*     double errorDiff_spectral  = fabs(Ddiff); */
-            /*     cout << errorDiff_spectral << endl; */
-            /* } */
-            /* cout << "----" << endl; */
+            cout << "--Drift--" << endl;
+            for (unsigned int m = 0; m < vec_spectral.size(); ++m) {
+                Ddrif = vec_spectral[m].drif - problem.soldrif(xt_spectral[i]);
+                double errorDrift_spectral = fabs(Ddrif);
+                cout << errorDrift_spectral << endl;
+            }
+            cout << "--Diffusion--" << endl;
+            for (unsigned int m = 0; m < vec_spectral.size(); ++m) {
+                Ddiff = vec_spectral[m].diff - problem.soldiff(xt_spectral[i]);
+                double errorDiff_spectral  = fabs(Ddiff);
+                cout << errorDiff_spectral << endl;
+            }
+            cout << "----" << endl;
 
             Ddrif = c_spectral.drif - problem.soldrif(xt_spectral[i]);
             Ddiff = c_spectral.diff - problem.soldiff(xt_spectral[i]);

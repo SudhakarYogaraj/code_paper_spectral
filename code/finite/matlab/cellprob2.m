@@ -63,7 +63,7 @@ figure; plot(t,x);
 %% Hermite basis of polynomials
 
 % Maximal degree
-N = 20; 
+N = 30; 
 
 % Symbolic variables for the computation
 syms w; syms pi real positive;

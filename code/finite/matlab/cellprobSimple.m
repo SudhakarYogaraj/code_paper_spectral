@@ -8,7 +8,7 @@ clc; clear all; close all;
 %% Parameters of the simulation
 alpha = 1;
 
-lambda = [3;1]; q = [1;1]; 
+lambda = [3;1]; q = [1;1];
 sigma = (sqrt(q.^2./(2*lambda)));
 
 % Symbolic variables
@@ -21,7 +21,7 @@ syms pi real positive;
 %% Hermite basis of polynomials
 
 % Maximal degree
-N = 15; 
+N = 30;
 
 % Weight function
 gamma = 1/sqrt(sym(pi))*exp(-y^2);
@@ -29,7 +29,7 @@ gamma = 1/sqrt(sym(pi))*exp(-y^2);
 % Usual basis of polynomials
 
 mon_y = sym(zeros(N + 1,1));
-for i = 0:N; mon_y(i+1) = y^i; end       
+for i = 0:N; mon_y(i+1) = y^i; end
 
 % Gram matrix
 G = int(mon_y*transpose(mon_y)*gamma,y,-inf,inf);
@@ -60,7 +60,7 @@ V = y^2 %- 10*y^4*exp(-2*y^2);
 rho = exp(-V);
 oper = @(f) diff(V)*diff(f) - diff(f,2);
 
-aux = exp(y-y^2); 
+aux = exp(y-y^2);
 Z = integral(matlabFunction(rho),-inf,inf);
 I = matlabFunction(aux*rho/Z);
 aux = aux - integral(I,-inf,inf);
@@ -90,14 +90,14 @@ for i = 1:length(s)
     s(i) = s(i) - integral(s_n,-inf,inf);
 end
 
-err = s - ex_sol; 
+err = s - ex_sol;
 err_L2 = zeros(length(err),1);
 for i = 1:length(err);
     I = matlabFunction(err(i).^2*rho);
     err_L2(i) = integral(I,-inf,inf);
 end
 figure; loglog(1:length(err),err_L2,'r.');
-xlabel('$d$'); 
+xlabel('$d$');
 ylabel('$\|\Phi-\Phi_d\|_{\rho}$');
 
 
@@ -126,10 +126,10 @@ xlabel('$y$'); ylabel('$e^{-V}/Z$');
 %     I = matlabFunction(f*basis(i)*rho);
 %     b2(i) = integral(I,-inf,inf);
 % % end
-% 
+%
 % ba1 = mon_y(2:end);
 % ba2 = basis;
-% 
+%
 % s1 = (A\b)'*ba1;
 % s2 = (A2\b2)'*ba2;
 % t = -1:.01:1;
@@ -161,7 +161,7 @@ sol = c./index/lambda;
 % Final time
 T = 1;
 
-% time step 
+% time step
 dt = .01;
 % Vector of times
 t = 0:dt:T;
@@ -175,7 +175,7 @@ x(1) = .5;
 X(1) = .5;
 
 % Euler's method
-for i = 2:length(t)    
+for i = 2:length(t)
     i
     p = 3;
     % Computation of the coefficients
@@ -187,22 +187,22 @@ for i = 2:length(t)
         I_c = @(s) basis_j(s).*fd(x(i-1),s);
         cd(j) = mean(I_c(sigma*randn(1,1000*2^(2*p))));
     end
-    
+
     % Brownian increment
     r = randn;
-    
+
     phi = c./index/lambda; phi(1) = 0;
     phi_d = cd./index/lambda; phi_d(1) = 0;
-    
+
     F = c'*phi_d;
     A0 = 2*c'*phi;
     A = sqrt(A0);
-    
+
     % Spectral method
-    x(i) = x(i-1) + F*dt + r*sqrt(dt)*A;   
-    
+    x(i) = x(i-1) + F*dt + r*sqrt(dt)*A;
+
     % Simplified equation
-    X(i) = X(i-1) + X(i-1)/alpha*dt + r*sqrt(dt)*sqrt(2/alpha)*X(i-1);   
+    X(i) = X(i-1) + X(i-1)/alpha*dt + r*sqrt(dt)*sqrt(2/alpha)*X(i-1);
 end
 
 plot(t,x,t,X);

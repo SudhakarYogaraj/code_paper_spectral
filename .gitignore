@@ -5,6 +5,7 @@ figures
 *.mat
 *.bak
 *.gen
+*.pyc
 tmp/
 *\~
 .dropbox
