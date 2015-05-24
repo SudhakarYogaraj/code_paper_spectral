@@ -1,75 +1,95 @@
-function build_problem_1d()
+function build_problem_nd()
 
+% Format of output
 format longEng
 
-% Symbolic variables
-syms y x pi;
-x = sym('x','real');
+% Symbolic treatment of pi
 pi = sym('pi','real');
 
-
 %% USER INPUT %%
+
+% Slow variables
+ns = 1;
 
 % Fast variables
 nf = 2;
 
-% 
-y = sym( zeros(1, nf) );
-for k = 1:nf; 
-    y(k) = sym(sprintf('y%d', k-1), 'real'); 
-end
+% Creation of symbolic variables
+x  = sym(zeros(1, ns));
+y  = sym(zeros(1, nf));
+g  = sym(zeros(1, ns));
+f  = sym(zeros(1, ns));
+h  = sym(zeros(1, nf));
+vy = sym(zeros(1, nf));
+hy = sym(zeros(nf, nf));
+gx = sym(zeros(ns, ns));
+fx = sym(zeros(ns, ns));
+
+for k = 1:nf; x(k) = sym(sprintf('x%d', k-1), 'real'); end
+for k = 1:nf; y(k) = sym(sprintf('y%d', k-1), 'real'); end
 
 % Potential
-% v = y^4/4 - y^2/2;
 v = y(1)^2 + y(2)^2
 
 % Coefficient of the BM
 s = sqrt(2);
 
-%% END OF USER INPUT %%
+% Solution of the cell problem
+g(1) = cos(x(1)) * sin(y(1));
+g(2) = cos(x(1)) * sin(y(2));
 
-% Square of covariant matrix
+% Non-leading order drift of fast process
+h(1) = cos(x(1)) * cos(y(1)) * cos(y(2));
+h(2) = cos(x(1)) * cos(y(1) + y(2));
+
+%% DEPENDENT VARIABLES
+
+% Square of covariance matrix
 S = s*s
 
 % Derivative of the potential
-vy = diff(v,y);
+for i = 1:nf;
+    vy(i) = diff(v,y(i));
+end
 
 % Associated invariant measure
 rho = exp(-v)
 rho_n = matlabFunction(rho);
-rho = rho/integral(rho_n, -inf, inf);
+rho = rho/integral2(rho_n, -inf, inf, -inf, inf);
 
 % Generator in weighted space
-Lw = @(f) 0.5 * diff( S * rho * diff(f,y) , y) / rho;
-
-% Solution of the cell problem
-g = cos(x) * sin(y);
-
-% Differential of g
-gx = diff(g,x);
-
-% Associated rhs
-f = - simplify( Lw(g) )
-
-% x-derivative of rhs
-fx = simplify( diff(f,x) )
-
-% non-leading order drift of fast process
-h = cos(x) * cos(y);
-
-% derivative of h
-hy = diff(h,y);
+Lw = @(f) 0.5 *( diff( S * rho * diff(f,y(1)) , y(1)) + diff( S * rho * diff(f,y(2)) , y(2)) ) / rho;
 
 % Linear term
-lin = simplify( 1/4*S*diff(v,y,2) - 1/8*S*(diff(v,y)^2) )
+lin = simplify( 1/4*S * (diff(v,y(1),2) + diff(v,y(2),2)) - 1/8*S*( diff(v,y(1))^2 + diff(v,y(2))^2 ) )
 
-% Standard deviation of approximating gaussian
-sigma = 1.2;
+% derivative of h
+for i = 1:nf
+    for j = 1:nf
+        hy(i,j) = diff(h(i),y(j));
+    end
+end
 
-% Approximating gaussian
-gaussian = 1/sqrt(2*sym(pi)*sigma^2) * exp(-y^2/(2*sigma^2))
+% Differential of g
+for i = 1:ns
+    for j = 1:ns
+        gx(i,j) = diff(g(i),x(j));
+    end
+end
 
-%% Generation of files for C++ program %%
+% Associated rhs
+for i = 1:ns
+    f(i) = - simplify( Lw(g(i)) )
+end
+
+% x-derivative of rhs
+for i = 1:ns
+    for j = 1:ns
+        fx(i,j) = simplify( diff(f(i),x(j)) )
+    end
+end
+
+%% GENERATION OF FILES FOR C++ PROGRAM %%
 
 % Output to files
 f0 = fopen('tmp/gx.gen','w');

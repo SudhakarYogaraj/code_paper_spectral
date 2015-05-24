@@ -12,7 +12,7 @@ tmp/%.tmp : aux/%.init tmp/%.sub aux/end
 	cat $^ > $@
 
 $(sub_files) : $(gen_files)
-	./format_code.sh
+	./format_code_nd.sh
 
 $(gen_files) : build_problem_1d.m
 	matlab -nodesktop -nosplash -r build_problem_1d
