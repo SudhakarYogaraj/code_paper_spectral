@@ -3,13 +3,13 @@ function build_problem_1d()
 format longEng
 
 % Symbolic variables
-syms y x pi;
+syms y0 x0 pi;
 
 %% USER INPUT %%
 
 % Potential
-% v = y^4/4 - y^2/2;
-v = y*y + log(pi)/2.
+% v = y0^4/4 - y0^2/2;
+v = y0*y0 + log(pi)/2.
 
 % Coefficient of the BM
 s = sqrt(2);
@@ -20,7 +20,7 @@ s = sqrt(2);
 S = s*s
 
 % Derivative of the potential
-vy = diff(v,y);
+vy = diff(v,y0);
 
 % Associated invariant measure
 rho = exp(-v)
@@ -28,34 +28,34 @@ rho_n = matlabFunction(rho);
 rho = rho/integral(rho_n, -inf, inf);
 
 % Generator in weighted space
-Lw = @(f) 0.5 * diff( S * rho * diff(f,y) , y) / rho;
+Lw = @(f) 0.5 * diff( S * rho * diff(f,y0) , y0) / rho;
 
 % Solution of the cell problem
-g = cos(x) * sin(y);
+g = cos(x0) * sin(y0);
 
 % Differential of g
-gx = diff(g,x);
+gx = diff(g,x0);
 
 % Associated rhs
 f = - simplify( Lw(g) )
 
-% x-derivative of rhs
-fx = simplify( diff(f,x) )
+% x0-derivative of rhs
+fx = simplify( diff(f,x0) )
 
 % non-leading order drift of fast process
-h = cos(x) * cos(y);
+h = cos(x0) * cos(y0);
 
 % derivative of h
-hy = diff(h,y);
+hy = diff(h,y0);
 
 % Linear term
-lin = simplify( 1/4*S*diff(v,y,2) - 1/8*S*(diff(v,y)^2) )
+lin = simplify( 1/4*S*diff(v,y0,2) - 1/8*S*(diff(v,y0)^2) )
 
 % Standard deviation of approximating gaussian
 sigma = 1.2;
 
 % Approximating gaussian
-gaussian = 1/sqrt(2*sym(pi)*sigma^2) * exp(-y^2/(2*sigma^2))
+gaussian = 1/sqrt(2*sym(pi)*sigma^2) * exp(-y0^2/(2*sigma^2))
 
 %% Generation of files for C++ program %%
 
