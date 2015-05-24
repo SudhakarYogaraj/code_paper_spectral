@@ -27,7 +27,6 @@ rho = exp(-v)
 rho_n = matlabFunction(rho);
 rho = rho/integral(rho_n, -inf, inf);
 
-
 % Generator in weighted space
 Lw = @(f) 0.5 * diff( S * rho * diff(f,y) , y) / rho;
 
