@@ -1,5 +1,6 @@
 #include "main.hpp"
 
+/* TODO: Pass to general LU solver (urbain, Sat 23 May 2015 20:12:16 BST) */
 /* TODO: Test gradient structures in several dimensions (urbain, Thu 21 May 2015 12:12:14 BST) */
 /* TODO: automatic problem generation for hmm (urbain, Thu 21 May 2015 18:23:04 BST) */
 
@@ -52,7 +53,7 @@ int main(int argc, char* argv[])
 
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
         /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
-        Solver_spectral solver_spectral = Solver_spectral(30, 30, problem.nf, "HERMITE");
+        Solver_spectral solver_spectral = Solver_spectral(40, 100, problem.nf, "HERMITE");
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.d,0.));

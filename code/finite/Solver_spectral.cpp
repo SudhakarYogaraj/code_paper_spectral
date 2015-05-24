@@ -2,10 +2,9 @@
 /* TODO: Integration over infinite domain: which variance for gaussian (urbain, Sat 09 May 2015 14:33:06 BST) */
 /* TODO: Convergence of hermite functions? (urbain, Sat 09 May 2015 14:33:28 BST) */
 /* TODO: adapt to multidimensional (urbain, Wed 20 May 2015 18:28:17 BST) */
-/* TODO: add monomial support (urbain, Wed 20 May 2015 20:32:49 BST) */
 /* FIXME: Error is very small when only 1 drift term (urbain, Wed 13 May 2015 21:01:14 BST) */
 /* TODO: Problem with exact sigma (urbain, Wed 20 May 2015 21:00:20 BST) */
-
+/* TODO: problem with symmetry (urbain, Sat 23 May 2015 20:15:58 BST) */
 
 #include "structures.hpp"
 #include "toolbox.hpp"
