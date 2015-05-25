@@ -98,22 +98,58 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
 
+    double n_tmp = bin(2*degree + nf, nf);
+    vector<double> tmp_vec(n_tmp, 0.);
+    vector<int> position_visited(n_tmp, 0);
+    for (int i = 0; i < nb; ++i) {
+        vector<int> m1 = ind2mult(i, degree, nf);
+        for (int j = 0; j < nb; ++j) {
+            vector<int> m2 = ind2mult(j, degree, nf);
+            int index = mult2ind(m1 + m2, 2*degree);
+            if (position_visited[index] == 0) {
+                position_visited[index] = 1;
+                auto lambda = [&] (vector<double> y) -> double {
+                    double tmp = 0.;
+                    for (int k = 0; k < nf; ++k) {
+                        tmp += 1/(2*pow(sigmas_hf[k], 2)) - pow(y[k], 2)/(4*pow(sigmas_hf[k], 4));
+                    }
+                    return (tmp - problem.linearTerm(x,y)) * basis(m1 + m2, y, sigmas_hf); };
+                    tmp_vec[index] += gauss.quadnd(lambda, sigmas_hf);
+            }
+        }
+    }
+
     vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nb; ++j) {
-            cout << "i: " << i << " j: " << j << endl;
             vector<int> m2 = ind2mult(j, degree, nf);
-            auto lambda = [&] (vector<double> y) -> double {
-                /* FIXME: Error multi-d here (urbain, Mon 25 May 2015 13:45:42 BST) */
-                double tmp = 0.;
-                for (int k = 0; k < nf; ++k) {
-                    tmp += 1/(2*pow(sigmas_hf[k], 2)) - pow(y[k], 2)/(4*pow(sigmas_hf[k], 4));
-                }
-                return (tmp - problem.linearTerm(x,y)) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf); };
-            tmp_mat[i][j] += gauss.quadnd(lambda, sigmas_hf);
+            int index = mult2ind(m1 + m2, 2*degree);
+            tmp_mat[i][j] += tmp_vec[index];
         }
     }
+
+    /* for (int i = 0; i < n_tmp; ++i) { */
+    /*     cout << tmp_vec[i] << endl; */
+    /* } */
+    /* exit(0); */
+
+/*     vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.)); */
+/*     for (int i = 0; i < nb; ++i) { */
+/*         vector<int> m1 = ind2mult(i, degree, nf); */
+/*         for (int j = 0; j < nb; ++j) { */
+/*             cout << "i: " << i << " j: " << j << endl; */
+/*             vector<int> m2 = ind2mult(j, degree, nf); */
+/*             auto lambda = [&] (vector<double> y) -> double { */
+/*                 /1* FIXME: Error multi-d here (urbain, Mon 25 May 2015 13:45:42 BST) *1/ */
+/*                 double tmp = 0.; */
+/*                 for (int k = 0; k < nf; ++k) { */
+/*                     tmp += 1/(2*pow(sigmas_hf[k], 2)) - pow(y[k], 2)/(4*pow(sigmas_hf[k], 4)); */
+/*                 } */
+/*                 return (tmp - problem.linearTerm(x,y)) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf); }; */
+/*             tmp_mat[i][j] += gauss.quadnd(lambda, sigmas_hf); */
+/*         } */
+/*     } */
 
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
@@ -149,7 +185,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     }
 
     for (int i = 0; i < solution[0].size(); ++i) {
-        cout << solution[0][i] << endl; 
+        cout << solution[0][i] << endl;
     }
 
     // Calculation of the coefficients of the simplified equation
