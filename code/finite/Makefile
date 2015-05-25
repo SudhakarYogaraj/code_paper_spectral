@@ -19,7 +19,7 @@ Solver_spectral.o : Problem.hpp Gaussian_integrator.hpp toolbox.hpp structures.h
 %.o: %.cpp %.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-Problem.cpp : matlab/aux_problem.cpp matlab/build_problem_1d.m
+Problem.cpp : matlab/aux_problem.cpp matlab/build_problem.m
 	$(MAKE) -C matlab
 
 problem:

@@ -70,7 +70,7 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
                     }
                 }
                 else {
-                    cout << i << ". " << A[i][i] - sum << endl;
+                    /* cout << i << ". " << A[i][i] - sum << endl; */
                     L[i][i] = sqrt(A[i][i]-sum);
                 }
             }

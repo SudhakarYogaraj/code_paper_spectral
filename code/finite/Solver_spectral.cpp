@@ -105,13 +105,15 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             cout << "i: " << i << " j: " << j << endl;
             vector<int> m2 = ind2mult(j, degree, nf);
             auto lambda = [&] (vector<double> y) -> double {
-                double tmp = 1/(2*pow(sigmas_hf[0], 2)) - pow(y[0], 2)/(4*pow(sigmas_hf[0], 4));
+                /* FIXME: Error multi-d here (urbain, Mon 25 May 2015 13:45:42 BST) */
+                double tmp = 0.;
+                for (int k = 0; k < nf; ++k) {
+                    tmp += 1/(2*pow(sigmas_hf[k], 2)) - pow(y[k], 2)/(4*pow(sigmas_hf[k], 4));
+                }
                 return (tmp - problem.linearTerm(x,y)) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf); };
             tmp_mat[i][j] += gauss.quadnd(lambda, sigmas_hf);
         }
     }
-
-    cout << "here" << endl;
 
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
@@ -146,6 +148,10 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         }
     }
 
+    for (int i = 0; i < solution[0].size(); ++i) {
+        cout << solution[0][i] << endl; 
+    }
+
     // Calculation of the coefficients of the simplified equation
     vector<double> F1(ns, 0.);
     vector<double> F2(ns, 0.);
@@ -168,6 +174,8 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
 
         c[j].diff =  cholesky(symmetric(A0));
         c[j].drif = F1 + F2;
+        cout << "diff" << c[j].diff[0][0] << endl;
+        cout << "drif" << c[j].drif[0] << endl;
     }
 }
 

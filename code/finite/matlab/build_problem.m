@@ -1,4 +1,4 @@
-function build_problem_nd()
+function build_problem()
 
 % Format of output
 format longEng
@@ -12,7 +12,7 @@ pi = sym('pi');
 ns = 1;
 
 % Fast variables
-nf = 1;
+nf = 2;
 
 % Creation of symbolic variables
 x  = sym(zeros(1, ns));
@@ -29,9 +29,9 @@ for k = 1:nf; x(k) = sym(sprintf('x%d', k-1), 'real'); end
 for k = 1:nf; y(k) = sym(sprintf('y%d', k-1), 'real'); end
 
 % Potential
-% v = y(1)^2 + y(2)^2
+v = y(1)^2 + y(2)^2
 % v = y(1)*y(1) + log(pi)/2.
-v = y(1)^4/4 - y(1)^2/2;
+% v = y(1)^4/4 - y(1)^2/2;
 
 % Coefficient of the BM
 s = sqrt(2);
@@ -123,12 +123,12 @@ end
 % Second derivative of potential
 for i = 1:nf
     for j = 1:nf
-        vyy(i,j) = diff(v(i), y(j));
+        vyy(i,j) = diff(vy(i), y(j));
     end
 end
 
-drif(1:nf) = vy;
-drif(nf+1:end) = -vyy*transpose(y(nf+1:end)) + h;
+drif(1:nf) = -vy;
+drif(nf+1:end) = -y(nf+1:end)*vyy + h;
 
 for i = 1:nf
     diffu(i) = s;
