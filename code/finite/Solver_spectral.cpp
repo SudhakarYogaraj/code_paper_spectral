@@ -57,8 +57,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector<double> coefficients_h(nb, 0.);
     for (int i = 0; i < nb; ++i) {
-        cout << i << endl;
-
+        cout << ((double) i )/((double) nb) << endl;
         vector<int> multIndex = ind2mult(i, degree, nf);
 
         vector<double> v0(ns,0.);
@@ -92,8 +91,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     }
     coefficients_h = basis2herm(coefficients_h,nf,degree);
 
-    cout << "here" << endl;
-
     // Solution of the Poisson equation
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
@@ -107,6 +104,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             vector<int> m2 = ind2mult(j, degree, nf);
             int index = mult2ind(m1 + m2, 2*degree);
             if (position_visited[index] == 0) {
+                cout << ((double) index )/((double) n_tmp) << endl;
                 position_visited[index] = 1;
                 auto lambda = [&] (vector<double> y) -> double {
                     double tmp = 0.;
@@ -129,28 +127,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         }
     }
 
-    /* for (int i = 0; i < n_tmp; ++i) { */
-    /*     cout << tmp_vec[i] << endl; */
-    /* } */
-    /* exit(0); */
-
-/*     vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.)); */
-/*     for (int i = 0; i < nb; ++i) { */
-/*         vector<int> m1 = ind2mult(i, degree, nf); */
-/*         for (int j = 0; j < nb; ++j) { */
-/*             cout << "i: " << i << " j: " << j << endl; */
-/*             vector<int> m2 = ind2mult(j, degree, nf); */
-/*             auto lambda = [&] (vector<double> y) -> double { */
-/*                 /1* FIXME: Error multi-d here (urbain, Mon 25 May 2015 13:45:42 BST) *1/ */
-/*                 double tmp = 0.; */
-/*                 for (int k = 0; k < nf; ++k) { */
-/*                     tmp += 1/(2*pow(sigmas_hf[k], 2)) - pow(y[k], 2)/(4*pow(sigmas_hf[k], 4)); */
-/*                 } */
-/*                 return (tmp - problem.linearTerm(x,y)) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf); }; */
-/*             tmp_mat[i][j] += gauss.quadnd(lambda, sigmas_hf); */
-/*         } */
-/*     } */
-
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
@@ -166,27 +142,14 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         }
     }
 
-    cout << "here" << endl;
-
-    for (unsigned int iii = 0; iii < mat.size(); ++iii) {
-        cout << setw(12) << mat[iii][0];
-        for (unsigned int jjj = 1; jjj < mat.size(); ++jjj) {
-            cout << ", ";
-            cout << setw(12) << mat[iii][jjj];
-        }
-        cout << endl;
-    }
-
+    cout << "Starting linear solver...";
     for (int i = 0; i < ns; ++i) {
         solution[i] = solve(mat, coefficients[i]);
         for (int j = 0; j < ns; ++j) {
             solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
         }
     }
-
-    for (int i = 0; i < solution[0].size(); ++i) {
-        cout << solution[0][i] << endl;
-    }
+    cout << "done!" << endl;
 
     // Calculation of the coefficients of the simplified equation
     vector<double> F1(ns, 0.);
@@ -210,8 +173,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
 
         c[j].diff =  cholesky(symmetric(A0));
         c[j].drif = F1 + F2;
-        cout << "diff" << c[j].diff[0][0] << endl;
-        cout << "drif" << c[j].drif[0] << endl;
     }
 }
 
