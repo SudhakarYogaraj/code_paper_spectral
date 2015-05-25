@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
         /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
-        Solver_spectral solver_spectral = Solver_spectral(10, 100, problem.nf, "HERMITE");
+        Solver_spectral solver_spectral = Solver_spectral(40, 100, problem.nf, "HERMITE");
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.d,0.));
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
             int seed = (int) abs(1000*distribution(generator));
 
             // Solution of the problem using the HMM method
-            /* tic(); solver_hmm.estimator(problem, xt_hmm[i], yInit, c_hmm, seed, t[i]); toc(); */
+            tic(); solver_hmm.estimator(problem, xt_hmm[i], yInit, c_hmm, seed, t[i]); toc();
             tic(); solver_spectral.estimator(problem, xt_spectral[i], vec_spectral, t[i]); toc();
             c_spectral = vec_spectral.back();
 
