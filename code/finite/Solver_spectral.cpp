@@ -50,13 +50,14 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf(1, 0.4);
+    vector<double> sigmas_hf(problem.nf, 0.4);
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector<double> coefficients_h(nb, 0.);
     for (int i = 0; i < nb; ++i) {
+        cout << i << endl;
 
         vector<int> multIndex = ind2mult(i, degree, nf);
 
@@ -91,6 +92,8 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     }
     coefficients_h = basis2herm(coefficients_h,nf,degree);
 
+    cout << "here" << endl;
+
     // Solution of the Poisson equation
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
@@ -99,6 +102,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nb; ++j) {
+            cout << "i: " << i << " j: " << j << endl;
             vector<int> m2 = ind2mult(j, degree, nf);
             auto lambda = [&] (vector<double> y) -> double {
                 double tmp = 1/(2*pow(sigmas_hf[0], 2)) - pow(y[0], 2)/(4*pow(sigmas_hf[0], 4));
@@ -106,6 +110,8 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             tmp_mat[i][j] += gauss.quadnd(lambda, sigmas_hf);
         }
     }
+
+    cout << "here" << endl;
 
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
@@ -121,6 +127,8 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             }
         }
     }
+
+    cout << "here" << endl;
 
     for (unsigned int iii = 0; iii < mat.size(); ++iii) {
         cout << setw(12) << mat[iii][0];
