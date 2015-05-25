@@ -6,8 +6,8 @@ for file in *.gen; do
 done
 
 dou="v.sub lin.sub rho.sub"
-vec="vy.sub g.sub f.sub h.sub"
-mat="gx.sub fx.sub hy.sub"
+vec="vy.sub g.sub f.sub h.sub drif.sub diff.sub"
+mat="gx.sub fx.sub hy.sub fy.sub"
 
 # Formatting for double, vector, and matrix outputs
 sed -i 's/^  [^=]*/    result /g' $dou
