@@ -69,21 +69,21 @@ vector< vector<double> > Problem::soldiff(vector<double> x) {
     return result;
 }
 
-vector< vector<double> > Problem::day(vector<double> x, vector<double> y) {
-    vector< vector<double> > result(this->d,vector<double>(this->nf,0.));
-    result[0][0] = cos(x[0])*(2*cos(y[0]) - 2*y[0]*sin(y[0]) + cos(y[0]));
-    return result;
-}
+/* vector< vector<double> > Problem::day(vector<double> x, vector<double> y) { */
+/*     vector< vector<double> > result(this->d,vector<double>(this->nf,0.)); */
+/*     result[0][0] = cos(x[0])*(2*cos(y[0]) - 2*y[0]*sin(y[0]) + cos(y[0])); */
+/*     return result; */
+/* } */
 
-vector<double> Problem::drif(vector<double> x, vector<double> y) {
-    vector<double> result(2*this->nf,0.);
-    result[0] = -2*y[0];
-    result[1] = -2*y[1] + cos(x[0])*cos(y[0]);
-    return result;
-}
+/* vector<double> Problem::drif(vector<double> x, vector<double> y) { */
+/*     vector<double> result(2*this->nf,0.); */
+/*     result[0] = -2*y[0]; */
+/*     result[1] = -2*y[1] + cos(x[0])*cos(y[0]); */
+/*     return result; */
+/* } */
 
-vector<double> Problem::diff(vector<double> x, vector<double> y) {
-    vector<double> result(2*nf,0.);
-    result[0] = sqrt(2.);
-    return result;
-}
+/* vector<double> Problem::diff(vector<double> x, vector<double> y) { */
+/*     vector<double> result(2*nf,0.); */
+/*     result[0] = sqrt(2.); */
+/*     return result; */
+/* } */
