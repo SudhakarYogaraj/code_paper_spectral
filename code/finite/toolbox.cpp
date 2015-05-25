@@ -70,7 +70,7 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
                     }
                 }
                 else {
-                    cout << i << ". " << A[i][i] - sum << endl;
+                    /* cout << i << ". " << A[i][i] - sum << endl; */
                     L[i][i] = sqrt(A[i][i]-sum);
                 }
             }
@@ -154,8 +154,7 @@ vector<double> solve(vector< vector<double> > A, vector<double> b) {
     for (unsigned int i = 0; i < A.size(); ++i) {
         for (unsigned int j = 0; j < A.size(); j++) {
             if ( fabs(A[i][j] - A[j][i]) > 1e-10) {
-                cout << "Matrix must be symmetric, but A[" << i << "][" << j << "] - A[" << j << "][" << i << "] = " << A[i][j] - A[j][i] << "." << endl;
-                exit(0);
+                cout << "Warning: matrix must be symmetric, but A[" << i << "][" << j << "] - A[" << j << "][" << i << "] = " << A[i][j] - A[j][i] << "." << endl;
             }
         }
     }

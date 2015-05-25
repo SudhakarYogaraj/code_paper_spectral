@@ -50,14 +50,14 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf(1, 0.4);
+    vector<double> sigmas_hf(problem.nf, 0.4);
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector<double> coefficients_h(nb, 0.);
     for (int i = 0; i < nb; ++i) {
-
+        cout << ((double) i )/((double) nb) << endl;
         vector<int> multIndex = ind2mult(i, degree, nf);
 
         vector<double> v0(ns,0.);
@@ -95,15 +95,35 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
 
+    double n_tmp = bin(2*degree + nf, nf);
+    vector<double> tmp_vec(n_tmp, 0.);
+    vector<int> position_visited(n_tmp, 0);
+    for (int i = 0; i < nb; ++i) {
+        vector<int> m1 = ind2mult(i, degree, nf);
+        for (int j = 0; j < nb; ++j) {
+            vector<int> m2 = ind2mult(j, degree, nf);
+            int index = mult2ind(m1 + m2, 2*degree);
+            if (position_visited[index] == 0) {
+                cout << ((double) index )/((double) n_tmp) << endl;
+                position_visited[index] = 1;
+                auto lambda = [&] (vector<double> y) -> double {
+                    double tmp = 0.;
+                    for (int k = 0; k < nf; ++k) {
+                        tmp += 1/(2*pow(sigmas_hf[k], 2)) - pow(y[k], 2)/(4*pow(sigmas_hf[k], 4));
+                    }
+                    return (tmp - problem.linearTerm(x,y)) * basis(m1 + m2, y, sigmas_hf); };
+                    tmp_vec[index] += gauss.quadnd(lambda, sigmas_hf);
+            }
+        }
+    }
+
     vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nb; ++j) {
             vector<int> m2 = ind2mult(j, degree, nf);
-            auto lambda = [&] (vector<double> y) -> double {
-                double tmp = 1/(2*pow(sigmas_hf[0], 2)) - pow(y[0], 2)/(4*pow(sigmas_hf[0], 4));
-                return (tmp - problem.linearTerm(x,y)) * basis(m1, y, sigmas_hf) * basis(m2, y, sigmas_hf); };
-            tmp_mat[i][j] += gauss.quadnd(lambda, sigmas_hf);
+            int index = mult2ind(m1 + m2, 2*degree);
+            tmp_mat[i][j] += tmp_vec[index];
         }
     }
 
@@ -122,21 +142,14 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         }
     }
 
-    for (unsigned int iii = 0; iii < mat.size(); ++iii) {
-        cout << setw(12) << mat[iii][0];
-        for (unsigned int jjj = 1; jjj < mat.size(); ++jjj) {
-            cout << ", ";
-            cout << setw(12) << mat[iii][jjj];
-        }
-        cout << endl;
-    }
-
+    cout << "Starting linear solver...";
     for (int i = 0; i < ns; ++i) {
         solution[i] = solve(mat, coefficients[i]);
         for (int j = 0; j < ns; ++j) {
             solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
         }
     }
+    cout << "done!" << endl;
 
     // Calculation of the coefficients of the simplified equation
     vector<double> F1(ns, 0.);
