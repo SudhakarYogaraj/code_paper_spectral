@@ -8,13 +8,11 @@ using namespace std;
 void Problem::init() {
 
     this->t_end = 1.;
-    this->nf = 1;
+    this->nf = 2;
     this->d = 1;
     this->x0 = vector<double>(d,1.2);
-    this->lambdas = {2};
-    this->betas   = {sqrt(2)};
 
-    this->sigmas = {0.7};
+    this->sigmas = {0.7, 0.7};
     /* this->sigmas = vector<double>(this->nf, 0.); */
     /* for (int i = 0; i < this->nf; ++i) { */
     /*     this->sigmas[i] = sqrt(betas[i]*betas[i] / (2*lambdas[i])); */
@@ -102,19 +100,24 @@ vector< vector<double> > Problem::dax(vector<double> x, vector<double> y) {
 
 vector< vector<double> > Problem::grad_h(vector<double> x, vector<double> y) {
     vector< vector<double> > result(this->nf, vector<double>(this->nf, 0.));
-    result[0][0] = -cos(x[0])*sin(y[0]);
+    result[0][0] = -cos(x[0])*cos(y[1])*sin(y[0]);
+    result[0][1] = -cos(x[0])*cos(y[0])*sin(y[1]);
+    result[1][0] = -sin(y[0]+y[1])*cos(x[0]);
+    result[1][1] = -sin(y[0]+y[1])*cos(x[0]);
     return result;
 }
 
 vector<double> Problem::grad(vector<double> x, vector<double> y){
     vector<double> result(this->nf);
     result[0] = y[0]*2.0;
+    result[1] = y[1]*2.0;
     return result;
 }
 
 vector<double> Problem::phi(vector<double> x, vector<double> y) {
     vector<double> result(this->d,0.);
     result[0] = cos(x[0])*sin(y[0]);
+    result[1] = cos(x[0])*sin(y[1]);
     return result;
 }
 
@@ -126,24 +129,25 @@ vector<double> Problem::a(vector<double> x, vector<double> y) {
 
 vector<double> Problem::fast_drift_h(vector<double> x, vector<double> y) {
     vector<double> result(this->nf);
-    result[0] = cos(x[0])*cos(y[0]);
+    result[0] = cos(x[0])*cos(y[0])*cos(y[1]);
+    result[1] = cos(y[0]+y[1])*cos(x[0]);
     return result;
 }
 
 double Problem::potential(vector<double> x, vector<double> y) {
     double result = 0.;
-    result = y[0]*y[0]+5.723649429247001E-1;
+    result = y[0]*y[0]+y[1]*y[1];
     return result;
 }
 
 double Problem::linearTerm(vector<double> x, vector<double> y){
     double result;
-    result = -y[0]*y[0]+1.0;
+    result = -y[0]*y[0]-y[1]*y[1]+2.0;
     return result;
 }
 
 double Problem::rho(vector<double> x, vector<double> y) {
     double result = 0.;
-    result = exp(-y[0]*y[0]-5.723649429247001E-1)*1.000000000070638;
+    result = exp(-y[0]*y[0]-y[1]*y[1])*3.183098861820866E-1;
     return result;
 }
