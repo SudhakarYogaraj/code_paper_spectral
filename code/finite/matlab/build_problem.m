@@ -30,7 +30,8 @@ for k = 1:nf; y(k) = sym(sprintf('y%d', k-1), 'real'); end
 
 % Potential
 % v = y(1)^2 + y(2)^2
-v = y(1)*y(1) + log(pi)/2.
+% v = y(1)*y(1) + log(pi)/2.
+v = y(1)^4/4 - y(1)^2/2;
 
 % Coefficient of the BM
 s = sqrt(2);

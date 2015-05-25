@@ -14,8 +14,8 @@ tmp/%.tmp : aux/%.init tmp/%.sub aux/end
 $(sub_files) : $(gen_files)
 	./format_code.sh
 
-$(gen_files) : build_problem_nd.m
-	matlab -nodesktop -nosplash -r build_problem_nd
+$(gen_files) : build_problem.m
+	matlab -nodesktop -nosplash -r build_problem
 
 .PHONY: clean
 clean:
