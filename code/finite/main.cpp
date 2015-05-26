@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {3.};
+    vector<double> p_values = {6.};
 
     // Vector of the log of the error
     vector<double> errors_hmm(p_values.size(), 0.);
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
         /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
         /* Solver_spectral solver_spectral = Solver_spectral(12, 30, problem.nf, "HERMITE"); */
-        Solver_spectral solver_spectral = Solver_spectral(30, 100, problem.nf, "MONOMIAL");
+        Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL");
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.d,0.));
@@ -81,9 +81,6 @@ int main(int argc, char* argv[])
 
             int seed = (int) abs(1000*distribution(generator));
 
-            cout << problem.soldrif(xt_spectral[i])[0] << endl;
-            cout << problem.soldiff(xt_spectral[i])[0][0] << endl;
-
             // Solution of the problem using the HMM method
             tic(); solver_hmm.estimator(problem, xt_hmm[i], yInit, c_hmm, seed, t[i]); toc();
             tic(); solver_spectral.estimator(problem, xt_spectral[i], vec_spectral, t[i]); toc();
@@ -96,23 +93,21 @@ int main(int argc, char* argv[])
             double errorDrift_hmm = fabs(Ddrif);
             double errorDiff_hmm  = fabs(Ddiff);
 
-            tic();
-            cout << "--Drift--" << endl;
-            vector<double> exact_drift = problem.soldrif(xt_spectral[i]);
-            for (unsigned int m = 0; m < vec_spectral.size(); ++m) {
-                Ddrif = vec_spectral[m].drif - exact_drift;
-                double errorDrift_spectral = fabs(Ddrif);
-                cout << errorDrift_spectral << endl;
-            }
-            cout << "--Diffusion--" << endl;
-            vector< vector<double> > exact_diffu = problem.soldiff(xt_spectral[i]);
-            for (unsigned int m = 0; m < vec_spectral.size(); ++m) {
-                Ddiff = vec_spectral[m].diff - exact_diffu;
-                double errorDiff_spectral  = fabs(Ddiff);
-                cout << errorDiff_spectral << endl;
-            }
-            cout << "----" << endl;
-            toc();
+            /* cout << "--Drift--" << endl; */
+            /* vector<double> exact_drift = problem.soldrif(xt_spectral[i]); */
+            /* for (unsigned int m = 0; m < vec_spectral.size(); ++m) { */
+            /*     Ddrif = vec_spectral[m].drif - exact_drift; */
+            /*     double errorDrift_spectral = fabs(Ddrif); */
+            /*     cout << errorDrift_spectral << endl; */
+            /* } */
+            /* cout << "--Diffusion--" << endl; */
+            /* vector< vector<double> > exact_diffu = problem.soldiff(xt_spectral[i]); */
+            /* for (unsigned int m = 0; m < vec_spectral.size(); ++m) { */
+            /*     Ddiff = vec_spectral[m].diff - exact_diffu; */
+            /*     double errorDiff_spectral  = fabs(Ddiff); */
+            /*     cout << errorDiff_spectral << endl; */
+            /* } */
+            /* cout << "----" << endl; */
 
             Ddrif = c_spectral.drif - problem.soldrif(xt_spectral[i]);
             Ddiff = c_spectral.diff - problem.soldiff(xt_spectral[i]);
