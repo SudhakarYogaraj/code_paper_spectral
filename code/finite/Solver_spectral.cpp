@@ -128,8 +128,20 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         }
     }
 
-    cout << "* Creating the matrix of the linear system." << endl;
+    cout << "* Creating the matrix of the linear system: step 1." << endl;
+    vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.));
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
+    for (int i = 0; i < nb; ++i) {
+        vector<int> m1 = ind2mult(i, degree, nf);
+        for (int j = 0; j < nb; ++j) {
+            progress_bar(( (double) (i*nb + j) )/( (double) (nb*nb) ));
+            for (int k = 0; k < nb; ++k) {
+                tmp_mat[i][j] += herm_to_basis[j][k]*prod_mat[i][k];
+            }
+        }
+    }
+    end_progress_bar();
+    cout << "* Creating the matrix of the linear system: step 2." << endl;
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nf; ++j) {
@@ -138,9 +150,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         for (int j = 0; j <= i; ++j) {
             progress_bar(( (double) (i*(i+1)) )/( (double) (nb*(nb+1)) ));
             for (int k = 0; k < nb; ++k) {
-                for (int l = 0; l < nb; ++l) {
-                    mat[i][j] += herm_to_basis[i][k]*herm_to_basis[j][l]*prod_mat[k][l];
-                }
+                mat[i][j] += herm_to_basis[i][k]*tmp_mat[k][j];
             }
             mat[j][i] = mat[i][j];
         }
@@ -160,24 +170,29 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector<double> F1(ns, 0.);
     vector<double> F2(ns, 0.);
     vector< vector <double> > A0(ns, vector<double>(ns,0.));
-    for (int j = 0; j < nb; ++j) {
-        for (int k = 0; k < ns; ++k) {
-            for (int l = 0; l < ns; ++l)
-                F1[k] += solution_dx[k][l][j]*coefficients[l][j];
+    for (int i = 0; i < nb; ++i) {
+        for (int j = 0; j < ns; ++j) {
+            for (int k = 0; k < ns; ++k)
+                F1[j] += solution_dx[j][k][i]*coefficients[k][i];
         }
 
-        for (int k = 0; k < ns; ++k) {
-            F2[k] += solution[k][j]*coefficients_h[j];
+        for (int j = 0; j < ns; ++j) {
+            F2[j] += solution[j][i]*coefficients_h[i];
         }
 
-        for (int k = 0; k < ns; ++k) {
-            for (int l = 0; l < ns; ++l) {
-                A0[k][l] += 2*solution[k][j]*coefficients[l][j];
+        for (int j = 0; j < ns; ++j) {
+            for (int k = 0; k < ns; ++k) {
+                A0[j][k] += 2*solution[j][i]*coefficients[k][i];
             }
         }
 
-        c[j].diff =  cholesky(symmetric(A0));
-        c[j].drif = F1 + F2;
+        vector<int> m = ind2mult(i,degree,nf);
+        for (unsigned int i = 0; i < m.size(); ++i) {
+            cout << m[i];
+        }
+        cout << endl;
+        c[i].diff =  cholesky(symmetric(A0));
+        c[i].drif = F1 + F2;
     }
 }
 
