@@ -45,7 +45,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf = {0.6, 0.6};
+    vector<double> sigmas_hf = {0.4, 0.4};
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
@@ -141,7 +141,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         }
     }
     for (int i = 0; i < nb; ++i) {
-        progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(nb+1)) ));
+        progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(2*nb+1)) ));
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nf; ++j) {
             mat[i][i] += m1[j]/(sigmas_hf[j]*sigmas_hf[j]);
