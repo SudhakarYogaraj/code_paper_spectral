@@ -29,7 +29,7 @@ for k = 1:nf; x(k) = sym(sprintf('x%d', k-1), 'real'); end
 for k = 1:nf; y(k) = sym(sprintf('y%d', k-1), 'real'); end
 
 % Potential
-v = y(1)^2 + y(2)^2
+v = y(1)^4/4 - y(1)^2/2 + y(2)^2
 % v = y(1)*y(1) + log(pi)/2.
 % v = y(1)^4/4 - y(1)^2/2;
 
@@ -38,11 +38,11 @@ s = sqrt(2);
 
 % Solution of the cell problem
 g(1) = cos(x(1)) * sin(y(1));
-% g(2) = cos(x(1)) * sin(y(2));
+g(2) = cos(x(1)) * sin(y(2));
 
 % Non-leading order drift of fast process
-h(1) = cos(x(1)) * cos(y(1)); %  * cos(y(2));
-% h(2) = cos(x(1)) * cos(y(1) + y(2));
+h(1) = cos(x(1)) * cos(y(1))  * cos(y(2));
+h(2) = cos(x(1)) * cos(y(1) + y(2));
 
 %% DEPENDENT VARIABLES
 
