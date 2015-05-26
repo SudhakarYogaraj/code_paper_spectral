@@ -51,7 +51,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector<double> coefficients_h(nb, 0.);
-    cout << "* Calculating the right-hand side of the linear system." << endl;
+    cout << "* Calculating the right-hand side of the linear system." << endl << endl;
     for (int i = 0; i < nb; ++i) {
         progress_bar(((double) i )/((double) nb));
         vector<int> multIndex = ind2mult(i, degree, nf);
@@ -96,7 +96,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     int n_done = 0;
     vector<double> tmp_vec(n_tmp, 0.);
     vector<int> position_visited(n_tmp, 0);
-    cout << "* Calculating necessary the products < L mi , mj >." << endl;
+    cout << "* Calculating the necessary products < L mi , mj >." << endl << endl;
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nb; ++j) {
@@ -124,31 +124,29 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         for (int j = 0; j < nb; ++j) {
             vector<int> m2 = ind2mult(j, degree, nf);
             int index = mult2ind(m1 + m2, 2*degree);
-            prod_mat[i][j] += tmp_vec[index];
+            prod_mat[i][j] = tmp_vec[index];
         }
     }
 
-    cout << "* Creating the matrix of the linear system: step 1." << endl;
+    cout << "* Creating the matrix of the linear system." << endl << endl;
     vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.));
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
+        progress_bar(( (double) (i*nb) )/( (double) (nb*(2*nb + 1)) ));
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nb; ++j) {
-            progress_bar(( (double) (i*nb + j) )/( (double) (nb*nb) ));
             for (int k = 0; k < nb; ++k) {
                 tmp_mat[i][j] += herm_to_basis[j][k]*prod_mat[i][k];
             }
         }
     }
-    end_progress_bar();
-    cout << "* Creating the matrix of the linear system: step 2." << endl;
     for (int i = 0; i < nb; ++i) {
+        progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(nb+1)) ));
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nf; ++j) {
             mat[i][i] += m1[j]/(sigmas_hf[j]*sigmas_hf[j]);
         }
         for (int j = 0; j <= i; ++j) {
-            progress_bar(( (double) (i*(i+1)) )/( (double) (nb*(nb+1)) ));
             for (int k = 0; k < nb; ++k) {
                 mat[i][j] += herm_to_basis[i][k]*tmp_mat[k][j];
             }
@@ -186,11 +184,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             }
         }
 
-        vector<int> m = ind2mult(i,degree,nf);
-        for (unsigned int i = 0; i < m.size(); ++i) {
-            cout << m[i];
-        }
-        cout << endl;
         c[i].diff =  cholesky(symmetric(A0));
         c[i].drif = F1 + F2;
     }
