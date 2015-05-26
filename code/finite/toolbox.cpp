@@ -158,13 +158,7 @@ vector<double> solve(vector< vector<double> > A, vector<double> b) {
             }
         }
     }
-    /* for (unsigned int i = 0; i < A.size(); ++i) { */
-    /*     for (unsigned int j = 0; j < i; j++) { */
-    /*         double tmp = (A[i][j] + A[j][i])/2.; */
-    /*         A[i][j] = tmp; */
-    /*         A[j][i] = tmp; */
-    /*     } */
-    /* } */
+
     vector< vector<double> > L = cholesky(A);
     vector< vector<double> > U = transpose(L);
     result = lsolve(L, result);

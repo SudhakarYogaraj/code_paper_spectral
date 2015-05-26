@@ -19,6 +19,23 @@ void Problem::init() {
     /* for (int i = 0; i < this->nf; ++i) { */
     /*     this->sigmas[i] = sqrt(betas[i]*betas[i] / (2*lambdas[i])); */
     /* } */
+
+    /* this->sigmas = vector<double>(nf, 1.); */
+    /* Gaussian_integrator gauss = Gaussian_integrator(100,this->nf); */
+    /* vector< vector<double> > sigmas_tmp(nf, vector<double>(nf,1.)); */
+    /* vector<double> x_tmp(d,0.); */
+    /* for (int i = 0; i < nf; ++i) { */
+    /*     for (int j = 0; j < nf; ++j) { */
+    /*         auto lambda = [&] (vector<double> y) -> double { */
+    /*             return y[j]*y[i]*rho(x_tmp, y)/gaussian(y, sigmas); */
+    /*         }; */
+    /*         sigmas_tmp[i][j] = sqrt(gauss.quadnd(lambda, sigmas)); */
+    /*         cout << "sigmas[" << i << "][" << j << "] = " << sigmas_tmp[i][j] << endl; */
+    /*     } */
+    /*     sigmas[i] = sigmas_tmp[i][i]; */
+    /* } */
+    /* exit(0); */
+
 }
 
 double Problem::stardiv_h(vector<double> x, vector<double> y) {

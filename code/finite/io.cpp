@@ -74,3 +74,22 @@ void print2Mats (vector< vector<double> > x, vector< vector<double> > y) {
         print2Vecs(x[i], y[i]);
     }
 }
+
+void progress_bar(double progress) {
+    if (progress < 1.0) {
+        int width = 70;
+        int position = width * progress;
+        cout << "[";
+        for (int i = 0; i < width; ++i) {
+            if (i < position) cout << "=";
+            else if (i == position) cout << ">";
+            else cout << " ";
+        }
+        cout << "] " << int(progress * 100.0) << " %\r";
+        cout.flush();
+    }
+}
+
+void end_progress_bar() {
+    cout << endl << endl;
+}

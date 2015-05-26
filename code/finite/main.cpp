@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {6.};
+    vector<double> p_values = {4.};
 
     // Vector of the log of the error
     vector<double> errors_hmm(p_values.size(), 0.);
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
         /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
         /* Solver_spectral solver_spectral = Solver_spectral(12, 30, problem.nf, "HERMITE"); */
-        Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL");
+        Solver_spectral solver_spectral = Solver_spectral(40, 100, problem.nf, "MONOMIAL");
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.d,0.));
@@ -118,9 +118,6 @@ int main(int argc, char* argv[])
             // Computation of the exact coefficients based on the exact solution
             vector<double> exact_drif = problem.soldrif(x_exact[i]);
             vector< vector<double> > exact_diff = problem.soldiff(x_exact[i]);
-
-            cout << exact_drif[0] << endl;
-            /* exit(0); */
 
             x_exact[i+1] = x_exact[i];
             xt_hmm[i+1] = xt_hmm[i];
