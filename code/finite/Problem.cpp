@@ -14,7 +14,7 @@ void Problem::init() {
     this->lambdas = {2};
     this->betas   = {sqrt(2)};
 
-    this->sigmas = {0.7};
+    this->sigmas = vector<double>(nf, 0.7);
     /* this->sigmas = vector<double>(this->nf, 0.); */
     /* for (int i = 0; i < this->nf; ++i) { */
     /*     this->sigmas[i] = sqrt(betas[i]*betas[i] / (2*lambdas[i])); */
