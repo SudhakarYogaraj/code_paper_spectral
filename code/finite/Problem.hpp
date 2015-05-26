@@ -17,7 +17,7 @@ class Problem {
         int nf;
 
         // Number of slow processes
-        int d;
+        int ns;
 
         // Initial condition for the slow process
         std::vector<double> x0;
