@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
         /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
         /* Solver_spectral solver_spectral = Solver_spectral(12, 30, problem.nf, "HERMITE"); */
-        Solver_spectral solver_spectral = Solver_spectral(30, 100, problem.nf, "MONOMIAL");
+        Solver_spectral solver_spectral = Solver_spectral(40, 100, problem.nf, "MONOMIAL");
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.ns,0.));
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 
             // Output to terminal
             cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
-            cout << "|----------------- Iteration " << setw(3) <<  i+1 << "/" << sizet-1 << ". Time: " << t[i] << ". Precision parameter: " << solver_hmm.p <<". -----------------|" << endl;
+            cout << "|------------- Iteration " << setw(3) <<  i+1 << "/" << sizet-1 << ". Time: " << t[i] << ". Precision parameter: " << solver_hmm.p <<". -------------|" << endl;
             cout << "o--------------------------------------------------o--------------------------------------------------o" << endl;
             cout << "|" << setw(50) <<  " " << "|" << setw(50) << " " <<  "|" <<  endl;
             cout << "|" << left << setw(50) <<  " 1) The HMM method:" << "|";
