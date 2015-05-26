@@ -1,10 +1,4 @@
-/* TODO: analysis of method (not clear wether 0th hermite function has to be included (urbain, Wed 13 May 2015 20:51:51 BST) */
-/* TODO: Integration over infinite domain: which variance for gaussian (urbain, Sat 09 May 2015 14:33:06 BST) */
-/* TODO: Convergence of hermite functions? (urbain, Sat 09 May 2015 14:33:28 BST) */
-/* TODO: adapt to multidimensional (urbain, Wed 20 May 2015 18:28:17 BST) */
-/* FIXME: Error is very small when only 1 drift term (urbain, Wed 13 May 2015 21:01:14 BST) */
 /* TODO: Problem with exact sigma (urbain, Wed 20 May 2015 21:00:20 BST) */
-/* TODO: problem with symmetry (urbain, Sat 23 May 2015 20:15:58 BST) */
 
 #include "structures.hpp"
 #include "toolbox.hpp"
@@ -12,6 +6,7 @@
 #include "Gaussian_integrator.hpp"
 #include "Solver_spectral.hpp"
 #include "templates.hpp"
+#include "io.hpp"
 #include <iomanip>
 
 using namespace std;
@@ -42,9 +37,9 @@ double Solver_spectral::basis(vector<int> mult, vector<double> x, vector<double>
 
 void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_coeffs>& c, double t) {
 
-    int nf     = problem.nf;
-    int ns     = problem.d;
-    int nb     = bin(degree + nf, nf);
+    int nf = problem.nf;
+    int ns = problem.d;
+    int nb = bin(degree + nf, nf);
 
     c = vector<SDE_coeffs> (nb);
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
@@ -56,8 +51,9 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector<double> coefficients_h(nb, 0.);
+    cout << "* Calculating the right-hand side of the linear system." << endl;
     for (int i = 0; i < nb; ++i) {
-        cout << ((double) i )/((double) nb) << endl;
+        progress_bar(((double) i )/((double) nb));
         vector<int> multIndex = ind2mult(i, degree, nf);
 
         vector<double> v0(ns,0.);
@@ -82,6 +78,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         }
         coefficients_h[i] = result_h;
     }
+    end_progress_bar();
 
     for (int i = 0; i < ns; ++i) {
         for (int j = 0; j < ns; ++j) {
@@ -95,16 +92,19 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
 
-    double n_tmp = bin(2*degree + nf, nf);
+    int n_tmp  = bin(2*degree + nf, nf);
+    int n_done = 0;
     vector<double> tmp_vec(n_tmp, 0.);
     vector<int> position_visited(n_tmp, 0);
+    cout << "* Calculating necessary the products < L mi , mj >." << endl;
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nb; ++j) {
             vector<int> m2 = ind2mult(j, degree, nf);
             int index = mult2ind(m1 + m2, 2*degree);
             if (position_visited[index] == 0) {
-                cout << ((double) index )/((double) n_tmp) << endl;
+                n_done ++;
+                progress_bar(((double) n_done)/((double) n_tmp));
                 position_visited[index] = 1;
                 auto lambda = [&] (vector<double> y) -> double {
                     double tmp = 0.;
@@ -116,17 +116,19 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             }
         }
     }
+    end_progress_bar();
 
-    vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.));
+    vector< vector<double> > prod_mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nb; ++j) {
             vector<int> m2 = ind2mult(j, degree, nf);
             int index = mult2ind(m1 + m2, 2*degree);
-            tmp_mat[i][j] += tmp_vec[index];
+            prod_mat[i][j] += tmp_vec[index];
         }
     }
 
+    cout << "* Creating the matrix of the linear system." << endl;
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
@@ -134,16 +136,18 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             mat[i][i] += m1[j]/(sigmas_hf[j]*sigmas_hf[j]);
         }
         for (int j = 0; j <= i; ++j) {
+            progress_bar(( (double) (i*(i+1)) )/( (double) (nb*(nb+1)) ));
             for (int k = 0; k < nb; ++k) {
                 for (int l = 0; l < nb; ++l) {
-                    mat[i][j] += herm_to_basis[i][k]*herm_to_basis[j][l]*tmp_mat[k][l];
+                    mat[i][j] += herm_to_basis[i][k]*herm_to_basis[j][l]*prod_mat[k][l];
                 }
             }
             mat[j][i] = mat[i][j];
         }
     }
+    end_progress_bar();
 
-    cout << "Starting linear solver...";
+    cout << "* Solving linear system." << endl;
     for (int i = 0; i < ns; ++i) {
         solution[i] = solve(mat, coefficients[i]);
         for (int j = 0; j < ns; ++j) {

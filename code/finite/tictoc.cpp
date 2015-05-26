@@ -8,6 +8,6 @@ void tic() {
 void toc() {
     std::cout << "Time elapsed: "
         << ((double)(clock() - tictoc_stack.top())) / CLOCKS_PER_SEC
-        << std::endl;
+        << std::endl << std::endl;
     tictoc_stack.pop();
 }
