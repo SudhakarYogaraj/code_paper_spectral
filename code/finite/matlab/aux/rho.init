@@ -1,3 +1,3 @@
 
 double Problem::rho(vector<double> x, vector<double> y) {
-    double result = 0.;
+    double result;

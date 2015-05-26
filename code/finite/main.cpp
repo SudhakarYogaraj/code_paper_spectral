@@ -42,9 +42,9 @@ int main(int argc, char* argv[])
 
     // Vector of random variables used to simulate the brownian
     // motion for the evolution of the slow variable.
-    vector< vector<double> > dWs(sizet,vector<double>(problem.d, 0.));
+    vector< vector<double> > dWs(sizet,vector<double>(problem.ns, 0.));
     for (unsigned int i = 0; i < sizet; i++) {
-        for (int j = 0; j < problem.d ; j++) {
+        for (int j = 0; j < problem.ns ; j++) {
             dWs[i][j] = distribution(generator);
         }
     }
@@ -54,12 +54,12 @@ int main(int argc, char* argv[])
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
         /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
         /* Solver_spectral solver_spectral = Solver_spectral(12, 30, problem.nf, "HERMITE"); */
-        Solver_spectral solver_spectral = Solver_spectral(40, 100, problem.nf, "MONOMIAL");
+        Solver_spectral solver_spectral = Solver_spectral(30, 100, problem.nf, "MONOMIAL");
 
         // Approximate and exact solutions
-        vector< vector<double> > xt_hmm(sizet,vector<double>(problem.d,0.));
-        vector< vector<double> > xt_spectral(sizet,vector<double>(problem.d,0.));
-        vector< vector<double> > x_exact(sizet,vector<double>(problem.d,0.));
+        vector< vector<double> > xt_hmm(sizet,vector<double>(problem.ns,0.));
+        vector< vector<double> > xt_spectral(sizet,vector<double>(problem.ns,0.));
+        vector< vector<double> > x_exact(sizet,vector<double>(problem.ns,0.));
 
         // Initial condition
         xt_hmm[0] = problem.x0;
@@ -123,8 +123,8 @@ int main(int argc, char* argv[])
             xt_hmm[i+1] = xt_hmm[i];
             xt_spectral[i+1] = xt_spectral[i];
 
-            for (int i1 = 0; i1 < problem.d; i1++) {
-                for (int i2 = 0; i2 < problem.d; i2++) {
+            for (int i1 = 0; i1 < problem.ns; i1++) {
+                for (int i2 = 0; i2 < problem.ns; i2++) {
                     x_exact[i+1][i1] += exact_diff[i1][i2]*sqrt(Dt)*dWs[i][i2];
                     xt_hmm[i+1][i1] += c_hmm.diff[i1][i2]*sqrt(Dt)*dWs[i][i2];
                     xt_spectral[i+1][i1] += c_spectral.diff[i1][i2]*sqrt(Dt)*dWs[i][i2];

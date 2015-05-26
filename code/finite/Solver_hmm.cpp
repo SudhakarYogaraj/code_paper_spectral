@@ -48,8 +48,8 @@ void Solver_hmm::estimator(Problem &problem, \
                int seed, \
                double t) {
 
-    data.drif = vector<double>(problem.d, 0.);
-    data.diff = vector< vector<double> >(problem.d, vector<double>(problem.d, 0.));
+    data.drif = vector<double>(problem.ns, 0.);
+    data.diff = vector< vector<double> >(problem.ns, vector<double>(problem.ns, 0.));
 
     default_random_engine generator;
     normal_distribution<double> distribution(0.0,1.0);
@@ -86,11 +86,11 @@ void Solver_hmm::estimator(Problem &problem, \
 
         // sumsAux1 =approx= dax
         vector< vector< vector<double> > > sumsAux1(this->nt + this->n, \
-                vector< vector<double> >(problem.d,vector<double>(problem.d,0.)));
+                vector< vector<double> >(problem.ns,vector<double>(problem.ns,0.)));
 
         // sumsAux2 =approx= a
         vector< vector<double> > sumsAux2(this->nt + this->n, \
-                vector<double>(problem.d, 0.));
+                vector<double>(problem.ns, 0.));
 
         // First component of each vector
         for (int index = 0; index <= this->np; index++) {
@@ -105,9 +105,9 @@ void Solver_hmm::estimator(Problem &problem, \
         }
 
         // Drift term by the HMM
-        vector<double> fim(problem.d, 0.);
-        vector<double> fim1(problem.d, 0.);
-        vector<double> fim2(problem.d, 0.);
+        vector<double> fim(problem.ns, 0.);
+        vector<double> fim1(problem.ns, 0.);
+        vector<double> fim2(problem.ns, 0.);
 
         for (int j = this->nt; j < this->nt + this->n; j++) {
 
@@ -115,31 +115,31 @@ void Solver_hmm::estimator(Problem &problem, \
             vector< vector<double> > dya_j = problem.day(xt, yAux[j]);
 
             // first term
-            for (int i1 = 0; i1 < problem.d; i1++) {
+            for (int i1 = 0; i1 < problem.ns; i1++) {
                 for (int k = 0; k < problem.nf; k++)
                     fim1[i1] += dya_j[i1][k]*yAux[j][problem.nf+k];
             }
 
             // second term: improved
-            for (int i1 = 0; i1 < problem.d; i1++) {
-                for (int i2 = 0; i2 < problem.d; i2++) {
+            for (int i1 = 0; i1 < problem.ns; i1++) {
+                for (int i2 = 0; i2 < problem.ns; i2++) {
                     fim2[i1] += this->micro_dt*problem.a(xt, \
                             yAux[j])[i2]*sumsAux1[j][i1][i2];
                 }
             }
         }
 
-        for (int i1 = 0; i1 < problem.d; i1++) {
+        for (int i1 = 0; i1 < problem.ns; i1++) {
             fim1[i1] = fim1[i1]/this->n;
             fim2[i1] = fim2[i1]/this->n;
             fim[i1] = fim1[i1] + fim2[i1];
         }
 
         // Diffusion term by the HMM
-        vector< vector<double> > him(problem.d, vector<double>(problem.d,0.));
+        vector< vector<double> > him(problem.ns, vector<double>(problem.ns,0.));
 
-        for (int i1 = 0; i1 < problem.d; i1++) {
-            for (int i2 = 0; i2 < problem.d; i2++) {
+        for (int i1 = 0; i1 < problem.ns; i1++) {
+            for (int i2 = 0; i2 < problem.ns; i2++) {
                 for (int j = this->nt; j < this->nt + this->n; j++) {
                     him[i1][i2] += this->micro_dt*problem.a(xt, \
                             yAux[j])[i1]*sumsAux2[j][i2];
@@ -149,8 +149,8 @@ void Solver_hmm::estimator(Problem &problem, \
         }
 
         // Incremental mean over the samples
-        for (int i1 = 0; i1 < problem.d; i1++) {
-            for (int i2 = 0; i2 < problem.d; i2++) {
+        for (int i1 = 0; i1 < problem.ns; i1++) {
+            for (int i2 = 0; i2 < problem.ns; i2++) {
                 data.diff[i1][i2] = (data.diff[i1][i2]*m + him[i1][i2])/(m+1);
             }
             data.drif[i1] = (data.drif[i1]*m + fim[i1])/(m+1);

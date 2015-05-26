@@ -38,7 +38,7 @@ double Solver_spectral::basis(vector<int> mult, vector<double> x, vector<double>
 void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_coeffs>& c, double t) {
 
     int nf = problem.nf;
-    int ns = problem.d;
+    int ns = problem.ns;
     int nb = bin(degree + nf, nf);
 
     c = vector<SDE_coeffs> (nb);
@@ -798,7 +798,7 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars, string stri
     }
 }
 
-int Solver_spectral::mult2ind(vector<int> m, int d) {
+int Solver_spectral::mult2ind(vector<int> m, int ns) {
     int l = m.size() - 1; int i;
     for(i = l; (i > 0) & (m[i] == 0); i--);
 
@@ -809,16 +809,16 @@ int Solver_spectral::mult2ind(vector<int> m, int d) {
     for (unsigned int j = 0; j < m.size(); ++j)
         s += m[j];
 
-    int dr = d - s;
+    int dr = ns - s;
     int vr = l - i;
     m[i] = m[i] - 1;
-    return bin(dr + vr + 1, vr) + mult2ind(m, d);
+    return bin(dr + vr + 1, vr) + mult2ind(m, ns);
 }
 
-vector<int> Solver_spectral::ind2mult(int ind, int d, int n) {
+vector<int> Solver_spectral::ind2mult(int ind, int ns, int n) {
     vector<int> m(n,0); int s = 0;
     for (int i = 0; i < ind; ++i) {
-        if (s < d) {
+        if (s < ns) {
             m[n-1] ++; s++;
         } else {
             int j; for(j = n-1; m[j] == 0; j--);
@@ -828,7 +828,7 @@ vector<int> Solver_spectral::ind2mult(int ind, int d, int n) {
     return m;
 }
 
-vector<double> Solver_spectral::basis2herm (vector<double> bcoeffs, int n, int d) {
+vector<double> Solver_spectral::basis2herm (vector<double> bcoeffs, int n, int ns) {
     vector<double> result(bcoeffs.size(), 0.);
     for (unsigned int i = 0; i < bcoeffs.size(); ++i) {
         for (unsigned int j = 0; j <= i; ++j) {

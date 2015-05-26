@@ -7,8 +7,8 @@ void Problem::init() {
 
     this->t_end = 1.;
     this->nf = 1;
-    this->d = 1;
-    this->x0 = vector<double>(d,1.2);
+    this->ns = 1;
+    this->x0 = vector<double>(ns,1.2);
     this->lambdas = {1.};
     this->betas   = {1.};
 }
@@ -26,33 +26,33 @@ void Problem::init() {
 //         + 2*cos(x)*cos(x) * int (cos(y)*cos(y) * e^(-y^2)/sqrt(pi) )
 // diff  = SQRT 2? * cos(x)*cos(x) * int (sin(y) * (2*y*cos(y) + sin(y)) * e^(-y^2)/sqrt(pi) )
 vector<double> Problem::soldrif(vector<double> x) {
-    vector<double> result(this->d,0.);
+    vector<double> result(this->ns,0.);
     result[0] = -sin(x[0])*cos(x[0])*(1 + exp(-1.0)) + cos(x[0])*cos(x[0])*(1. + exp(-1.));
     return result;
 }
 
 // ! Coefficient 2? Seems to have been forgotten in exact solution
 vector< vector<double> > Problem::soldiff(vector<double> x) {
-    vector< vector<double> > result(this->d,vector<double>(this->d,0.));
+    vector< vector<double> > result(this->ns,vector<double>(this->ns,0.));
     result[0][0] = sqrt(2*cos(x[0])*cos(x[0])*(1 + exp(-1.0)));
     return result;
 }
 
 // Phi = 2*cos(x)*sin(y)
 vector<double> Problem::a(vector<double> x, vector<double> y) {
-    vector<double> result(this->d,0.);
+    vector<double> result(this->ns,0.);
     result[0] = cos(x[0])*(2*y[0]*cos(y[0]) + sin(y[0]));
     return result;
 }
 
 vector< vector<double> > Problem::dax(vector<double> x, vector<double> y) {
-    vector< vector<double> > result(this->d,vector<double>(this->d,0.));
+    vector< vector<double> > result(this->ns,vector<double>(this->ns,0.));
     result[0][0] = - sin(x[0])*(2*y[0]*cos(y[0]) + sin(y[0]));
     return result;
 }
 
 vector< vector<double> > Problem::day(vector<double> x, vector<double> y) {
-    vector< vector<double> > result(this->d,vector<double>(this->nf,0.));
+    vector< vector<double> > result(this->ns,vector<double>(this->nf,0.));
     result[0][0] = cos(x[0])*(2*cos(y[0]) - 2*y[0]*sin(y[0]) + cos(y[0]));
     return result;
 }

@@ -180,4 +180,9 @@ fclose(f10); system('echo -e "" >> tmp/fy.gen');
 fclose(f11); system('echo -e "" >> tmp/drif.gen');
 fclose(f12); system('echo -e "" >> tmp/diff.gen');
 
+command_nf = ['sed -i "s/\(this->nf =\) [0-9]*/\1 ', num2str(nf), '/g" aux/problem.aux'];
+command_ns = ['sed -i "s/\(this->ns =\) [0-9]*/\1 ', num2str(ns), '/g" aux/problem.aux'];
+system(command_nf);
+system(command_ns);
+
 exit(0);
