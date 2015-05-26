@@ -15,6 +15,7 @@ std::vector< std::vector<double> > symmetric(std::vector< std::vector<double> > 
 
 // Cholesky decomposition of a matrix.
 std::vector< std::vector<double> > cholesky(std::vector< std::vector<double> > A);
+void lu(std::vector< std::vector<double> > a, std::vector< std::vector<double> >& l, std::vector< std::vector<double> >& u);
 
 // Solution of linear system for SPD matrices.
 std::vector<double> solve(std::vector< std::vector<double> > A, std::vector<double> b);
