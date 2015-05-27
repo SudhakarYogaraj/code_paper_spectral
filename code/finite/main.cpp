@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {4.};
+    vector<double> p_values = {6.};
 
     // Vector of the log of the error
     vector<double> errors_hmm(p_values.size(), 0.);
@@ -54,7 +54,8 @@ int main(int argc, char* argv[])
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
         /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
         /* Solver_spectral solver_spectral = Solver_spectral(12, 30, problem.nf, "HERMITE"); */
-        Solver_spectral solver_spectral = Solver_spectral(40, 100, problem.nf, "MONOMIAL");
+        /* too long */
+        Solver_spectral solver_spectral = Solver_spectral(15, 30, problem.nf, "MONOMIAL");
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.ns,0.));
@@ -198,7 +199,6 @@ int main(int argc, char* argv[])
             cout << "|" << setw(101) <<  " " << "|" << endl;
             cout << "o-----------------------------------------------------------------------------------------------------o" << endl;
             cout << endl << endl;
-            exit(0);
         }
         writeToFile("time.dat",t); int p_aux = (int) (10*solver_hmm.p + 0.0001);
         writeMatToFile("xt_hmm" + to_string(p_aux) + ".dat", xt_hmm);
