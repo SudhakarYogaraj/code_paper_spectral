@@ -31,9 +31,11 @@ void Problem::update_stats(vector<double> x) {
     for (int i = 0;i < n_iterations; ++i) {
 
         // Calculation of the bias of 'rho'
+
+        bias = vector<double> (nf, 0.);
         for (int i = 0; i < nf; ++i) {
             auto lambda = [&] (vector<double> y) -> double {
-                return y[i]* (rho(x, y - bias)/gaussian(y, sigmas));
+                return (y[i] + bias[i]) * (rho(x, bias + y)/gaussian(y, sigmas));
             };
             bias[i] = gauss.quadnd(lambda, sigmas);
         }
@@ -72,16 +74,17 @@ vector<double> Problem::soldrif(vector<double> x) {
     vector<double> result(this->ns,0.);
     Gaussian_integrator gauss = Gaussian_integrator(100,this->nf);
     auto lambda = [&] (vector<double> y) -> vector<double> {
-        double div_h = stardiv_h(x,y);
+        vector<double> z = y + bias;
+        double div_h = stardiv_h(x,z);
         vector<double> tmp(this->ns,0.);
-        vector<double> slow_drift = this->a(x,y);
-        vector<double> solution = this->phi(x,y);
-        vector< vector<double> > diff_phi_x = this->phi_x(x,y);
+        vector<double> slow_drift = this->a(x,z);
+        vector<double> solution = this->phi(x,z);
+        vector< vector<double> > diff_phi_x = this->phi_x(x,z);
         for (int i = 0; i < this->ns; ++i) {
             tmp = tmp + diff_phi_x[i]*slow_drift[i];
         }
         tmp = tmp + solution*div_h;
-        return tmp*(this->rho(x,y)/gaussian(y,sigmas));
+        return tmp*(this->rho(x,z)/gaussian(y,sigmas));
     };
     result = gauss.quadnd(lambda, sigmas, result);
     return result;
@@ -91,9 +94,10 @@ vector< vector<double> > Problem::soldiff(vector<double> x) {
     Gaussian_integrator gauss = Gaussian_integrator(100,this->nf);
     vector< vector<double> > result(this->ns,vector<double>(this->ns,0.));
     auto lambda = [&] (vector<double> y) -> vector< vector<double> > {
+        vector<double> z = y + bias;
         vector< vector<double> > tens_prod(this->ns, vector<double>(this->ns, 0.));
-        vector<double> slowdrift = this->a(x,y);
-        vector<double> solution  = this->phi(x,y);
+        vector<double> slowdrift = this->a(x,z);
+        vector<double> solution  = this->phi(x,z);
         for (int i = 0; i < this->ns; ++i) {
             for (int j = 0; j < this->ns; ++j) {
                 tens_prod[i][j] = 2*slowdrift[i]*solution[j]*(this->rho(x,y)/gaussian(y,sigmas));
