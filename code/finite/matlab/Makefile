@@ -15,7 +15,7 @@ $(sub_files) : $(gen_files)
 	./format_code.sh
 
 $(gen_files) problem.init : build_problem.m
-	matlab -nodesktop -nosplash -r build_problem
+	matlab -nodesktop -nosplash -nojvm -r build_problem
 
 .PHONY: clean
 clean:
