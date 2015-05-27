@@ -2,40 +2,50 @@
 #include "templates.hpp"
 #include "Gaussian_integrator.hpp"
 #include "toolbox.hpp"
+#include "io.hpp"
 
 using namespace std;
 
 void Problem::init() {
 
     this->t_end = 1.;
-    this->nf = 2;
+    this->nf = 3;
     this->ns = 1;
     this->x0 = vector<double>(ns,1.2);
     this->lambdas = {2};
     this->betas   = {sqrt(2)};
+    this->bias = vector<double>(nf, 0.);
+    this->sigmas = vector<double>(nf, 1.);
 
-    this->sigmas = vector<double>(nf, 0.7);
-    /* this->sigmas = vector<double>(this->nf, 0.); */
-    /* for (int i = 0; i < this->nf; ++i) { */
-    /*     this->sigmas[i] = sqrt(betas[i]*betas[i] / (2*lambdas[i])); */
-    /* } */
 
-    /* this->sigmas = vector<double>(nf, 1.); */
-    /* Gaussian_integrator gauss = Gaussian_integrator(100,this->nf); */
-    /* vector< vector<double> > sigmas_tmp(nf, vector<double>(nf,1.)); */
-    /* vector<double> x_tmp(ns,0.); */
-    /* for (int i = 0; i < nf; ++i) { */
-    /*     for (int j = 0; j < nf; ++j) { */
-    /*         auto lambda = [&] (vector<double> y) -> double { */
-    /*             return y[j]*y[i]*rho(x_tmp, y)/gaussian(y, sigmas); */
-    /*         }; */
-    /*         sigmas_tmp[i][j] = sqrt(gauss.quadnd(lambda, sigmas)); */
-    /*         cout << "sigmas[" << i << "][" << j << "] = " << sigmas_tmp[i][j] << endl; */
-    /*     } */
-    /*     sigmas[i] = sigmas_tmp[i][i]; */
-    /* } */
-    /* exit(0); */
+    // Calculation of the covariance matrix of 'rho'
+    Gaussian_integrator gauss = Gaussian_integrator(100, this->nf);
+    vector< vector<double> > sigmas_tmp(nf, vector<double>(nf,1.));
+    vector<double> x_tmp(ns,0.);
+    for (int i = 0; i < nf; ++i) {
+        for (int j = 0; j < nf; ++j) {
+            auto lambda = [&] (vector<double> y) -> double {
+                return y[i]*y[j]* (rho(x_tmp, y)/gaussian(y, sigmas));
+            };
+            sigmas_tmp[i][j] = gauss.quadnd(lambda, sigmas);
+        }
+    }
+    sigmas_tmp = cholesky(sigmas_tmp);
 
+    for (int i = 0; i < nf; ++i)
+        sigmas[i] = sigmas_tmp[i][i];
+
+    // Calculation of the bias of 'rho'
+    this->bias = vector<double>(nf, 0.);
+    for (int i = 0; i < nf; ++i) {
+            auto lambda = [&] (vector<double> y) -> double {
+                return y[i]* (rho(x_tmp, y)/gaussian(y, sigmas));
+            };
+            bias[i] = gauss.quadnd(lambda, sigmas);
+    }
+
+    niceMat(sigmas_tmp);
+    niceVec(bias);
 }
 
 double Problem::stardiv_h(vector<double> x, vector<double> y) {
