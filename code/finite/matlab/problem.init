@@ -16,16 +16,19 @@ void Problem::init() {
     this->betas   = {sqrt(2)};
     this->bias = vector<double>(nf, 0.);
     this->sigmas = vector<double>(nf, 1.);
+    this->sqrt_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
+    for (int i = 0; i < nf; ++i) {
+        sqrt_cov[i][i] = 1.;
+    }
 }
 
 /*
- * Calculation of the covariance and mean of the invariant measure.
+ * Calculation of the sqrt_cov and mean of the invariant measure.
  * The outer loop serves to obtain a more accurate result.
  */
 void Problem::update_stats(vector<double> x) {
 
     Gaussian_integrator gauss = Gaussian_integrator(30, nf);
-    vector< vector<double> > sigmas_tmp(nf, vector<double>(nf,1.));
 
     int n_iterations = 3;
     for (int i = 0;i < n_iterations; ++i) {
@@ -40,22 +43,21 @@ void Problem::update_stats(vector<double> x) {
             bias[i] = gauss.quadnd(lambda, sigmas);
         }
 
-        // Calculation of the covariance
+        // Calculation of the sqrt_cov
         for (int i = 0; i < nf; ++i) {
             for (int j = 0; j < nf; ++j) {
                 auto lambda = [&] (vector<double> y) -> double {
                     return (y[i] - bias[i]) * (y[j] - bias[j]) * (rho(x, y - bias)/gaussian(y, sigmas));
                 };
-                sigmas_tmp[i][j] = gauss.quadnd(lambda, sigmas);
+                sqrt_cov[i][j] = gauss.quadnd(lambda, sigmas);
             }
         }
+        sqrt_cov = cholesky(sqrt_cov);
+        for (int i = 0; i < nf; ++i)
+            sigmas[i] = sqrt_cov[i][i];
     }
 
-    sigmas_tmp = cholesky(sigmas_tmp);
-    for (int i = 0; i < nf; ++i)
-        sigmas[i] = sigmas_tmp[i][i];
-
-    niceMat(sigmas_tmp);
+    niceMat(sqrt_cov);
     niceVec(bias);
 }
 
