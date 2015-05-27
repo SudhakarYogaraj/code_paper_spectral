@@ -45,6 +45,7 @@ class Problem {
         std::vector<double> lambdas;
         std::vector<double> betas;
         std::vector<double> sigmas;
+        std::vector<double> bias;
 
         // FOR HMM
         // Drift and diffusion terms of the fast system, in its transformed
