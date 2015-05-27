@@ -46,6 +46,7 @@ class Problem {
         std::vector<double> betas;
         std::vector<double> sigmas;
         std::vector<double> bias;
+        std::vector< std::vector<double> > sqrt_cov;
         void update_stats(std::vector<double> x);
 
         // FOR HMM
