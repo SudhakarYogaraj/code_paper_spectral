@@ -82,6 +82,9 @@ int main(int argc, char* argv[])
 
             int seed = (int) abs(1000*distribution(generator));
 
+            // Update of the statistics of the invariant measure
+            problem.update_stats(x_exact[i]);
+
             // Solution of the problem using the HMM method
             tic(); solver_hmm.estimator(problem, xt_hmm[i], yInit, c_hmm, seed, t[i]); toc();
             tic(); solver_spectral.estimator(problem, xt_spectral[i], vec_spectral, t[i]); toc();
