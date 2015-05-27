@@ -45,7 +45,12 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf = {0.4, 0.4};
+    vector<double> sigmas_hf = {0.4, 0.4, 0.4};
+    /* vector<double> sigmas_hf = problem.sigmas*0.5; */
+    /* for (unsigned int iii = 0; iii < sigmas_hf.size(); ++iii) { */
+    /*     cout << setw(12) << sigmas_hf[iii]; */
+    /*     cout << endl; */
+    /* } */
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
