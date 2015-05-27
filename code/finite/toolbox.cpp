@@ -164,24 +164,6 @@ vector<double> usolve(vector< vector<double> > U, vector<double> b) {
     return result;
 }
 
-void niceMat(vector< vector<double> > a) {
-    int n = a.size();
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            cout << a[i][j] << " ";
-        }
-        cout << endl;
-    }
-}
-
-void niceVec(vector<double> a) {
-    int n = a.size();
-    for (int i = 0; i < n; ++i) {
-            cout << a[i] << " ";
-            cout << endl;
-    }
-}
-
 vector<double> solve(vector< vector<double> > A, vector<double> b) {
     vector<double> result = b;
     vector< vector<double> > At = transpose(A);
