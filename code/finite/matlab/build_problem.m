@@ -12,7 +12,7 @@ pi = sym('pi');
 ns = 1;
 
 % Fast variables
-nf = 2;
+nf = 3;
 
 % Creation of symbolic variables
 x  = sym(zeros(1, ns));
@@ -29,8 +29,8 @@ for k = 1:nf; x(k) = sym(sprintf('x%d', k-1), 'real'); end
 for k = 1:nf; y(k) = sym(sprintf('y%d', k-1), 'real'); end
 
 % Potential
-% v = y(1)^4/4 - y(1)^2/2 + y(2)^2
-v = y(1)^2 + y(2)^2
+v = y(1)^4/4 - y(1)^2/2 + y(2)^2 + y(3)^4
+% v = y(1)^2 + y(2)^2
 % v = y(1)*y(1) + log(pi)/2.
 % v = y(1)^4/4 - y(1)^2/2;
 
@@ -40,6 +40,7 @@ s = sqrt(2);
 % Solution of the cell problem
 g(1) = cos(x(1)) * sin(y(1));
 g(2) = cos(x(1)) * sin(y(2));
+g(3) = cos(x(1)) * sin(y(2) + y(1));
 
 % Non-leading order drift of fast process
 h(1) = cos(x(1)) * cos(y(1))  * cos(y(2));
@@ -62,6 +63,8 @@ if (nf == 1)
     rho = rho/integral(rho_n, -inf, inf);
 elseif (nf == 2)
     rho = rho/integral2(rho_n, -inf, inf, -inf, inf);
+elseif (nf == 3)
+    rho = rho/integral3(rho_n, -inf, inf, -inf, inf, -inf, inf);
 end
 
 % Generator in weighted space
@@ -69,6 +72,8 @@ if (nf == 1)
     Lw = @(f) 0.5 * diff( S * rho * diff(f,y(1)) , y(1)) / rho;
 elseif (nf == 2)
     Lw = @(f) 0.5 *( diff( S * rho * diff(f,y(1)) , y(1)) + diff( S * rho * diff(f,y(2)) , y(2)) ) / rho;
+elseif (nf == 3)
+    Lw = @(f) 0.5 *( diff( S * rho * diff(f,y(1)) , y(1)) + diff( S * rho * diff(f,y(2)) , y(2)) + diff( S * rho * diff(f,y(3)) , y(3)) ) / rho;
 end
 
 % Linear term
@@ -76,6 +81,8 @@ if (nf == 1)
     lin = simplify( 1/4*S*diff(v,y(1),2) - 1/8*S*(diff(v,y(1))^2) )
 elseif (nf == 2)
     lin = simplify( 1/4*S * (diff(v,y(1),2) + diff(v,y(2),2)) - 1/8*S*( diff(v,y(1))^2 + diff(v,y(2))^2 ) )
+elseif (nf == 3)
+    lin = simplify( 1/4*S * (diff(v,y(1),2) + diff(v,y(2),2) + diff(v,y(3),2)) - 1/8*S*( diff(v,y(1))^2 + diff(v,y(2))^2 + diff(v,y(3))^2 ) )
 end
 
 % derivative of h
@@ -180,8 +187,8 @@ fclose(f10); system('echo -e "" >> tmp/fy.gen');
 fclose(f11); system('echo -e "" >> tmp/drif.gen');
 fclose(f12); system('echo -e "" >> tmp/diff.gen');
 
-command_nf = ['sed -i "s/\(this->nf =\) [0-9]*/\1 ', num2str(nf), '/g" aux/problem.aux'];
-command_ns = ['sed -i "s/\(this->ns =\) [0-9]*/\1 ', num2str(ns), '/g" aux/problem.aux'];
+command_nf = ['sed -i "s/\(this->nf =\) [0-9]*/\1 ', num2str(nf), '/g" problem.init'];
+command_ns = ['sed -i "s/\(this->ns =\) [0-9]*/\1 ', num2str(ns), '/g" problem.init'];
 system(command_nf);
 system(command_ns);
 
