@@ -17,6 +17,7 @@ void Problem::init() {
     this->bias = vector<double>(nf, 0.);
     this->sigmas = vector<double>(nf, 1.);
     this->sqrt_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
+    this->det_sqrt_cov = 1.;
     for (int i = 0; i < nf; ++i) {
         sqrt_cov[i][i] = 1.;
     }
@@ -29,36 +30,50 @@ void Problem::init() {
 void Problem::update_stats(vector<double> x) {
 
     Gaussian_integrator gauss = Gaussian_integrator(30, nf);
+    vector<double> sigmas_quad (nf, 1.0);
 
-    int n_iterations = 3;
-    for (int i = 0;i < n_iterations; ++i) {
+    int n_iterations = 5, i = 0;
+    for (int n = 0; n < n_iterations; ++n) {
 
         // Calculation of the bias of 'rho'
-
         bias = vector<double> (nf, 0.);
-        for (int i = 0; i < nf; ++i) {
+        for (i = 0; i < nf; ++i) {
             auto lambda = [&] (vector<double> y) -> double {
-                return (y[i] + bias[i]) * (rho(x, bias + y)/gaussian(y, sigmas));
+                vector<double> z = rescale(y);
+                return det_sqrt_cov * z[i] * (rho(x,z)/gaussian(y, sigmas_quad));
             };
-            bias[i] = gauss.quadnd(lambda, sigmas);
+            bias[i] = gauss.quadnd(lambda, sigmas_quad);
         }
 
         // Calculation of the sqrt_cov
-        for (int i = 0; i < nf; ++i) {
+        for (i = 0; i < nf; ++i) {
             for (int j = 0; j < nf; ++j) {
                 auto lambda = [&] (vector<double> y) -> double {
-                    return (y[i] - bias[i]) * (y[j] - bias[j]) * (rho(x, y - bias)/gaussian(y, sigmas));
+                    vector<double> z = rescale(y);
+                    return det_sqrt_cov * (z[i] - bias[i]) * (z[j] - bias[j]) * (rho(x,z)/gaussian(y, sigmas_quad));
                 };
-                sqrt_cov[i][j] = gauss.quadnd(lambda, sigmas);
+                sqrt_cov[i][j] = gauss.quadnd(lambda, sigmas_quad);
             }
         }
         sqrt_cov = cholesky(sqrt_cov);
-        for (int i = 0; i < nf; ++i)
-            sigmas[i] = sqrt_cov[i][i];
+
+        // Determinant of sqrt_cov
+        for (det_sqrt_cov = 1., i = 0; i < nf; ++i)
+            det_sqrt_cov *= sqrt_cov[i][i];
     }
 
     niceMat(sqrt_cov);
     niceVec(bias);
+}
+
+vector<double> Problem::rescale(vector<double> y) {
+    vector<double> result(y.size(), 0.);
+    for (int i = 0; i < y.size(); ++i) {
+        for (int j = 0; j < y.size(); ++j) {
+            result[i] += sqrt_cov[i][j] * y[j];
+        }
+    }
+    return (result + bias);
 }
 
 double Problem::stardiv_h(vector<double> x, vector<double> y) {

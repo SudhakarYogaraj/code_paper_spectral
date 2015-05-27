@@ -47,7 +47,9 @@ class Problem {
         std::vector<double> sigmas;
         std::vector<double> bias;
         std::vector< std::vector<double> > sqrt_cov;
+        double det_sqrt_cov;
         void update_stats(std::vector<double> x);
+        std::vector<double> rescale(std::vector<double> y);
 
         // FOR HMM
         // Drift and diffusion terms of the fast system, in its transformed
