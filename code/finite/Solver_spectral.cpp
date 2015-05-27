@@ -122,7 +122,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
                     for (int k = 0; k < nf; ++k) {
                         tmp += 1/(2*pow(sigmas_hf[k], 2)) - pow(y[k], 2)/(4*pow(sigmas_hf[k], 4));
                     }
-                    return (tmp - problem.linearTerm(x,y)) * basis(m1 + m2, y, sigmas_hf); };
+                    return (tmp - problem.linearTerm(x,y + problem.bias)) * basis(m1 + m2, y, sigmas_hf); };
                     tmp_vec[index] += gauss.quadnd(lambda, sigmas_hf);
             }
         }

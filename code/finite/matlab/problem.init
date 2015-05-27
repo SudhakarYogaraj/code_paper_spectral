@@ -24,7 +24,7 @@ void Problem::init() {
  */
 void Problem::update_stats(vector<double> x) {
 
-    Gaussian_integrator gauss = Gaussian_integrator(100, nf);
+    Gaussian_integrator gauss = Gaussian_integrator(30, nf);
     vector< vector<double> > sigmas_tmp(nf, vector<double>(nf,1.));
 
     int n_iterations = 3;
