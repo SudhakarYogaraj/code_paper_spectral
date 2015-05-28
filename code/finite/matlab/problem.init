@@ -17,6 +17,8 @@ void Problem::init() {
     this->bias = vector<double>(nf, 0.);
     this->sigmas = vector<double>(nf, 1.);
     this->sqrt_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
+    this->covariance = vector< vector<double> > (nf, vector<double> (nf,0.));
+    this->inv_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
     this->det_sqrt_cov = 1.;
     for (int i = 0; i < nf; ++i) {
         sqrt_cov[i][i] = 1.;
@@ -46,7 +48,6 @@ void Problem::update_stats(vector<double> x) {
         }
 
         // Calculation of the sqrt_cov
-        vector< vector<double> > covariance(nf, vector<double> (nf, 0.));
         for (i = 0; i < nf; ++i) {
             for (int j = 0; j < nf; ++j) {
                 auto lambda = [&] (vector<double> z) -> double {
@@ -61,10 +62,47 @@ void Problem::update_stats(vector<double> x) {
         // Determinant of sqrt_cov
         for (det_sqrt_cov = 1., i = 0; i < nf; ++i)
             det_sqrt_cov *= sqrt_cov[i][i];
+
+        // Inverse of covariance matrix
+        for (int i = 0; i < nf; ++i) {
+            vector<double> rhs_tmp(nf, 0.); rhs_tmp[i] = 1.;
+            inv_cov[i] = solve(covariance, rhs_tmp);
+        }
+        inv_cov = transpose(inv_cov);
     }
 
     niceMat(sqrt_cov);
+    cout << " --- " << endl;
+    niceMat(covariance);
+    cout << " --- " << endl;
+    niceMat(inv_cov);
+    cout << " --- " << endl;
     niceVec(bias);
+}
+
+double Problem::linear_term_gaussian(vector<double> y) {
+
+    // Square of the factor multiplying the brownian motion
+    double S = 2.;
+
+    // Laplacian of the potential
+    double laplacian = 0.;
+    for (int i = 0; i < nf; ++i) {
+        laplacian += inv_cov[i][i];
+    }
+
+    // Square of the gradient of the potential
+    double grad2 = 0.;
+    vector<double> c_grad (nf, 0.);
+    for (int i = 0; i < nf; ++i) {
+        for (int j = 0; j < nf; ++j) {
+            c_grad[i] += inv_cov[i][j] * y[j];
+        }
+        grad2 += c_grad[i] * c_grad[i];
+    }
+
+    // Linear potential in Schrodinger equation
+    return (0.25 * S * laplacian - 0.125 * S * grad2);
 }
 
 vector<double> Problem::rescale(vector<double> y) {
