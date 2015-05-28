@@ -9,7 +9,7 @@ using namespace std;
 void Problem::init() {
 
     this->t_end = 1.;
-    this->nf = 3;
+    this->nf = 2;
     this->ns = 1;
     this->x0 = vector<double>(ns,1.2);
     this->lambdas = {2};
