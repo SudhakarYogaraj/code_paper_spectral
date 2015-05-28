@@ -16,19 +16,20 @@ void Problem::init() {
     this->betas   = {sqrt(2)};
     this->bias = vector<double>(nf, 0.);
     this->sigmas = vector<double>(nf, 1.);
+    this->eig_val_cov = vector<double>(nf, 1.);
     this->sqrt_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
     this->covariance = vector< vector<double> > (nf, vector<double> (nf,0.));
+    this->eig_vec_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
     this->inv_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
     this->det_sqrt_cov = 1.;
     for (int i = 0; i < nf; ++i) {
         sqrt_cov[i][i] = 1.;
+        eig_vec_cov[i][i] = 1.;
     }
 }
 
-/*
- * Calculation of the sqrt_cov and mean of the invariant measure.
- * The outer loop serves to obtain a more accurate result.
- */
+// Calculation of the sqrt_cov and mean of the invariant measure.
+// The outer loop serves to obtain a more accurate result.
 void Problem::update_stats(vector<double> x) {
 
     Gaussian_integrator gauss = Gaussian_integrator(30, nf);
@@ -47,7 +48,7 @@ void Problem::update_stats(vector<double> x) {
             bias[i] = gauss.quadnd(lambda, sigmas_quad);
         }
 
-        // Calculation of the sqrt_cov
+        // Calculation of the covariance matrix
         for (i = 0; i < nf; ++i) {
             for (int j = 0; j < nf; ++j) {
                 auto lambda = [&] (vector<double> z) -> double {
@@ -57,11 +58,23 @@ void Problem::update_stats(vector<double> x) {
                 covariance[i][j] = gauss.quadnd(lambda, sigmas_quad);
             }
         }
+
+        // Cholesky factorization
         sqrt_cov = cholesky(covariance);
 
-        // Determinant of sqrt_cov
+        // Eigenvalue decomposition
+        eig_qr(covariance, eig_vec_cov, eig_val_cov);
+
+        sqrt_cov = eig_vec_cov;
+        for (int i = 0; i < nf; i++) {
+            for (int j = 0; j < nf; j++) {
+                sqrt_cov[i][j] *= sqrt(eig_val_cov[j]);
+            }
+        }
+
+        // Determinant of Cholesky factorization
         for (det_sqrt_cov = 1., i = 0; i < nf; ++i)
-            det_sqrt_cov *= sqrt_cov[i][i];
+            det_sqrt_cov *= sqrt(eig_val_cov[i][i]);
 
         // Inverse of covariance matrix
         for (int i = 0; i < nf; ++i) {
@@ -70,6 +83,7 @@ void Problem::update_stats(vector<double> x) {
         }
         inv_cov = transpose(inv_cov);
     }
+
 
     niceMat(sqrt_cov);
     cout << " --- " << endl;
