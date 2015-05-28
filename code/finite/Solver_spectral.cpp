@@ -45,7 +45,8 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf = {2., 1.};
+    vector<double> sigmas_hf = {1., 1.};
+    vector<double> sigmas_1 = {1., 1.};
     /* vector<double> sigmas_hf = problem.sigmas*0.5; */
     /* for (unsigned int iii = 0; iii < sigmas_hf.size(); ++iii) { */
     /*     cout << setw(12) << sigmas_hf[iii]; */
@@ -64,20 +65,20 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         vector<double> v0(ns,0.);
         vector< vector<double> > m0(ns, vector<double> (ns,0.));
 
-        auto lambda = [&] (vector<double> y) -> vector<double> {
-            vector<double> z = y + problem.bias;
-            return problem.a(x,z) * basis(multIndex, y, sigmas_hf) * sqrt( problem.rho(x,z) / gaussian(y,sigmas_hf) );
+        auto lambda = [&] (vector<double> z) -> vector<double> {
+            vector<double> y = z + problem.bias;
+            return problem.a(x,y) * basis(multIndex, z, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_hf) );
         };
-        auto lambda_dx = [&] (vector<double> y) -> vector< vector<double> > {
-            vector<double> z = y + problem.bias;
-            return problem.dax(x,z) * basis(multIndex, y, sigmas_hf) * sqrt( problem.rho(x,z) / gaussian(y,sigmas_hf) );
+        auto lambda_dx = [&] (vector<double> z) -> vector< vector<double> > {
+            vector<double> y = z + problem.bias;
+            return problem.dax(x,y) * basis(multIndex, z, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_hf) );
         };
-        auto lambda_h = [&] (vector<double> y) -> double {
-            vector<double> z = y + problem.bias;
-            return problem.stardiv_h(x,z) * basis(multIndex, y, sigmas_hf) * sqrt( problem.rho(x,z) / gaussian(y,sigmas_hf) );
+        auto lambda_h = [&] (vector<double> z) -> double {
+            vector<double> y = z + problem.bias;
+            return problem.stardiv_h(x,y) * basis(multIndex, z, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_hf) );
         };
 
-        vector<double> result = gauss.quadnd(lambda, sigmas_hf, v0);
+        vector<double> result = gauss.quadnd(lambda, sigmas_hf, v0); // * problem.det_sqrt_cov;
         vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, sigmas_hf, m0);
         double result_h = gauss.quadnd(lambda_h, sigmas_hf);
 
@@ -117,12 +118,13 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
                 n_done ++;
                 progress_bar(((double) n_done)/((double) n_tmp));
                 position_visited[index] = 1;
-                auto lambda = [&] (vector<double> y) -> double {
+                auto lambda = [&] (vector<double> z) -> double {
                     double tmp = 0.;
+                    vector<double> y = z + problem.bias; // problem.rescale(z);
                     for (int k = 0; k < nf; ++k) {
-                        tmp += 1/(2*pow(sigmas_hf[k], 2)) - pow(y[k], 2)/(4*pow(sigmas_hf[k], 4));
+                        tmp += 1/(2*pow(sigmas_hf[k], 2)) - pow(z[k], 2)/(4*pow(sigmas_hf[k], 4));
                     }
-                    return (tmp - problem.linearTerm(x,y + problem.bias)) * basis(m1 + m2, y, sigmas_hf); };
+                    return (tmp - problem.linearTerm(x,y)) * basis(m1 + m2, z, sigmas_hf); };
                     tmp_vec[index] += gauss.quadnd(lambda, sigmas_hf);
             }
         }
