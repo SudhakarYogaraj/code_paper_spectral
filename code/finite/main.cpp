@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     problem.init();
 
     // Values of the precision parameter
-    vector<double> p_values = {6.};
+    vector<double> p_values = {4.};
 
     // Vector of the log of the error
     vector<double> errors_hmm(p_values.size(), 0.);
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
         /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
         /* Solver_spectral solver_spectral = Solver_spectral(12, 30, problem.nf, "HERMITE"); */
         /* too long */
-        Solver_spectral solver_spectral = Solver_spectral(15, 30, problem.nf, "MONOMIAL");
+        Solver_spectral solver_spectral = Solver_spectral(20, 100, problem.nf, "MONOMIAL");
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.ns,0.));

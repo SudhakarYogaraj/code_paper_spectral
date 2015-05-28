@@ -12,7 +12,7 @@ pi = sym('pi');
 ns = 1;
 
 % Fast variables
-nf = 3;
+nf = 2;
 
 % Creation of symbolic variables
 x  = sym(zeros(1, ns));
@@ -30,7 +30,8 @@ for k = 1:nf; y(k) = sym(sprintf('y%d', k-1), 'real'); end
 
 % Potential
 % v = y(1)^2/2 + y(2)^2/2 + y(3)^2/2
-v = y(1)^4/4 - y(1)^2/2 + (y(2)-2)^2/2 + y(3)^4
+% v = y(1)^4/4 - y(1)^2/2 + (y(2)-2)^2/2 + y(3)^4
+v = (y(1) - 1)^2/8 + (y(2)-2)^2/2 %+ 2*(y(3) + 1)^2
 % v = y(1)^2 + y(2)^2
 % v = y(1)*y(1) + log(pi)/2.
 % v = y(1)^4/4 - y(1)^2/2;
