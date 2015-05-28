@@ -31,4 +31,8 @@ double monomial(std::vector<int> mult, std::vector<double> x);
 // Integer power.
 double ipow(double x, int e);
 
+// Eigenvalue decomposition
+void qr(std::vector< std::vector<double> > a, std::vector< std::vector<double> >& q, std::vector< std::vector<double> >& r);
+void eig_qr(std::vector< std::vector<double> > a, std::vector< std::vector<double> >& v, std::vector<double>& l);
+
 #endif
