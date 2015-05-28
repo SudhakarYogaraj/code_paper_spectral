@@ -35,4 +35,8 @@ template<class type> std::vector<type> operator*(const std::vector<type>& vec, c
     return result;
 }
 
+std::vector< std::vector<double> > operator*(const std::vector< std::vector<double> >& mat1, const std::vector< std::vector<double> >& mat2);
+std::vector<double> operator*(const std::vector< std::vector<double> >& mat, const std::vector<double>& vec);
+double operator*(const std::vector<double>& vec1, const std::vector<double>& vec2);
+
 #endif
