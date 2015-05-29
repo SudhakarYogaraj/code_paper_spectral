@@ -1,4 +1,6 @@
 #include "toolbox.hpp"
+#include "templates.hpp"
+#include "io.hpp"
 
 using namespace std;
 
@@ -211,4 +213,59 @@ double monomial(vector<int> mult, vector<double> x) {
         result *= ipow(x[i], mult[i]);
     }
     return result;
+}
+
+void qr(vector< vector<double> > a, vector< vector<double> >& q, vector< vector<double> >& r) {
+    vector< vector<double> > at = transpose(a);
+    vector< vector<double> > qt (a.size(), vector<double> (a.size(), 0.));
+    vector< vector<double> > rt (a.size(), vector<double> (a.size(), 0.));
+    for (unsigned int i = 0; i < a.size(); ++i) {
+        vector<double> u = at[i];
+        for (unsigned int j = 0; j < i; ++j) {
+            u = u - qt[j] * (at[i] * qt[j]);
+            rt[i][j] = qt[j] * at[i];
+        }
+        qt[i] = u * (1/fabs(u));
+        rt[i][i] = qt[i] * at[i];
+    }
+    q = transpose(qt);
+    r = transpose(rt);;
+
+    if ( fabs(a - q*r) > 1e-10) {
+        cout << "Error in qr decomposition (" << fabs(a - q*r) << ")" << endl;
+        exit(0);
+    }
+}
+
+void eig_qr(vector< vector<double> > a, vector< vector<double> >& v, vector<double>& l) {
+    vector< vector<double> > q (a.size(), vector<double> (a.size(), 0.));
+    vector< vector<double> > u (a.size(), vector<double> (a.size(), 0.));
+    vector< vector<double> > r (a.size(), vector<double> (a.size(), 0.));
+
+    for (int i = 0; i < u.size(); ++i) {
+        u[i][i] = 1;
+    }
+
+    int n_iter = 1000;
+    for (int n = 0; n < n_iter; ++n) {
+        qr(a,q,r);
+        a = r*q;
+        u = u*q;
+    }
+
+    for (int i = 0; i < a.size(); ++i) {
+        l[i] = a[i][i];
+    }
+    v = u;
+
+    vector< vector<double> > prod = a*u;
+    for (int i = 0; i < a.size(); i++) {
+        for (int j = 0; j < a.size(); j++) {
+            double err = prod[i][j] / u[i][j] - l[i];
+            if( fabs (err) > 1e-10) {
+                cout << "Error in eigen-decomposition (" << err << ")." << endl;
+                exit(0);
+            }
+        }
+    }
 }
