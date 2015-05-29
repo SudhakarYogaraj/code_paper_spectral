@@ -1,5 +1,4 @@
 /* TODO: Problem with exact sigma (urbain, Wed 20 May 2015 21:00:20 BST) */
-
 #include "structures.hpp"
 #include "toolbox.hpp"
 #include "Problem.hpp"
@@ -44,14 +43,41 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     c = vector<SDE_coeffs> (nb);
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
-    /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
-    vector<double> sigmas_hf = {1., 1.};
+    vector<double> sigmas_hf = {0.8, 0.7};
     vector<double> sigmas_1 = {1., 1.};
-    /* vector<double> sigmas_hf = problem.sigmas*0.5; */
-    /* for (unsigned int iii = 0; iii < sigmas_hf.size(); ++iii) { */
-    /*     cout << setw(12) << sigmas_hf[iii]; */
-    /*     cout << endl; */
-    /* } */
+
+    // rescaling
+    double det_change = 1.;
+    vector<double> eig_change (nf,0.);
+    vector< vector<double> > mat_change = problem.eig_vec_cov;
+    for (int i = 0; i < nf; ++i) {
+        eig_change[i] = problem.eig_val_cov[i] * sigmas_hf[i] * sigmas_hf[i];
+        det_change *= sqrt(eig_change[i]);
+    }
+    for (int i = 0; i < nf; i++) {
+        for (int j = 0; j < nf; j++) {
+            mat_change[i][j] *= sqrt(eig_change[j]);
+        }
+    }
+
+    auto rescale = [&] (vector<double> z) -> vector<double> {
+        vector<double> result(z.size(), 0.);
+        for (int i = 0; i < z.size(); ++i) {
+            for (int j = 0; j < z.size(); ++j) {
+                result[i] += mat_change[i][j] * z[j];
+            }
+        }
+        return (result + problem.bias);
+    };
+
+    auto gaussian_linear_term = [&] (vector<double> z) -> double {
+        double laplacian = 0., grad2 = 0., S = 2.;
+        for (int k = 0; k < nf; ++k) {
+            laplacian += 1/eig_change[k];
+            grad2 += z[k]*z[k] / eig_change[k];
+        }
+        return (0.25 * S * laplacian - 0.125 * S * grad2);
+    };
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
@@ -65,22 +91,27 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
         vector<double> v0(ns,0.);
         vector< vector<double> > m0(ns, vector<double> (ns,0.));
 
+        // bi(x) = herm_mS(x) * sqrt(gaussian_mS(x)) = herm((x-m)/s) * sqrt(gaussian((x-m)/s) / det(s))
+        // where herm = normalized hermite poly
+        // gaussian = mean 0 var 1 gaussian
+        // 2 factors: x det(s) for scaling of domain / sqrt(det(s)) for scaling of hf
         auto lambda = [&] (vector<double> z) -> vector<double> {
-            vector<double> y = z + problem.bias;
-            return problem.a(x,y) * basis(multIndex, z, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_hf) );
+            vector<double> y = rescale(z);
+            return problem.a(x,y) * basis(multIndex, z, sigmas_1) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_1) );
         };
         auto lambda_dx = [&] (vector<double> z) -> vector< vector<double> > {
-            vector<double> y = z + problem.bias;
-            return problem.dax(x,y) * basis(multIndex, z, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_hf) );
+            vector<double> y = rescale(z);
+            return problem.dax(x,y) * basis(multIndex, z, sigmas_1) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_1) );
         };
         auto lambda_h = [&] (vector<double> z) -> double {
-            vector<double> y = z + problem.bias;
-            return problem.stardiv_h(x,y) * basis(multIndex, z, sigmas_hf) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_hf) );
+            vector<double> y = rescale(z);
+            return problem.stardiv_h(x,y) * basis(multIndex, z, sigmas_1) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_1) );
         };
 
-        vector<double> result = gauss.quadnd(lambda, sigmas_hf, v0); // * problem.det_sqrt_cov;
-        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, sigmas_hf, m0);
-        double result_h = gauss.quadnd(lambda_h, sigmas_hf);
+        // ! Hermite polynomials don't have scaling (H(x,s) = H(x/s, 1))
+        vector<double> result = gauss.quadnd(lambda, sigmas_1, v0) * sqrt(det_change);
+        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, sigmas_1, m0) * sqrt(det_change);
+        double result_h = gauss.quadnd(lambda_h, sigmas_1) * sqrt(det_change);
 
         for (int j = 0; j < ns; ++j) {
             coefficients[j][i] = result[j];
@@ -119,13 +150,14 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
                 progress_bar(((double) n_done)/((double) n_tmp));
                 position_visited[index] = 1;
                 auto lambda = [&] (vector<double> z) -> double {
-                    double tmp = 0.;
-                    vector<double> y = z + problem.bias; // problem.rescale(z);
-                    for (int k = 0; k < nf; ++k) {
-                        tmp += 1/(2*pow(sigmas_hf[k], 2)) - pow(z[k], 2)/(4*pow(sigmas_hf[k], 4));
-                    }
-                    return (tmp - problem.linearTerm(x,y)) * basis(m1 + m2, z, sigmas_hf); };
-                    tmp_vec[index] += gauss.quadnd(lambda, sigmas_hf);
+                    vector<double> y = rescale(z);
+                    double tmp_term = (gaussian_linear_term(z) - problem.linearTerm(x,y));
+                    /* if (fabs(tmp_term) > 1e-7) { */
+                    /*     cout << tmp_term; */
+                    /* } */
+                    return tmp_term * basis(m1 + m2, z, sigmas_1);
+                };
+                tmp_vec[index] += gauss.quadnd(lambda, sigmas_1);
             }
         }
     }
@@ -156,8 +188,11 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     for (int i = 0; i < nb; ++i) {
         progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(2*nb+1)) ));
         vector<int> m1 = ind2mult(i, degree, nf);
+        /* FIXME: sigmas? (urbain, Thu 28 May 2015 18:15:19 BST) */
+        /* FIXME: Normalization (urbain, Thu 28 May 2015 20:55:46 BST) */
+
         for (int j = 0; j < nf; ++j) {
-            mat[i][i] += m1[j]/(sigmas_hf[j]*sigmas_hf[j]);
+            mat[i][i] += m1[j]/eig_change[j];
         }
         for (int j = 0; j <= i; ++j) {
             for (int k = 0; k < nb; ++k) {
