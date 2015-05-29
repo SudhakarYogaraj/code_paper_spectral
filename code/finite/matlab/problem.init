@@ -59,9 +59,6 @@ void Problem::update_stats(vector<double> x) {
             }
         }
 
-        // Cholesky factorization
-        sqrt_cov = cholesky(covariance);
-
         // Eigenvalue decomposition
         eig_qr(covariance, eig_vec_cov, eig_val_cov);
 
@@ -72,7 +69,7 @@ void Problem::update_stats(vector<double> x) {
             }
         }
 
-        // Determinant of Cholesky factorization
+        // Determinant of sqrt_cov
         for (det_sqrt_cov = 1., i = 0; i < nf; ++i)
             det_sqrt_cov *= sqrt(eig_val_cov[i]);
 
@@ -93,36 +90,6 @@ void Problem::update_stats(vector<double> x) {
     niceVec(bias);
     cout << " --- " << endl;
     niceMat(eig_vec_cov);
-}
-
-double Problem::linear_term_gaussian(vector<double> y, vector<double> sigmas_aux) {
-
-    // Square of the factor multiplying the brownian motion
-    double S = 2.;
-
-    // covariance = Q l Q^T
-    // covariance^1 = Q l^-1 Q^T
-    // y^t cov^-t cov^-1 y = y^t Q l^-1 l^-1 Q^t
-
-    // Laplacian of the potential
-    double laplacian = 0.;
-    for (int i = 0; i < nf; ++i) {
-        double eig_new = eig_val_cov[i] * sigmas_aux[i] * sigmas_aux[i];
-        laplacian += 1/eig_new;
-    }
-
-    // Square of the gradient of the potential
-    double grad2 = 0.;
-    vector<double> c_grad (nf, 0.);
-    for (int i = 0; i < nf; ++i) {
-        for (int j = 0; j < nf; ++j) {
-            c_grad[i] += inv_cov[i][j] * (y[j] - bias[j]);
-        }
-        grad2 += c_grad[i] * c_grad[i];
-    }
-
-    // Linear potential in Schrodinger equation
-    return (0.25 * S * laplacian - 0.125 * S * grad2);
 }
 
 vector<double> Problem::rescale(vector<double> y) {
@@ -183,22 +150,3 @@ vector< vector<double> > Problem::soldiff(vector<double> x) {
     result = cholesky(symmetric( gauss.quadnd(lambda, sigmas, result) * det_sqrt_cov ));
     return result;
 }
-
-/* vector< vector<double> > Problem::day(vector<double> x, vector<double> y) { */
-/*     vector< vector<double> > result(this->ns,vector<double>(this->nf,0.)); */
-/*     result[0][0] = cos(x[0])*(2*cos(y[0]) - 2*y[0]*sin(y[0]) + cos(y[0])); */
-/*     return result; */
-/* } */
-
-/* vector<double> Problem::drif(vector<double> x, vector<double> y) { */
-/*     vector<double> result(2*this->nf,0.); */
-/*     result[0] = -2*y[0]; */
-/*     result[1] = -2*y[1] + cos(x[0])*cos(y[0]); */
-/*     return result; */
-/* } */
-
-/* vector<double> Problem::diff(vector<double> x, vector<double> y) { */
-/*     vector<double> result(2*nf,0.); */
-/*     result[0] = sqrt(2.); */
-/*     return result; */
-/* } */

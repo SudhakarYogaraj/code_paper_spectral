@@ -42,7 +42,6 @@ class Problem {
         std::vector<double>  fast_drift_h(std::vector<double> x, std::vector<double> y);
         std::vector< std::vector<double> > grad_h(std::vector<double> x, std::vector<double> y);
         double stardiv_h(std::vector<double> x, std::vector<double> y);
-        double linear_term_gaussian(std::vector<double> y);
         std::vector<double> lambdas;
         std::vector<double> betas;
         std::vector<double> sigmas;
