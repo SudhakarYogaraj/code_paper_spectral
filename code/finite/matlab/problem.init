@@ -74,7 +74,7 @@ void Problem::update_stats(vector<double> x) {
 
         // Determinant of Cholesky factorization
         for (det_sqrt_cov = 1., i = 0; i < nf; ++i)
-            det_sqrt_cov *= sqrt(eig_val_cov[i][i]);
+            det_sqrt_cov *= sqrt(eig_val_cov[i]);
 
         // Inverse of covariance matrix
         for (int i = 0; i < nf; ++i) {
@@ -84,7 +84,6 @@ void Problem::update_stats(vector<double> x) {
         inv_cov = transpose(inv_cov);
     }
 
-
     niceMat(sqrt_cov);
     cout << " --- " << endl;
     niceMat(covariance);
@@ -92,17 +91,24 @@ void Problem::update_stats(vector<double> x) {
     niceMat(inv_cov);
     cout << " --- " << endl;
     niceVec(bias);
+    cout << " --- " << endl;
+    niceMat(eig_vec_cov);
 }
 
-double Problem::linear_term_gaussian(vector<double> y) {
+double Problem::linear_term_gaussian(vector<double> y, vector<double> sigmas_aux) {
 
     // Square of the factor multiplying the brownian motion
     double S = 2.;
 
+    // covariance = Q l Q^T
+    // covariance^1 = Q l^-1 Q^T
+    // y^t cov^-t cov^-1 y = y^t Q l^-1 l^-1 Q^t
+
     // Laplacian of the potential
     double laplacian = 0.;
     for (int i = 0; i < nf; ++i) {
-        laplacian += inv_cov[i][i];
+        double eig_new = eig_val_cov[i] * sigmas_aux[i] * sigmas_aux[i];
+        laplacian += 1/eig_new;
     }
 
     // Square of the gradient of the potential
@@ -110,7 +116,7 @@ double Problem::linear_term_gaussian(vector<double> y) {
     vector<double> c_grad (nf, 0.);
     for (int i = 0; i < nf; ++i) {
         for (int j = 0; j < nf; ++j) {
-            c_grad[i] += inv_cov[i][j] * y[j];
+            c_grad[i] += inv_cov[i][j] * (y[j] - bias[j]);
         }
         grad2 += c_grad[i] * c_grad[i];
     }
@@ -121,8 +127,7 @@ double Problem::linear_term_gaussian(vector<double> y) {
 
 vector<double> Problem::rescale(vector<double> y) {
     vector<double> result(y.size(), 0.);
-    for (int i = 0; i < y.size(); ++i) {
-        for (int j = 0; j < y.size(); ++j) {
+    for (int i = 0; i < y.size(); ++i) { for (int j = 0; j < y.size(); ++j) {
             result[i] += sqrt_cov[i][j] * y[j];
         }
     }
