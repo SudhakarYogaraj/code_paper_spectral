@@ -9,54 +9,96 @@ using namespace std;
 void Problem::init() {
 
     this->t_end = 1.;
-    this->nf = 3;
+    this->nf = 2;
     this->ns = 1;
     this->x0 = vector<double>(ns,1.2);
     this->lambdas = {2};
     this->betas   = {sqrt(2)};
     this->bias = vector<double>(nf, 0.);
     this->sigmas = vector<double>(nf, 1.);
+    this->eig_val_cov = vector<double>(nf, 1.);
+    this->sqrt_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
+    this->covariance = vector< vector<double> > (nf, vector<double> (nf,0.));
+    this->eig_vec_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
+    this->inv_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
+    this->det_sqrt_cov = 1.;
+    for (int i = 0; i < nf; ++i) {
+        sqrt_cov[i][i] = 1.;
+        eig_vec_cov[i][i] = 1.;
+    }
 }
 
-/*
- * Calculation of the covariance and mean of the invariant measure.
- * The outer loop serves to obtain a more accurate result.
- */
+// Calculation of the sqrt_cov and mean of the invariant measure.
+// The outer loop serves to obtain a more accurate result.
 void Problem::update_stats(vector<double> x) {
 
     Gaussian_integrator gauss = Gaussian_integrator(30, nf);
-    vector< vector<double> > sigmas_tmp(nf, vector<double>(nf,1.));
+    vector<double> sigmas_quad (nf, 1.);
 
-    int n_iterations = 3;
-    for (int i = 0;i < n_iterations; ++i) {
+    int n_iterations = 5, i = 0;
+    for (int n = 0; n < n_iterations; ++n) {
 
         // Calculation of the bias of 'rho'
-
         bias = vector<double> (nf, 0.);
-        for (int i = 0; i < nf; ++i) {
-            auto lambda = [&] (vector<double> y) -> double {
-                return (y[i] + bias[i]) * (rho(x, bias + y)/gaussian(y, sigmas));
+        for (i = 0; i < nf; ++i) {
+            auto lambda = [&] (vector<double> z) -> double {
+                vector<double> y = rescale(z);
+                return det_sqrt_cov * y[i] * (rho(x,y)/gaussian(z, sigmas_quad));
             };
-            bias[i] = gauss.quadnd(lambda, sigmas);
+            bias[i] = gauss.quadnd(lambda, sigmas_quad);
         }
 
-        // Calculation of the covariance
-        for (int i = 0; i < nf; ++i) {
+        // Calculation of the covariance matrix
+        for (i = 0; i < nf; ++i) {
             for (int j = 0; j < nf; ++j) {
-                auto lambda = [&] (vector<double> y) -> double {
-                    return (y[i] - bias[i]) * (y[j] - bias[j]) * (rho(x, y - bias)/gaussian(y, sigmas));
+                auto lambda = [&] (vector<double> z) -> double {
+                    vector<double> y = rescale(z);
+                    return det_sqrt_cov * (y[i] - bias[i]) * (y[j] - bias[j]) * (rho(x,y)/gaussian(z, sigmas_quad));
                 };
-                sigmas_tmp[i][j] = gauss.quadnd(lambda, sigmas);
+                covariance[i][j] = gauss.quadnd(lambda, sigmas_quad);
             }
         }
+
+        // Eigenvalue decomposition
+        eig_qr(covariance, eig_vec_cov, eig_val_cov);
+
+        sqrt_cov = eig_vec_cov;
+        for (int i = 0; i < nf; i++) {
+            for (int j = 0; j < nf; j++) {
+                sqrt_cov[i][j] *= sqrt(eig_val_cov[j]);
+            }
+        }
+
+        // Determinant of sqrt_cov
+        for (det_sqrt_cov = 1., i = 0; i < nf; ++i)
+            det_sqrt_cov *= sqrt(eig_val_cov[i]);
+
+        // Inverse of covariance matrix
+        for (int i = 0; i < nf; ++i) {
+            vector<double> rhs_tmp(nf, 0.); rhs_tmp[i] = 1.;
+            inv_cov[i] = solve(covariance, rhs_tmp);
+        }
+        inv_cov = transpose(inv_cov);
     }
 
-    sigmas_tmp = cholesky(sigmas_tmp);
-    for (int i = 0; i < nf; ++i)
-        sigmas[i] = sigmas_tmp[i][i];
-
-    niceMat(sigmas_tmp);
+    niceMat(sqrt_cov);
+    cout << " --- " << endl;
+    niceMat(covariance);
+    cout << " --- " << endl;
+    niceMat(inv_cov);
+    cout << " --- " << endl;
     niceVec(bias);
+    cout << " --- " << endl;
+    niceMat(eig_vec_cov);
+}
+
+vector<double> Problem::rescale(vector<double> y) {
+    vector<double> result(y.size(), 0.);
+    for (int i = 0; i < y.size(); ++i) { for (int j = 0; j < y.size(); ++j) {
+            result[i] += sqrt_cov[i][j] * y[j];
+        }
+    }
+    return (result + bias);
 }
 
 double Problem::stardiv_h(vector<double> x, vector<double> y) {
@@ -73,57 +115,38 @@ double Problem::stardiv_h(vector<double> x, vector<double> y) {
 vector<double> Problem::soldrif(vector<double> x) {
     vector<double> result(this->ns,0.);
     Gaussian_integrator gauss = Gaussian_integrator(100,this->nf);
-    auto lambda = [&] (vector<double> y) -> vector<double> {
-        vector<double> z = y + bias;
-        double div_h = stardiv_h(x,z);
+    auto lambda = [&] (vector<double> z) -> vector<double> {
+        vector<double> y = rescale(z);
+        double div_h = stardiv_h(x,y);
         vector<double> tmp(this->ns,0.);
-        vector<double> slow_drift = this->a(x,z);
-        vector<double> solution = this->phi(x,z);
-        vector< vector<double> > diff_phi_x = this->phi_x(x,z);
+        vector<double> slow_drift = this->a(x,y);
+        vector<double> solution = this->phi(x,y);
+        vector< vector<double> > diff_phi_x = this->phi_x(x,y);
         for (int i = 0; i < this->ns; ++i) {
             tmp = tmp + diff_phi_x[i]*slow_drift[i];
         }
-        tmp = tmp + solution*div_h;
-        return tmp*(this->rho(x,z)/gaussian(y,sigmas));
+        tmp = tmp + solution * div_h;
+        return tmp*(this->rho(x,y)/gaussian(z,sigmas));
     };
-    result = gauss.quadnd(lambda, sigmas, result);
+    result = gauss.quadnd(lambda, sigmas, result) * det_sqrt_cov;
     return result;
 }
 
 vector< vector<double> > Problem::soldiff(vector<double> x) {
     Gaussian_integrator gauss = Gaussian_integrator(100,this->nf);
     vector< vector<double> > result(this->ns,vector<double>(this->ns,0.));
-    auto lambda = [&] (vector<double> y) -> vector< vector<double> > {
-        vector<double> z = y + bias;
+    auto lambda = [&] (vector<double> z) -> vector< vector<double> > {
+        vector<double> y = rescale(z);
         vector< vector<double> > tens_prod(this->ns, vector<double>(this->ns, 0.));
-        vector<double> slowdrift = this->a(x,z);
-        vector<double> solution  = this->phi(x,z);
+        vector<double> slowdrift = this->a(x,y);
+        vector<double> solution  = this->phi(x,y);
         for (int i = 0; i < this->ns; ++i) {
             for (int j = 0; j < this->ns; ++j) {
-                tens_prod[i][j] = 2*slowdrift[i]*solution[j]*(this->rho(x,y)/gaussian(y,sigmas));
+                tens_prod[i][j] = 2*slowdrift[i]*solution[j]*(this->rho(x,y)/gaussian(z,sigmas));
             }
         }
         return tens_prod;
     };
-    result = cholesky(symmetric( gauss.quadnd(lambda, sigmas, result) ));
+    result = cholesky(symmetric( gauss.quadnd(lambda, sigmas, result) * det_sqrt_cov ));
     return result;
 }
-
-/* vector< vector<double> > Problem::day(vector<double> x, vector<double> y) { */
-/*     vector< vector<double> > result(this->ns,vector<double>(this->nf,0.)); */
-/*     result[0][0] = cos(x[0])*(2*cos(y[0]) - 2*y[0]*sin(y[0]) + cos(y[0])); */
-/*     return result; */
-/* } */
-
-/* vector<double> Problem::drif(vector<double> x, vector<double> y) { */
-/*     vector<double> result(2*this->nf,0.); */
-/*     result[0] = -2*y[0]; */
-/*     result[1] = -2*y[1] + cos(x[0])*cos(y[0]); */
-/*     return result; */
-/* } */
-
-/* vector<double> Problem::diff(vector<double> x, vector<double> y) { */
-/*     vector<double> result(2*nf,0.); */
-/*     result[0] = sqrt(2.); */
-/*     return result; */
-/* } */

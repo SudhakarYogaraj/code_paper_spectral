@@ -4,7 +4,7 @@
 CXX    = clang++
 CXXFLAGS = -O3 -std=c++11 -Wall
 target = dev.exec
-objects = main.o Problem.o Solver_hmm.o Solver_spectral.o Gaussian_integrator.o toolbox.o io.o tictoc.o
+objects = main.o Problem.o Solver_hmm.o Solver_spectral.o Gaussian_integrator.o toolbox.o io.o tictoc.o templates.o
 
 all : $(target)
 
