@@ -37,20 +37,16 @@ double Solver_spectral::basis(vector<int> mult, vector<double> x, vector<double>
 
 void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_coeffs>& c, double t) {
 
-    int nf = problem.nf;
-    int ns = problem.ns;
-    int nb = bin(degree + nf, nf);
+    // Parameters of the problem
+    int nf = problem.nf, ns = problem.ns, nb = bin(degree + nf, nf);
 
-    c = vector<SDE_coeffs> (nb);
+    // Integrator
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
-    /* vector<double> sigmas_hf(1, 1./sqrt(2.) ); */
+    // Vectors to store the coefficients of the sde
+    c = vector<SDE_coeffs> (nb);
+
     vector<double> sigmas_hf = {0.4, 0.4, 0.4};
-    /* vector<double> sigmas_hf = problem.sigmas*0.5; */
-    /* for (unsigned int iii = 0; iii < sigmas_hf.size(); ++iii) { */
-    /*     cout << setw(12) << sigmas_hf[iii]; */
-    /*     cout << endl; */
-    /* } */
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
@@ -144,7 +140,6 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
         progress_bar(( (double) (i*nb) )/( (double) (nb*(2*nb + 1)) ));
-        vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nb; ++j) {
             for (int k = 0; k < nb; ++k) {
                 tmp_mat[i][j] += herm_to_basis[j][k]*prod_mat[i][k];
