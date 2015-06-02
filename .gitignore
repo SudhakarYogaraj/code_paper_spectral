@@ -1,21 +1,12 @@
-# Literature pdf files
-figures
+## Addition to the default .gitignore
 Problem.cpp
 *.exec
 *.o
-*.mat
-*.bak
-*.gen
-*.pyc
 tmp/
 *\~
 .dropbox
 Session.vim
-main.tex
 
-## Addition to the default .gitignore
-*.sty
-!header.sty
 
 *.zip
 *.pdf

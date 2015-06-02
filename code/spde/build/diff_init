@@ -1,2 +1,0 @@
-vector<double> Problem::diff(vector<double> x, vector<double> y) {
-    vector<double> result(2*nf,0.);
