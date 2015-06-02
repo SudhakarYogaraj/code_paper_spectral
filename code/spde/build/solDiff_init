@@ -1,2 +1,0 @@
-vector< vector<double> > Problem::soldiff(vector<double> x) {
-    vector< vector<double> > result(this->d,vector<double>(this->d,0.));

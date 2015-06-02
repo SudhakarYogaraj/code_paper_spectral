@@ -1,2 +1,0 @@
-vector<double> Problem::soldrif(vector<double> x) {
-    vector<double> result(this->d,0.);
