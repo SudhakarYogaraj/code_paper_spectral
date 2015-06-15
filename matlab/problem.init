@@ -10,7 +10,7 @@ void Problem::init() {
 
     this->t_end = 1.;
     this->nf = 2;
-    this->ns = 1;
+    this->ns = 2;
     this->x0 = vector<double>(ns,1.2);
     this->lambdas = {2};
     this->betas   = {sqrt(2)};
@@ -81,14 +81,16 @@ void Problem::update_stats(vector<double> x) {
         inv_cov = transpose(inv_cov);
     }
 
-    niceMat(sqrt_cov);
-    cout << " --- " << endl;
+    cout << endl << "* Covariance matrix of the invariant density" << endl;
     niceMat(covariance);
-    cout << " --- " << endl;
+
+    cout << endl << "* Inverse of the covariance matrix" << endl;
     niceMat(inv_cov);
-    cout << " --- " << endl;
+
+    cout << endl << "* Bias of the invariant density" << endl;
     niceVec(bias);
-    cout << " --- " << endl;
+
+    cout << endl << "* Eigenvectors of the covariance matrix" << endl;
     niceMat(eig_vec_cov);
 }
 
