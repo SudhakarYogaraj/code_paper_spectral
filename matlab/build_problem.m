@@ -9,7 +9,7 @@ pi = sym('pi');
 %% USER INPUT %%
 
 % Slow variables
-ns = 1;
+ns = 2;
 
 % Fast variables
 nf = 2;
@@ -31,7 +31,7 @@ for k = 1:nf; y(k) = sym(sprintf('y%d', k-1), 'real'); end
 % Potential
 % v = y(1)^2/2 + y(2)^2/2 + y(3)^2/2
 % v = y(1)^4/4 - y(1)^2/2 + (y(2)-2)^2/2 + y(3)^4
-v = 0.5 * ((y(1) - 1)^4+ (y(2)-1)^2 + 0.2*(y(1) - 1)*(y(2) -1))   %+ 2*(y(3) + 1)^2
+v = 0.5 * ((y(1) - 1)^4 + (y(2)-1)^2 + 0.2*(y(1) - 1)*(y(2) -1))   %+ 2*(y(3) + 1)^2
 % v = y(1)^2 + y(2)^2
 % v = y(1)*y(1) + log(pi)/2.
 % v = y(1)^4/4 - y(1)^2/2;
@@ -41,8 +41,8 @@ s = sqrt(2);
 
 % Solution of the cell problem
 g(1) = cos(x(1)) * sin(y(1));
-g(2) = cos(x(1)) * sin(y(2));
-g(3) = cos(x(1)) * sin(y(2) + y(1));
+g(2) = cos(x(1)) * sin(y(1) + y(2));
+% g(2) = cos(x(1)) * sin(y(2) + y(1));
 
 % Non-leading order drift of fast process
 h(1) = cos(x(1)) * cos(y(1))  * cos(y(2));
