@@ -232,10 +232,9 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
                 A0[j][k] += 2*solution[j][i]*coefficients[k][i];
             }
         }
-
-        c[i].diff =  cholesky(symmetric(A0));
-        c[i].drif = F1 + F2;
     }
+    c[nb-1].diff =  cholesky(symmetric(A0));
+    c[nb-1].drif = F1 + F2;
 }
 
 Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars, string string_basis) {

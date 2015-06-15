@@ -4,6 +4,7 @@ Problem.cpp
 *.o
 tmp/
 *\~
+*.pyc
 .dropbox
 Session.vim
 
