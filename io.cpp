@@ -2,7 +2,7 @@
 
 using namespace std;
 
-const string output_path = "/home/urbain/output/";
+const string output_path = "out/";
 
 void writeToFile(string s, vector<double> x) {
     std::ofstream output_file(output_path + s);
