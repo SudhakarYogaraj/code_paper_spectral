@@ -1,5 +1,8 @@
 function build_problem()
 
+% Ensure that folder for temporary files exist
+system('mkdir -p tmp');
+
 % Format of output
 format longEng
 

@@ -8,6 +8,7 @@
 #include "Solver_hmm.hpp"
 #include "templates.hpp"
 #include "io.hpp"
+#include "global.hpp"
 
 #include <iostream>
 #include <iomanip>

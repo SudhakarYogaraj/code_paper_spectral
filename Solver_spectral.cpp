@@ -6,6 +6,7 @@
 #include "Solver_spectral.hpp"
 #include "templates.hpp"
 #include "io.hpp"
+#include "global.hpp"
 #include <iomanip>
 
 using namespace std;
@@ -85,9 +86,9 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector<double> coefficients_h(nb, 0.);
-    cout << "* Calculating the right-hand side of the linear system." << endl << endl;
+    if(VERBOSE) cout << "* Calculating the right-hand side of the linear system." << endl << endl;
     for (int i = 0; i < nb; ++i) {
-        progress_bar(((double) i )/((double) nb));
+        if(VERBOSE) progress_bar(((double) i )/((double) nb));
         vector<int> multIndex = ind2mult(i, degree, nf);
 
         vector<double> v0(ns,0.);
@@ -123,7 +124,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
         }
         coefficients_h[i] = result_h;
     }
-    end_progress_bar();
+    if(VERBOSE) end_progress_bar();
 
     for (int i = 0; i < ns; ++i) {
         for (int j = 0; j < ns; ++j) {
@@ -141,7 +142,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     int n_done = 0;
     vector<double> tmp_vec(n_tmp, 0.);
     vector<int> position_visited(n_tmp, 0);
-    cout << "* Calculating the necessary products < L mi , mj >." << endl << endl;
+    if(VERBOSE) cout << "* Calculating the necessary products < L mi , mj >." << endl << endl;
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult(i, degree, nf);
         for (int j = 0; j < nb; ++j) {
@@ -149,7 +150,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
             int index = mult2ind(m1 + m2, 2*degree);
             if (position_visited[index] == 0) {
                 n_done ++;
-                progress_bar(((double) n_done)/((double) n_tmp));
+                if(VERBOSE) progress_bar(((double) n_done)/((double) n_tmp));
                 position_visited[index] = 1;
                 auto lambda = [&] (vector<double> z) -> double {
                     vector<double> y = rescale(z);
@@ -163,7 +164,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
             }
         }
     }
-    end_progress_bar();
+    if(VERBOSE) end_progress_bar();
 
     vector< vector<double> > prod_mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
@@ -175,11 +176,11 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
         }
     }
 
-    cout << "* Creating the matrix of the linear system." << endl << endl;
+    if(VERBOSE) cout << "* Creating the matrix of the linear system." << endl << endl;
     vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.));
     vector< vector<double> > mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
-        progress_bar(( (double) (i*nb) )/( (double) (nb*(2*nb + 1)) ));
+        if(VERBOSE) progress_bar(( (double) (i*nb) )/( (double) (nb*(2*nb + 1)) ));
         for (int j = 0; j < nb; ++j) {
             for (int k = 0; k < nb; ++k) {
                 tmp_mat[i][j] += herm_to_basis[j][k]*prod_mat[i][k];
@@ -187,7 +188,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
         }
     }
     for (int i = 0; i < nb; ++i) {
-        progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(2*nb+1)) ));
+        if(VERBOSE) progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(2*nb+1)) ));
         vector<int> m1 = ind2mult(i, degree, nf);
         /* FIXME: sigmas? (urbain, Thu 28 May 2015 18:15:19 BST) */
         /* FIXME: Normalization (urbain, Thu 28 May 2015 20:55:46 BST) */
@@ -202,16 +203,16 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
             mat[j][i] = mat[i][j];
         }
     }
-    end_progress_bar();
+    if(VERBOSE) end_progress_bar();
 
-    cout << "* Solving linear system." << endl;
+    if(VERBOSE) cout << "* Solving linear system." << endl;
     for (int i = 0; i < ns; ++i) {
         solution[i] = solve(mat, coefficients[i]);
         for (int j = 0; j < ns; ++j) {
             solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
         }
     }
-    cout << "done!" << endl;
+    if(VERBOSE) cout << "done!" << endl;
 
     // Calculation of the coefficients of the simplified equation
     vector<double> F1(ns, 0.);
