@@ -6,6 +6,6 @@
 #include <iostream>
 
 void tic();
-void toc();
+double toc();
 
 #endif

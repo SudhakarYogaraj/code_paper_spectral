@@ -7,6 +7,9 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
+
+    int output1 = 1;
+
     // Initialization of the problem
     Problem problem;
     problem.init();
@@ -48,9 +51,38 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    for (int i = 2; i < 30; ++i) {
-        Solver_spectral solver_spectral = Solver_spectral(10, 20, problem.nf, "MONOMIAL");
-        SDE_coeffs ci = solver_spectral.estimator(problem, problem.x0, t[i]);
+
+    // OUTPUT 1: GRAPH TIME - PRECISION FOR SPECTRAL METHOD
+
+    if (output1) {
+
+        vector<int> estimator_degrees = {2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
+        vector<double> estimator_time(estimator_degrees.size());
+        vector<double> estimator_error(estimator_degrees.size());
+
+        cout << "* Generating output for graph precision-time (spectral)" << endl;
+        for (unsigned int i = 0; i < estimator_degrees.size(); ++i) {
+
+            // Create new solver
+            Solver_spectral solver_spectral = Solver_spectral(estimator_degrees[i], 30, problem.nf, "MONOMIAL");
+
+            // Update of the statistics of the invariant measure
+            problem.update_stats(problem.x0);
+
+            // Measure time of execution
+            tic(); SDE_coeffs ci = solver_spectral.estimator(problem, problem.x0, 0.);
+            estimator_time[i] = toc();
+
+            // Erorr
+            vector<double> Ddrif = (ci.drif - problem.soldrif(problem.x0));
+            vector< vector<double> > Ddiff = (ci.diff - problem.soldiff(problem.x0));
+            estimator_error[i] = fabs(Ddrif);// + fabs(Ddiff);
+
+            // Summary of iteration
+            cout << "    Iteration " << i << ". Time: " << estimator_time[i] << ". Error: " << estimator_error[i] << endl;
+        }
+        writeToFile("spectral_time", estimator_time);
+        writeToFile("spectral_error", estimator_error);
     }
 
     for (unsigned int j = 0; j < p_values.size(); ++j) {
