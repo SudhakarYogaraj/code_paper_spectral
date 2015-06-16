@@ -34,7 +34,7 @@ double Solver_spectral::basis(vector<int> mult, vector<double> x, vector<double>
     return result;
 }
 
-void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_coeffs>& c, double t) {
+SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double t) {
 
     // Parameters of the problem
     int nf = problem.nf, ns = problem.ns, nb = bin(degree + nf, nf);
@@ -43,7 +43,7 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     // Vectors to store the coefficients of the sde
-    c = vector<SDE_coeffs> (nb);
+    SDE_coeffs sde_coeffs;
 
     vector<double> sigmas_hf = {0.8, 0.7};
     vector<double> sigmas_1 = {1., 1.};
@@ -233,8 +233,9 @@ void Solver_spectral::estimator(Problem &problem, vector<double> x,  vector<SDE_
             }
         }
     }
-    c[nb-1].diff =  cholesky(symmetric(A0));
-    c[nb-1].drif = F1 + F2;
+    sde_coeffs.diff =  cholesky(symmetric(A0));
+    sde_coeffs.drif = F1 + F2;
+    return sde_coeffs;
 }
 
 Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars, string string_basis) {

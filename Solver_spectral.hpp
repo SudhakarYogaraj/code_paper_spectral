@@ -15,7 +15,7 @@ class Solver_spectral {
         int nNodes;
 
         Solver_spectral(int degree, int nNodes, int n_vars, std::string poly_basis);
-        void estimator(Problem&, std::vector<double> x, std::vector<SDE_coeffs>& , double t);
+        SDE_coeffs estimator(Problem&, std::vector<double> x, double t);
 
     private:
         // Matrix containing the coefficients of uni- and multi-
