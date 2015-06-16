@@ -3,6 +3,7 @@
 #include "Gaussian_integrator.hpp"
 #include "toolbox.hpp"
 #include "io.hpp"
+#include "global.hpp"
 
 using namespace std;
 
@@ -81,17 +82,19 @@ void Problem::update_stats(vector<double> x) {
         inv_cov = transpose(inv_cov);
     }
 
-    cout << endl << "* Covariance matrix of the invariant density" << endl;
-    niceMat(covariance);
+    if(DEBUG) {
+        cout << endl << "* Covariance matrix of the invariant density" << endl;
+        niceMat(covariance);
 
-    cout << endl << "* Inverse of the covariance matrix" << endl;
-    niceMat(inv_cov);
+        cout << endl << "* Inverse of the covariance matrix" << endl;
+        niceMat(inv_cov);
 
-    cout << endl << "* Bias of the invariant density" << endl;
-    niceVec(bias);
+        cout << endl << "* Bias of the invariant density" << endl;
+        niceVec(bias);
 
-    cout << endl << "* Eigenvectors of the covariance matrix" << endl;
-    niceMat(eig_vec_cov);
+        cout << endl << "* Eigenvectors of the covariance matrix" << endl;
+        niceMat(eig_vec_cov);
+    }
 }
 
 vector<double> Problem::rescale(vector<double> y) {

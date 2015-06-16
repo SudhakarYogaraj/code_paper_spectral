@@ -2,7 +2,7 @@
 Problem.cpp
 *.exec
 *.o
-tmp/
+tmp
 *\~
 *.pyc
 .dropbox
