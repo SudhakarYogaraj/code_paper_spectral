@@ -1,6 +1,5 @@
 #ifndef TEMPLATES_H
 #define TEMPLATES_H
-
 #include <vector>
 #include <cmath>
 
