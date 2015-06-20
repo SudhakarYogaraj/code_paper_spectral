@@ -1,6 +1,9 @@
 ## Addition to the default .gitignore
 Problem.cpp
 *.exec
+dep
+obj
+out
 *.o
 tmp
 *\~
