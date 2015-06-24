@@ -31,16 +31,17 @@ class Solver_spectral {
         // exansion in monomials.
         std::vector<double> basis2herm (std::vector<double> mcoeffs, int n, int ns);
 
-        // Auxiliary function to convert multi-indices to linear indices.
+        // Auxiliary functions to convert multi-indices to linear indices, and
+        // vice-versa.
         int mult2ind(std::vector<int> m);
-
-        // Auxiliary function to convert linear indices to multi-indices.
         std::vector<int> ind2mult(int ind, int n);
-
-        // basis of polynomials to use
-        std::string poly_basis;
 
         // Calculate coefficients of Hermite polynomials.
         void hermite_coefficients (int degree, std::vector< std::vector<double> >& matrix);
+
+        // Bias and covariance of approximating function
+        std::vector<double> bias;
+        std::vector<double> eig_val_cov;
+        std::vector< std::vector<double> > eig_vec_cov;
 };
 #endif

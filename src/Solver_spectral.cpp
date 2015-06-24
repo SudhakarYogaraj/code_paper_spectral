@@ -14,47 +14,61 @@ using namespace std;
 
 SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double t) {
 
-    // Parameters of the problem
-    int nf = problem.nf, ns = problem.ns, nb = bin(degree + nf, nf);
-
-    // Integrator
-    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
-
     // Vectors to store the coefficients of the sde
     SDE_coeffs sde_coeffs;
 
-    vector<double> sigmas_hf = {0.8, 0.7};
+    // Parameters of the problem
+    int nf = problem.nf;
+    int ns = problem.ns;
+    int nb = bin(degree + nf, nf);
+
+    // User defined rescaling of the eigenvalues
+    vector<double> var_scaling = {0.8, 0.7};
     vector<double> sigmas_1 = {1., 1.};
 
-    // rescaling
-    double det_change = 1.;
-    vector<double> eig_change (nf,0.);
-    vector< vector<double> > mat_change = problem.eig_vec_cov;
+    // Update of bias and covariance
+    this->bias = problem.bias;
+    this->eig_vec_cov = problem.eig_vec_cov;
+    this->eig_val_cov = problem.eig_val_cov;
+
+    // User-defined scaling of the eigenvalues
     for (int i = 0; i < nf; ++i) {
-        eig_change[i] = problem.eig_val_cov[i] * sigmas_hf[i] * sigmas_hf[i];
-        det_change *= sqrt(eig_change[i]);
+        this->eig_val_cov[i] *= var_scaling[i]*var_scaling[i];
     }
+
+    // Square root of covariance matrix
+    vector< vector<double> > sqrt_cov = this->eig_vec_cov;
     for (int i = 0; i < nf; i++) {
         for (int j = 0; j < nf; j++) {
-            mat_change[i][j] *= sqrt(eig_change[j]);
+            sqrt_cov[i][j] *= sqrt(this->eig_val_cov[j]);
         }
+    }
+
+    // Determinant of the covariance matrix
+    double det_cov = 1.;
+    for (int i = 0; i < nf; ++i) {
+        det_cov *= this->eig_val_cov[i];
     }
 
     auto rescale = [&] (vector<double> z) -> vector<double> {
         vector<double> result(z.size(), 0.);
         for (int i = 0; i < z.size(); ++i) {
             for (int j = 0; j < z.size(); ++j) {
-                result[i] += mat_change[i][j] * z[j];
+                result[i] += sqrt_cov[i][j] * z[j];
             }
         }
         return (result + problem.bias);
     };
 
+    // Integrator
+    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
+
+
     auto gaussian_linear_term = [&] (vector<double> z) -> double {
         double laplacian = 0., grad2 = 0., S = 2.;
         for (int k = 0; k < nf; ++k) {
-            laplacian += 1/eig_change[k];
-            grad2 += z[k]*z[k] / eig_change[k];
+            laplacian += 1/this->eig_val_cov[k];
+            grad2 += z[k]*z[k] /this->eig_val_cov[k];
         }
         return (0.25 * S * laplacian - 0.125 * S * grad2);
     };
@@ -89,9 +103,9 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
         };
 
         // ! Hermite polynomials don't have scaling (H(x,s) = H(x/s, 1))
-        vector<double> result = gauss.quadnd(lambda, sigmas_1, v0) * sqrt(det_change);
-        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, sigmas_1, m0) * sqrt(det_change);
-        double result_h = gauss.quadnd(lambda_h, sigmas_1) * sqrt(det_change);
+        vector<double> result = gauss.quadnd(lambda, sigmas_1, v0) * sqrt(sqrt(det_cov));
+        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, sigmas_1, m0) * sqrt(sqrt(det_cov));
+        double result_h = gauss.quadnd(lambda_h, sigmas_1) * sqrt(sqrt(det_cov));;
 
         for (int j = 0; j < ns; ++j) {
             coefficients[j][i] = result[j];
@@ -171,7 +185,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
         /* FIXME: Normalization (urbain, Thu 28 May 2015 20:55:46 BST) */
 
         for (int j = 0; j < nf; ++j) {
-            mat[i][i] += m1[j]/eig_change[j];
+            mat[i][i] += m1[j]/this->eig_val_cov[j];
         }
         for (int j = 0; j <= i; ++j) {
             for (int k = 0; k < nb; ++k) {
@@ -195,24 +209,32 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     vector<double> F1(ns, 0.);
     vector<double> F2(ns, 0.);
     vector< vector <double> > A0(ns, vector<double>(ns,0.));
+
+    // Calculation of the coefficients of the effective equation
     for (int i = 0; i < nb; ++i) {
+
+        // First part of the drift coefficient
         for (int j = 0; j < ns; ++j) {
             for (int k = 0; k < ns; ++k)
                 F1[j] += solution_dx[j][k][i]*coefficients[k][i];
         }
 
+        // Second part of the drift coefficient
         for (int j = 0; j < ns; ++j) {
             F2[j] += solution[j][i]*coefficients_h[i];
         }
 
+        // Diffusion coefficient
         for (int j = 0; j < ns; ++j) {
             for (int k = 0; k < ns; ++k) {
                 A0[j][k] += 2*solution[j][i]*coefficients[k][i];
             }
         }
     }
+
     sde_coeffs.diff =  cholesky(symmetric(A0));
     sde_coeffs.drif = F1 + F2;
+
     return sde_coeffs;
 }
 
@@ -263,6 +285,12 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
     this->hermiteCoeffs_nd = matnd;
 }
 
+/*! Compute linear index from multi-index
+ *
+ * This functions computes the linear index associated with a given multi-index.
+ * Note that the ordering chosen is such that the resulting multi-index does not
+ * depend on the degree of polynomial approximation.
+ */
 int Solver_spectral::mult2ind(vector<int> m) {
 
     // Number of variables
