@@ -32,10 +32,10 @@ class Solver_spectral {
         std::vector<double> basis2herm (std::vector<double> mcoeffs, int n, int ns);
 
         // Auxiliary function to convert multi-indices to linear indices.
-        int mult2ind(std::vector<int> m, int ns);
+        int mult2ind(std::vector<int> m);
 
         // Auxiliary function to convert linear indices to multi-indices.
-        std::vector<int> ind2mult(int ind, int ns, int n);
+        std::vector<int> ind2mult(int ind, int n);
 
         // basis of polynomials to use
         std::string poly_basis;
