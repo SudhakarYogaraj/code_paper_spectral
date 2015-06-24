@@ -51,7 +51,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-
     // OUTPUT 1: GRAPH TIME - PRECISION FOR SPECTRAL METHOD
 
     if (output1) {
@@ -59,6 +58,9 @@ int main(int argc, char* argv[]) {
         vector<int> estimator_degrees = {2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
         vector<double> estimator_time(estimator_degrees.size());
         vector<double> estimator_error(estimator_degrees.size());
+
+        ofstream out_time("out/spectral_time");
+        ofstream out_errs("out/spectral_error");
 
         cout << "* Generating output for graph precision-time (spectral)" << endl;
         for (unsigned int i = 0; i < estimator_degrees.size(); ++i) {
@@ -80,9 +82,13 @@ int main(int argc, char* argv[]) {
 
             // Summary of iteration
             cout << "    Iteration " << i << ". Time: " << estimator_time[i] << ". Error: " << estimator_error[i] << endl;
+
+            // Write to file
+            out_time << estimator_time[i] << endl;
+            out_errs << estimator_error[i] << endl;
         }
-        writeToFile("spectral_time", estimator_time);
-        writeToFile("spectral_error", estimator_error);
+        /* writeToFile("spectral_time", estimator_time); */
+        /* writeToFile("spectral_error", estimator_error); */
     }
 
     for (unsigned int j = 0; j < p_values.size(); ++j) {

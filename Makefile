@@ -38,7 +38,7 @@ $(TARGET) : $(OBJ_FILES)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(MAKEDEPEND)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-	sed -i "s#^\([^.]*\.o\)#$(OBJ_DIR)/\1#g" $(DEP_DIR)/$*.d
+	@sed -i "s#^\([^.]*\.o\)#$(OBJ_DIR)/\1#g" $(DEP_DIR)/$*.d
 
 # Build problem (generates Problem.cpp)
 problem:
