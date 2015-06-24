@@ -5,7 +5,6 @@
 #include <string>
 #include <functional>
 #include <vector>
-#include <assert.h>
 
 class Solver_spectral {
     public:
@@ -14,7 +13,7 @@ class Solver_spectral {
         int degree;
         int nNodes;
 
-        Solver_spectral(int degree, int nNodes, int n_vars, std::string poly_basis);
+        Solver_spectral(int degree, int nNodes, int n_vars);
         SDE_coeffs estimator(Problem&, std::vector<double> x, double t);
 
     private:
@@ -25,7 +24,7 @@ class Solver_spectral {
         std::vector< std::vector<double> > herm_to_basis;
 
         // Basis used for the method
-        double basis(std::vector<int> mult, std::vector<double> x, std::vector<double> sigmas);
+        double monomial(std::vector<int> mult, std::vector<double> x);
 
         // Function to obtain the coefficients of the expansion of a
         // polynomial in terms of hermite polynomials, based on its
@@ -40,5 +39,8 @@ class Solver_spectral {
 
         // basis of polynomials to use
         std::string poly_basis;
+
+        // Calculate coefficients of Hermite polynomials.
+        void hermite_coefficients (int degree, std::vector< std::vector<double> >& matrix);
 };
 #endif

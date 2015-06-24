@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
         for (unsigned int i = 0; i < estimator_degrees.size(); ++i) {
 
             // Create new solver
-            Solver_spectral solver_spectral = Solver_spectral(estimator_degrees[i], 30, problem.nf, "MONOMIAL");
+            Solver_spectral solver_spectral = Solver_spectral(estimator_degrees[i], 30, problem.nf);
 
             // Update of the statistics of the invariant measure
             problem.update_stats(problem.x0);
@@ -94,10 +94,7 @@ int main(int argc, char* argv[]) {
     for (unsigned int j = 0; j < p_values.size(); ++j) {
 
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
-        /* Solver_spectral solver_spectral = Solver_spectral(20, 30, problem.nf, "MONOMIAL"); */
-        /* Solver_spectral solver_spectral = Solver_spectral(12, 30, problem.nf, "HERMITE"); */
-        /* too long */
-        Solver_spectral solver_spectral = Solver_spectral(10, 20, problem.nf, "MONOMIAL");
+        Solver_spectral solver_spectral = Solver_spectral(10, 20, problem.nf);
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.ns,0.));
