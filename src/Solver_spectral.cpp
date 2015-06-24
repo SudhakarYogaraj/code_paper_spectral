@@ -323,7 +323,7 @@ vector<double> Solver_spectral::basis2herm (vector<double> bcoeffs, int n, int n
  * degree 0 to the degree passed to the method. The coefficients on the first
  * line represent the coefficients of the.
  */
-void hermite_coefficients (int degree, vector< vector<double> >& matrix) {
+void Solver_spectral::hermite_coefficients (int degree, vector< vector<double> >& matrix) {
 
     if (degree >= 0) {
         matrix[0][0] = 1.0;
