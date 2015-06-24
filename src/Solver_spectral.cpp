@@ -66,7 +66,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     if(VERBOSE) cout << "* Calculating the right-hand side of the linear system." << endl << endl;
     for (int i = 0; i < nb; ++i) {
         if(VERBOSE) progress_bar(((double) i )/((double) nb));
-        vector<int> multIndex = ind2mult(i, degree, nf);
+        vector<int> multIndex = ind2mult(i, nf);
 
         vector<double> v0(ns,0.);
         vector< vector<double> > m0(ns, vector<double> (ns,0.));
@@ -121,10 +121,10 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     vector<int> position_visited(n_tmp, 0);
     if(VERBOSE) cout << "* Calculating the necessary products < L mi , mj >." << endl << endl;
     for (int i = 0; i < nb; ++i) {
-        vector<int> m1 = ind2mult(i, degree, nf);
+        vector<int> m1 = ind2mult(i, nf);
         for (int j = 0; j < nb; ++j) {
-            vector<int> m2 = ind2mult(j, degree, nf);
-            int index = mult2ind(m1 + m2, 2*degree);
+            vector<int> m2 = ind2mult(j, nf);
+            int index = mult2ind(m1 + m2);
             if (position_visited[index] == 0) {
                 n_done ++;
                 if(VERBOSE) progress_bar(((double) n_done)/((double) n_tmp));
@@ -145,10 +145,10 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
 
     vector< vector<double> > prod_mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
-        vector<int> m1 = ind2mult(i, degree, nf);
+        vector<int> m1 = ind2mult(i, nf);
         for (int j = 0; j < nb; ++j) {
-            vector<int> m2 = ind2mult(j, degree, nf);
-            int index = mult2ind(m1 + m2, 2*degree);
+            vector<int> m2 = ind2mult(j, nf);
+            int index = mult2ind(m1 + m2);
             prod_mat[i][j] = tmp_vec[index];
         }
     }
@@ -166,7 +166,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     }
     for (int i = 0; i < nb; ++i) {
         if(VERBOSE) progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(2*nb+1)) ));
-        vector<int> m1 = ind2mult(i, degree, nf);
+        vector<int> m1 = ind2mult(i, nf);
         /* FIXME: sigmas? (urbain, Thu 28 May 2015 18:15:19 BST) */
         /* FIXME: Normalization (urbain, Thu 28 May 2015 20:55:46 BST) */
 
@@ -240,12 +240,12 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
     for (int i = 0; i < nb; ++i) {
 
         // Multi-index corresponding to linear index i
-        vector<int> m1 = ind2mult(i,degree,n_vars);
+        vector<int> m1 = ind2mult(i,n_vars);
 
         for (int j = 0; j < nb; ++j) {
 
             // Multi-index corresponding to linear index j
-            vector<int> m2 = ind2mult(j,degree,n_vars);
+            vector<int> m2 = ind2mult(j,n_vars);
 
             // Calculation of the coefficients of x^m2 in h^m1
             matnd[i][j] = 1.;
@@ -263,36 +263,81 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
     this->hermiteCoeffs_nd = matnd;
 }
 
-int Solver_spectral::mult2ind(vector<int> m, int ns) {
-    int l = m.size() - 1; int i;
-    for(i = l; (i > 0) & (m[i] == 0); i--);
+int Solver_spectral::mult2ind(vector<int> m) {
 
-    if ((i == 0) & (m[0] == 0))
-        return 0;
+    // Number of variables
+    int n = m.size();
 
-    int s = 0;
-    for (unsigned int j = 0; j < m.size(); ++j)
-        s += m[j];
-
-    int dr = ns - s;
-    int vr = l - i;
-    m[i] = m[i] - 1;
-    return bin(dr + vr + 1, vr) + mult2ind(m, ns);
-}
-
-vector<int> Solver_spectral::ind2mult(int ind, int ns, int n) {
-    vector<int> m(n,0); int s = 0;
-    for (int i = 0; i < ind; ++i) {
-        if (s < ns) {
-            m[n-1] ++; s++;
-        } else {
-            int j; for(j = n-1; m[j] == 0; j--);
-            s -= m[j]; m[j] = 0; m[j-1] ++; s ++;
-        }
+    // Univariate case
+    if(n == 1) {
+        return m[0];
     }
-    return m;
+
+    // Degree of m
+    int degree = 0;
+
+    // Calculation of the degree
+    for (int i = 0; i < m.size(); ++i) {
+        degree += m[i];
+    }
+
+    // Case degree == 0
+    if (degree == 0) {
+        return 0;
+    }
+
+    // Dimension of the space of degree (degree - 1)
+    int result = bin((degree-1) + n, n);
+
+    // Remove last element of m
+    m.pop_back();
+
+    return result + mult2ind(m);
 }
 
+/*! Compute multi-index from linear index
+ *
+ * This function computes the multi-index corresponding to the linear index
+ * passed in argument. The arguments are
+ * - ind: the linear index,
+ * - n: size of the multiindex.
+ */
+vector<int> Solver_spectral::ind2mult(int ind, int n) {
+
+    // Univariate case
+    if (n == 1) {
+        return vector<int>(1,ind);
+    }
+
+    // Degree of the corresponding multi-index
+    int degree = 0;
+
+    // Calculation of the degree
+    while ( bin(degree + n, n) <= ind) {
+        degree ++;
+    }
+
+    // Case when degree == 0
+    if (degree == 0) {
+        return vector<int>(n,0);
+    }
+
+    // Dimension of the space of strictly lower degree
+    int dim = bin((degree-1) + n, n);
+
+    // Initialization of the vector that will contain the result
+    vector<int> result = ind2mult(ind - dim, n-1);
+
+    // Add an element at the end
+    result.push_back(degree);
+
+    // Calculate value of last element
+    for (int i = 0; i < n-1; ++i) {
+        result[n-1] -= result[i];
+    }
+
+    return result;
+}
 
 /*! Function to evaluate monomial in a point
  *
@@ -300,6 +345,7 @@ vector<int> Solver_spectral::ind2mult(int ind, int ns, int n) {
  * multi-index, in a point.
  */
 double Solver_spectral::monomial(vector<int> mult, vector<double> x) {
+
     double result = 1.;
     for (unsigned int i = 0; i < mult.size(); ++i) {
         result *= ipow(x[i], mult[i]);
