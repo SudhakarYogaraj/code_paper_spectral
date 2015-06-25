@@ -12,6 +12,84 @@
 
 using namespace std;
 
+/*! Function that calculates the 0-order term in the Schrodinger equation
+ *
+ * Assuming that L is the generator of an OU process with
+ *
+ * TODO: add description (urbain, Thu 25 Jun 2015 01:27:09 CEST)
+ */
+double Solver_spectral::gaussian_linear_term(vector<double> z) {
+
+    // Laplacian term.
+    double laplacian = 0.;
+
+    // Square of the gradient.
+    double grad2 = 0.;
+
+    // Square of the coefficient of the noise.
+    double S = 2.;
+
+    // Computation of the term
+    for (int k = 0; k < this->nf; ++k) {
+        laplacian += 1/this->eig_val_cov[k];
+        grad2 += z[k]*z[k] /this->eig_val_cov[k];
+    }
+
+    // Standard formula for the potential
+    return (0.25 * S * laplacian - 0.125 * S * grad2);
+}
+
+/*! Change of variable y = Cz + m
+ *
+ * This function implements the change of variables y = Cz + m.. If z is
+ * distributed as G(0,I), y will be distributed as G(CC^T,m).
+ */
+vector<double> Solver_spectral::map_to_real(vector<double> z) {
+
+    // Initialization
+    vector<double> result(z.size(), 0.);
+
+    for (int i = 0; i < z.size(); ++i) {
+
+        // Left-multiply z by covariance matrix
+        for (int j = 0; j < z.size(); ++j) {
+            result[i] += this->sqrt_cov[i][j] * z[j];
+        }
+
+        // Add bias
+        result[i] += this->bias[i];
+    }
+
+    return result;
+}
+
+void Solver_spectral::update_stats(Problem &problem, vector<double> var_scaling) {
+
+    // Update of bias and covariance
+    this->bias = problem.bias;
+    this->eig_vec_cov = problem.eig_vec_cov;
+    this->eig_val_cov = problem.eig_val_cov;
+
+    // Apply user-defined extra-scaling
+    for (int i = 0; i < nf; ++i) {
+        this->eig_val_cov[i] *= var_scaling[i]*var_scaling[i];
+    }
+
+    // Square root of covariance matrix
+    this->sqrt_cov = this->eig_vec_cov;
+    for (int i = 0; i < nf; i++) {
+        for (int j = 0; j < nf; j++) {
+            this->sqrt_cov[i][j] *= sqrt(this->eig_val_cov[j]);
+        }
+    }
+
+    // Determinant of the covariance matrix
+    this->det_cov = 1.;
+    for (int i = 0; i < nf; ++i) {
+        this->det_cov *= this->eig_val_cov[i];
+    }
+}
+
 SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double t) {
 
     // Vectors to store the coefficients of the sde
@@ -24,54 +102,12 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
 
     // User defined rescaling of the eigenvalues
     vector<double> var_scaling = {0.8, 0.7};
-    vector<double> sigmas_1 = {1., 1.};
 
-    // Update of bias and covariance
-    this->bias = problem.bias;
-    this->eig_vec_cov = problem.eig_vec_cov;
-    this->eig_val_cov = problem.eig_val_cov;
-
-    // User-defined scaling of the eigenvalues
-    for (int i = 0; i < nf; ++i) {
-        this->eig_val_cov[i] *= var_scaling[i]*var_scaling[i];
-    }
-
-    // Square root of covariance matrix
-    vector< vector<double> > sqrt_cov = this->eig_vec_cov;
-    for (int i = 0; i < nf; i++) {
-        for (int j = 0; j < nf; j++) {
-            sqrt_cov[i][j] *= sqrt(this->eig_val_cov[j]);
-        }
-    }
-
-    // Determinant of the covariance matrix
-    double det_cov = 1.;
-    for (int i = 0; i < nf; ++i) {
-        det_cov *= this->eig_val_cov[i];
-    }
-
-    auto rescale = [&] (vector<double> z) -> vector<double> {
-        vector<double> result(z.size(), 0.);
-        for (int i = 0; i < z.size(); ++i) {
-            for (int j = 0; j < z.size(); ++j) {
-                result[i] += sqrt_cov[i][j] * z[j];
-            }
-        }
-        return (result + problem.bias);
-    };
+    // Update statistics of Gaussian
+    this->update_stats(problem, var_scaling);
 
     // Integrator
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
-
-
-    auto gaussian_linear_term = [&] (vector<double> z) -> double {
-        double laplacian = 0., grad2 = 0., S = 2.;
-        for (int k = 0; k < nf; ++k) {
-            laplacian += 1/this->eig_val_cov[k];
-            grad2 += z[k]*z[k] /this->eig_val_cov[k];
-        }
-        return (0.25 * S * laplacian - 0.125 * S * grad2);
-    };
 
     // Expansion of right-hand side of the Poisson equation
     vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
@@ -90,22 +126,23 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
         // gaussian = mean 0 var 1 gaussian
         // 2 factors: x det(s) for scaling of domain / sqrt(det(s)) for scaling of hf
         auto lambda = [&] (vector<double> z) -> vector<double> {
-            vector<double> y = rescale(z);
-            return problem.a(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_1) );
+            vector<double> y = this->map_to_real(z);
+            return problem.a(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z) );
         };
         auto lambda_dx = [&] (vector<double> z) -> vector< vector<double> > {
-            vector<double> y = rescale(z);
-            return problem.dax(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_1) );
+            vector<double> y = this->map_to_real(z);
+            return problem.dax(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z) );
         };
         auto lambda_h = [&] (vector<double> z) -> double {
-            vector<double> y = rescale(z);
-            return problem.stardiv_h(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z,sigmas_1) );
+            vector<double> y = this->map_to_real(z);
+            return problem.stardiv_h(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z) );
         };
+        // relation stardiv hmm formula.
 
         // ! Hermite polynomials don't have scaling (H(x,s) = H(x/s, 1))
-        vector<double> result = gauss.quadnd(lambda, sigmas_1, v0) * sqrt(sqrt(det_cov));
-        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, sigmas_1, m0) * sqrt(sqrt(det_cov));
-        double result_h = gauss.quadnd(lambda_h, sigmas_1) * sqrt(sqrt(det_cov));;
+        vector<double> result = gauss.quadnd(lambda, v0) * sqrt(sqrt(det_cov));
+        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, m0) * sqrt(sqrt(det_cov));
+        double result_h = gauss.quadnd(lambda_h) * sqrt(sqrt(det_cov));;
 
         for (int j = 0; j < ns; ++j) {
             coefficients[j][i] = result[j];
@@ -144,14 +181,14 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
                 if(VERBOSE) progress_bar(((double) n_done)/((double) n_tmp));
                 position_visited[index] = 1;
                 auto lambda = [&] (vector<double> z) -> double {
-                    vector<double> y = rescale(z);
+                    vector<double> y = map_to_real(z);
                     double tmp_term = (gaussian_linear_term(z) - problem.linearTerm(x,y));
                     /* if (fabs(tmp_term) > 1e-7) { */
                     /*     cout << tmp_term; */
                     /* } */
                     return tmp_term * monomial(m1 + m2, z);
                 };
-                tmp_vec[index] += gauss.quadnd(lambda, sigmas_1);
+                tmp_vec[index] += gauss.quadnd(lambda);
             }
         }
     }
@@ -246,6 +283,9 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
  * - The number of variables in the fast processes.
  */
 Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
+
+    // Number of fast processes
+    this->nf = n_vars;
 
     // Dimension of the approximation space
     int nb = bin(degree + n_vars, n_vars);

@@ -5,11 +5,10 @@
 using namespace std;
 
 // Standard normal gaussian
-double gaussian(vector<double> y, vector<double> sigmas) {
+double gaussian(vector<double> y) {
     double result = 1.;
     for (unsigned int i = 0; i < y.size(); ++i) {
-        double s = sigmas[i];
-        result *= exp(-y[i]*y[i]/(2*s*s))/(sqrt(2*PI)*s);
+        result *= exp(-y[i]*y[i]/2)/(sqrt(2*PI));
     }
     return result;
 }

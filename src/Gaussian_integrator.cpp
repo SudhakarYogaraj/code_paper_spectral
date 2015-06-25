@@ -69,33 +69,15 @@ Gaussian_integrator::Gaussian_integrator(int nNodes, int nVars) {
 
     this->nodes = x;
     this->weights = w;
+    this->nVars = nVars;
 }
 
-double Gaussian_integrator::flatquadnd(function<double(vector<double>)> f, const vector<double>& sigmas) {
+double Gaussian_integrator::quadnd(function<double(vector<double>)> f) {
     double result = 0.;
-    int nVars = sigmas.size();
     for (unsigned int i = 0; i < nodes.size(); ++i) {
         std::vector<double> x = nodes[i];
         for (int j = 0; j < nVars; ++j) {
-            x[j] = x[j] * (sqrt(2)*sigmas[j]);
-        }
-        double gaussian = 1.;
-        for (unsigned int i = 0; i < sigmas.size(); ++i) {
-            double s = sigmas[i];
-            gaussian *= exp(-x[i]*x[i]/(2*s*s))/(sqrt(2*PI)*s);
-        }
-        result = result + (f(x) * weights[i] * (1/gaussian) );
-    }
-    return result*(1./pow(sqrt(PI),nVars));
-}
-
-double Gaussian_integrator::quadnd(function<double(vector<double>)> f, const vector<double>& sigmas) {
-    double result = 0.;
-    int nVars = sigmas.size();
-    for (unsigned int i = 0; i < nodes.size(); ++i) {
-        std::vector<double> x = nodes[i];
-        for (int j = 0; j < nVars; ++j) {
-            x[j] = x[j] * (sqrt(2)*sigmas[j]);
+            x[j] = x[j] * sqrt(2);
         }
         result = result + (f(x) * weights[i]);
     }

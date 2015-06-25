@@ -17,11 +17,17 @@ class Solver_spectral {
         SDE_coeffs estimator(Problem&, std::vector<double> x, double t);
 
     private:
+
+        // Number of dimension to solve on
+        int nf;
+
         // Matrix containing the coefficients of uni- and multi-
         // dimensional Hermite polynomials in terms of monomials.
         std::vector< std::vector<double> > hermiteCoeffs_1d;
         std::vector< std::vector<double> > hermiteCoeffs_nd;
-        std::vector< std::vector<double> > herm_to_basis;
+
+        double gaussian_linear_term(std::vector<double> z);
+        std::vector<double> map_to_real(std::vector<double> z);
 
         // Basis used for the method
         double monomial(std::vector<int> mult, std::vector<double> x);
@@ -39,9 +45,14 @@ class Solver_spectral {
         // Calculate coefficients of Hermite polynomials.
         void hermite_coefficients (int degree, std::vector< std::vector<double> >& matrix);
 
-        // Bias and covariance of approximating function
+        // Update variance and bias of gaussian
+        void update_stats(Problem& problem, std::vector<double> var_scaling);
+
+        // Statistics associated with the hermite functions
         std::vector<double> bias;
         std::vector<double> eig_val_cov;
         std::vector< std::vector<double> > eig_vec_cov;
+        std::vector< std::vector<double> > sqrt_cov;
+        double det_cov;
 };
 #endif

@@ -22,7 +22,7 @@ std::vector< std::vector<double> > transpose(std::vector< std::vector<double> > 
 std::vector<double> solve(std::vector< std::vector<double> > A, std::vector<double> b);
 
 // Gaussian density.
-double gaussian(std::vector<double> y, std::vector<double> sigmas);
+double gaussian(std::vector<double> y);
 
 // Evaluation of monomials.
 double monomial(std::vector<int> mult, std::vector<double> x, std::vector<double> sigmas);

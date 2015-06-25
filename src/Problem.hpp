@@ -44,7 +44,6 @@ class Problem {
         double stardiv_h(std::vector<double> x, std::vector<double> y);
         std::vector<double> lambdas;
         std::vector<double> betas;
-        std::vector<double> sigmas;
         std::vector<double> bias;
         std::vector<double> eig_val_cov;
         std::vector< std::vector<double> > eig_vec_cov;
