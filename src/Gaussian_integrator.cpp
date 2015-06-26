@@ -67,6 +67,18 @@ Gaussian_integrator::Gaussian_integrator(int nNodes, int nVars) {
         }
     }
 
+    // Scaling to get rid of factors
+    for (int i = 0; i < nPoints; ++i) {
+
+        // Scaling of the weights
+        w[i] /= pow(sqrt(PI),nVars);
+
+        // Scaling of the points
+        for (int j = 0; j < nVars; ++j) {
+            x[i][j] *= sqrt(2);
+        }
+    }
+
     this->nodes = x;
     this->weights = w;
     this->nVars = nVars;
@@ -75,11 +87,7 @@ Gaussian_integrator::Gaussian_integrator(int nNodes, int nVars) {
 double Gaussian_integrator::quadnd(function<double(vector<double>)> f) {
     double result = 0.;
     for (unsigned int i = 0; i < nodes.size(); ++i) {
-        std::vector<double> x = nodes[i];
-        for (int j = 0; j < nVars; ++j) {
-            x[j] = x[j] * sqrt(2);
-        }
-        result = result + (f(x) * weights[i]);
+        result += f(nodes[i]) * weights[i];
     }
-    return result*(1./pow(sqrt(PI),nVars));
+    return result;
 }
