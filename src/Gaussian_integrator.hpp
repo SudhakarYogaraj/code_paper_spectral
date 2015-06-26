@@ -18,13 +18,9 @@ class Gaussian_integrator {
         template<typename T, typename F> std::vector<T> quadnd(F f, const std::vector<T>& v0) {
             std::vector<T> result = v0;
             for (unsigned int i = 0; i < nodes.size(); ++i) {
-                std::vector<double> x = nodes[i];
-                for (int j = 0; j < nVars; ++j) {
-                    x[j] = x[j] * sqrt(2);
-                }
-                result = result + (f(x) * weights[i]);
+                result = result + f(nodes[i]) * weights[i];
             }
-            return result*(1./pow(sqrt(PI),nVars));
+            return result;
         }
 
         std::vector< std::vector<double> > nodes;
