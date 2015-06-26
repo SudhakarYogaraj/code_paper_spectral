@@ -96,10 +96,92 @@ void Solver_spectral::update_stats(Problem &problem, vector<double> var_scaling)
     }
 }
 
+vector< vector<double> >  Solver_spectral::discretize_a(Problem &problem, vector<double> x, Gaussian_integrator& gauss) {
+
+    // Weights and points of the integrator.
+    vector< vector<double> > quad_points = gauss.nodes;
+    vector<double>  quad_weights = gauss.weights;
+
+    // Parameters of the problem
+    int ns = problem.ns;
+    int ni = gauss.weights.size();
+
+    // Discretization of a at gridpoints
+    vector< vector<double> > a_discretized(ns, vector<double> (ni, 1.));
+
+    // Computation of the function to integrate at the gridpoints.
+    for (int i = 0; i < ns; ++i) {
+        for (int j = 0; j < ni; ++j) {
+
+            // Integration point and rescaled version for integrattion
+            vector<double> z = quad_points[j];
+            vector<double> y = map_to_real(z);
+
+            // Scaling to pass to Schrodinger equation;
+            a_discretized[i][j] *= sqrt(problem.rho(x,y));
+
+            // Scaling needed for the integration;
+            a_discretized[i][j] /= sqrt(gaussian(z));
+
+            // Discretization of a
+            a_discretized[i][j] *= problem.a(x,y)[i];
+
+            // Weight of the integration
+            a_discretized[i][j] *= quad_weights[j];
+        }
+    }
+
+    return a_discretized;
+}
+
+vector< vector<double> >  Solver_spectral::project_a(Problem& problem, Gaussian_integrator& gauss, vector< vector<double> > a_discretized,  int degree) {
+
+    // Parameters of the problem
+    int nf = problem.nf;
+    int ns = problem.ns;
+    int nb = bin(degree + nf, nf);
+    int ni = gauss.weights.size();
+
+    // Nodes of the gaussian quadrature
+    vector< vector<double> > quad_points = gauss.nodes;
+
+    // Vector of coefficients to return
+    vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
+
+
+    // Loop over the slow variables
+    for (int i = 0; i < ns; ++i) {
+
+        // Loop over all the monomials
+        for (int j = 0; j < nb; ++j) {
+
+            // Multi-index associated with j
+            vector<int> m = ind2mult(j, nf);
+
+            // Loop over the points of the quadrature
+            for (int k = 0; k < ni; ++k) {
+
+                // Evaluate monomial in point
+                double mon_val = this->monomial(m, quad_points[k]);
+
+                // Update coefficient
+                coefficients[i][j] += a_discretized[i][k] * mon_val;
+            }
+
+            // Scaling due to change of variable
+            coefficients[i][j] *= sqrt(sqrt(det_cov));
+        }
+    }
+    return coefficients;
+}
+
 SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double t) {
 
     // Vectors to store the coefficients of the sde
     SDE_coeffs sde_coeffs;
+
+    // Integrator
+    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     // Parameters of the problem
     int nf = problem.nf;
@@ -112,38 +194,14 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     // Update statistics of Gaussian
     this->update_stats(problem, var_scaling);
 
-    // Integrator
-    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
+    // Discretization of a at gridpoints
+    vector< vector<double> >a_discretized =  discretize_a(problem, x, gauss);
 
     // Weights and points of the integrator.
     vector< vector<double> > quad_points = gauss.nodes;
-    vector<double>  quad_weights = gauss.weights;
 
     // Expansion of right-hand side of the Poisson equation
-    vector< vector<double> > coefficients(ns, vector<double>(nb, 1.));
-
-    // Discretization of a at gridpoints
-    vector< vector<double> > a_discretized(quad_weights.size(), vector<double> (ns, 0.));
-
-    // Computation of the function to integrate at the gridpoints.
-    for (int i = 0; i < ns; ++i) {
-        for (int j = 0; j < quad_points.size(); ++j) {
-
-            // Integration point and rescaled version for integrattion
-            vector<double> z = quad_points[i];
-            vector<double> y = map_to_real(z);
-
-            // Scaling to pass to Schrodinger equation;
-            a_discretized[i][j] *= sqrt( problem.rho(x,y) / gaussian(z) );
-
-            // Scaling needed for the integration;
-            a_discretized[i][j] *= sqrt( problem.rho(x,y) / gaussian(z) );
-
-            // Discretization of a
-            a_discretized[i][j] = problem.a(x,y)[j];
-        }
-    }
-
+    vector< vector<double> > coefficients = project_a(problem, gauss, a_discretized, degree);
 
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector<double> coefficients_h(nb, 0.);
@@ -159,10 +217,6 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
         // where herm = normalized hermite poly
         // gaussian = mean 0 var 1 gaussian
         // 2 factors: x det(s) for scaling of domain / sqrt(det(s)) for scaling of hf
-        auto lambda = [&] (vector<double> z) -> vector<double> {
-            vector<double> y = this->map_to_real(z);
-            return problem.a(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z) );
-        };
         auto lambda_dx = [&] (vector<double> z) -> vector< vector<double> > {
             vector<double> y = this->map_to_real(z);
             return problem.dax(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z) );
@@ -174,12 +228,10 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
         // relation stardiv hmm formula.
 
         // ! Hermite polynomials don't have scaling (H(x,s) = H(x/s, 1))
-        vector<double> result = gauss.quadnd(lambda, v0) * sqrt(sqrt(det_cov));
         vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, m0) * sqrt(sqrt(det_cov));
         double result_h = gauss.quadnd(lambda_h) * sqrt(sqrt(det_cov));;
 
         for (int j = 0; j < ns; ++j) {
-            coefficients[j][i] = result[j];
             for (int k = 0; k < ns; ++k) {
                 coefficients_dx[j][k][i] = result_dx[j][k];
             }
