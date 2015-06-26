@@ -6,6 +6,10 @@
 #include <functional>
 #include <vector>
 
+#include "Gaussian_integrator.hpp"
+#include "Problem.hpp"
+#include "structures.hpp"
+
 class Solver_spectral {
     public:
 
@@ -47,6 +51,9 @@ class Solver_spectral {
 
         // Update variance and bias of gaussian
         void update_stats(Problem& problem, std::vector<double> var_scaling);
+
+        std::vector< std::vector<double> > discretize_a(Problem &problem, std::vector<double> x, Gaussian_integrator& gauss);
+        std::vector< std::vector<double> > project_a(Problem& problem, Gaussian_integrator& gauss, std::vector< std::vector<double> > a_discretized,  int degree);
 
         // Statistics associated with the hermite functions
         std::vector<double> bias;
