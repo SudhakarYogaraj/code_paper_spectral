@@ -53,7 +53,7 @@ class Solver_spectral {
         void update_stats(Problem& problem, std::vector<double> var_scaling);
 
         std::vector< std::vector<double> > discretize_a(Problem &problem, std::vector<double> x, Gaussian_integrator& gauss);
-        std::vector< std::vector<double> > project_a(Problem& problem, Gaussian_integrator& gauss, std::vector< std::vector<double> > a_discretized,  int degree);
+        std::vector<double> project(int nf, int degree, Gaussian_integrator& gauss, std::vector<double> f_discretized);
 
         // Statistics associated with the hermite functions
         std::vector<double> bias;
