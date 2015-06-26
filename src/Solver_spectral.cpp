@@ -63,6 +63,12 @@ vector<double> Solver_spectral::map_to_real(vector<double> z) {
     return result;
 }
 
+/*! Update the statistics of the Gaussian related to Hermite functions
+ *
+ * This function updates the statistics of the Gaussian from which the Hermite
+ * functions are calculated. In simple words, the Hermite functions are
+ * concentrated where the density of the Gaussian is non-zero.
+ */
 void Solver_spectral::update_stats(Problem &problem, vector<double> var_scaling) {
 
     // Update of bias and covariance
@@ -109,8 +115,36 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     // Integrator
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
+    // Weights and points of the integrator.
+    vector< vector<double> > quad_points = gauss.nodes;
+    vector<double>  quad_weights = gauss.weights;
+
     // Expansion of right-hand side of the Poisson equation
-    vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
+    vector< vector<double> > coefficients(ns, vector<double>(nb, 1.));
+
+    // Discretization of a at gridpoints
+    vector< vector<double> > a_discretized(quad_weights.size(), vector<double> (ns, 0.));
+
+    // Computation of the function to integrate at the gridpoints.
+    for (int i = 0; i < ns; ++i) {
+        for (int j = 0; j < quad_points.size(); ++j) {
+
+            // Integration point and rescaled version for integrattion
+            vector<double> z = quad_points[i];
+            vector<double> y = map_to_real(z);
+
+            // Scaling to pass to Schrodinger equation;
+            a_discretized[i][j] *= sqrt( problem.rho(x,y) / gaussian(z) );
+
+            // Scaling needed for the integration;
+            a_discretized[i][j] *= sqrt( problem.rho(x,y) / gaussian(z) );
+
+            // Discretization of a
+            a_discretized[i][j] = problem.a(x,y)[j];
+        }
+    }
+
+
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector<double> coefficients_h(nb, 0.);
     if(VERBOSE) cout << "* Calculating the right-hand side of the linear system." << endl << endl;
