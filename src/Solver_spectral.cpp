@@ -134,43 +134,38 @@ vector< vector<double> >  Solver_spectral::discretize_a(Problem &problem, vector
     return a_discretized;
 }
 
-vector< vector<double> >  Solver_spectral::project_a(Problem& problem, Gaussian_integrator& gauss, vector< vector<double> > a_discretized,  int degree) {
+vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator& gauss, vector<double> f_discretized) {
 
-    // Parameters of the problem
-    int nf = problem.nf;
-    int ns = problem.ns;
+    // Number of polynomials
     int nb = bin(degree + nf, nf);
+
+    // Number of integration points
     int ni = gauss.weights.size();
 
     // Nodes of the gaussian quadrature
     vector< vector<double> > quad_points = gauss.nodes;
 
-    // Vector of coefficients to return
-    vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
+    // Vector of coefficients of the projection
+    vector<double> coefficients(nb, 0.);
 
+    // Loop over all the monomials
+    for (int i = 0; i < nb; ++i) {
 
-    // Loop over the slow variables
-    for (int i = 0; i < ns; ++i) {
+        // Multi-index associated with i
+        vector<int> m = ind2mult(i, nf);
 
-        // Loop over all the monomials
-        for (int j = 0; j < nb; ++j) {
+        // Loop over the points of the quadrature
+        for (int j = 0; j < ni; ++j) {
 
-            // Multi-index associated with j
-            vector<int> m = ind2mult(j, nf);
+            // Evaluate monomial in point
+            double mon_val = monomial(m, quad_points[j]);
 
-            // Loop over the points of the quadrature
-            for (int k = 0; k < ni; ++k) {
-
-                // Evaluate monomial in point
-                double mon_val = this->monomial(m, quad_points[k]);
-
-                // Update coefficient
-                coefficients[i][j] += a_discretized[i][k] * mon_val;
-            }
-
-            // Scaling due to change of variable
-            coefficients[i][j] *= sqrt(sqrt(det_cov));
+            // Update coefficient
+            coefficients[i] += f_discretized[j] * mon_val;
         }
+
+        // Scaling due to change of variable
+        coefficients[i] *= sqrt(sqrt(det_cov));
     }
     return coefficients;
 }
@@ -200,8 +195,13 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     // Weights and points of the integrator.
     vector< vector<double> > quad_points = gauss.nodes;
 
+    // Coefficients of the projection of a.
+    vector< vector<double> > coefficients(ns);
+
     // Expansion of right-hand side of the Poisson equation
-    vector< vector<double> > coefficients = project_a(problem, gauss, a_discretized, degree);
+    for (int i = 0; i < ns; ++i) {
+        coefficients[i] = project(nf, degree, gauss, a_discretized[i]);
+    }
 
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
     vector<double> coefficients_h(nb, 0.);
