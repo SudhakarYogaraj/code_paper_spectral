@@ -52,7 +52,6 @@ class Solver_spectral {
         // Update variance and bias of gaussian
         void update_stats(Problem& problem, std::vector<double> var_scaling);
 
-        std::vector< std::vector<double> > discretize_a(Problem &problem, std::vector<double> x, Gaussian_integrator& gauss);
         std::vector<double> discretize(Problem &problem, std::vector<double> x, Gaussian_integrator& gauss, double(*f)(std::vector<double>,std::vector<double>));
         std::vector<double> project(int nf, int degree, Gaussian_integrator& gauss, std::vector<double> f_discretized);
 
