@@ -134,6 +134,41 @@ vector< vector<double> >  Solver_spectral::discretize_a(Problem &problem, vector
     return a_discretized;
 }
 
+vector<double> Solver_spectral::discretize(Problem &problem, vector<double> x, Gaussian_integrator& gauss, double(*f)(vector<double>, vector<double> )) {
+
+    // Weights and points of the integrator.
+    vector< vector<double> > quad_points = gauss.nodes;
+    vector<double>  quad_weights = gauss.weights;
+
+    // Number of integration points
+    int ni = gauss.weights.size();
+
+    // Discretization of a at gridpoints
+    vector<double> f_discretized(ni, 1.);
+
+    // Computation of the function to integrate at the gridpoints.
+    for (int j = 0; j < ni; ++j) {
+
+        // Integration point and rescaled version for integrattion
+        vector<double> z = quad_points[j];
+        vector<double> y = map_to_real(z);
+
+        // Scaling to pass to Schrodinger equation;
+        f_discretized[j] *= sqrt(problem.rho(x,y));
+
+        // Scaling needed for the integration;
+        f_discretized[j] /= sqrt(gaussian(z));
+
+        // Discretization of a
+        f_discretized[j] *= f(x,y);
+
+        // Weight of the integration
+        f_discretized[j] *= quad_weights[j];
+    }
+
+    return f_discretized;
+}
+
 vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator& gauss, vector<double> f_discretized) {
 
     // Number of polynomials
@@ -213,10 +248,6 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
         vector<double> v0(ns,0.);
         vector< vector<double> > m0(ns, vector<double> (ns,0.));
 
-        // bi(x) = herm_mS(x) * sqrt(gaussian_mS(x)) = herm((x-m)/s) * sqrt(gaussian((x-m)/s) / det(s))
-        // where herm = normalized hermite poly
-        // gaussian = mean 0 var 1 gaussian
-        // 2 factors: x det(s) for scaling of domain / sqrt(det(s)) for scaling of hf
         auto lambda_dx = [&] (vector<double> z) -> vector< vector<double> > {
             vector<double> y = this->map_to_real(z);
             return problem.dax(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z) );
