@@ -104,17 +104,6 @@ vector<double> Problem::rescale(vector<double> y) {
     return (result + bias);
 }
 
-double Problem::stardiv_h(vector<double> x, vector<double> y) {
-    double result = 0.;
-    vector<double> fast_h = fast_drift_h(x,y);
-    vector<double> gradient_v = grad(x,y);
-    vector< vector<double> > gradient_h = grad_h(x,y);
-    for (int i = 0; i < this->nf; ++i) {
-        result += gradient_v[i] * fast_h[i] - gradient_h[i][i];
-    }
-    return result;
-}
-
 vector<double> Problem::soldrif(vector<double> x) {
     vector<double> result(this->ns,0.);
     Gaussian_integrator gauss = Gaussian_integrator(100,this->nf);
