@@ -19,7 +19,7 @@ DEP_FILES := $(addprefix $(DEP_DIR)/,$(notdir $(CPP_FILES:.cpp=.d)))
 OBJ_FILES := $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cpp=.o)))
 
 # Target executable
-TARGET = dev.exec
+TARGET = $(shell git rev-parse --abbrev-ref HEAD).exec
 
 # Program to generate dependencies
 MAKEDEPEND = $(CXX) $(CXXFLAGS) -MM -o $(DEP_DIR)/$*.d $<
