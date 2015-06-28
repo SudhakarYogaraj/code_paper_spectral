@@ -275,32 +275,18 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
 
     int n_tmp  = bin(2*degree + nf, nf);
-    int n_done = 0;
     vector<double> tmp_vec(n_tmp, 0.);
     vector<int> position_visited(n_tmp, 0);
     if(VERBOSE) cout << "* Calculating the necessary products < L mi , mj >." << endl << endl;
-    for (int i = 0; i < nb; ++i) {
-        vector<int> m1 = ind2mult(i, nf);
-        for (int j = 0; j < nb; ++j) {
-            vector<int> m2 = ind2mult(j, nf);
-            int index = mult2ind(m1 + m2);
-            if (position_visited[index] == 0) {
-                n_done ++;
-                if(VERBOSE) progress_bar(((double) n_done)/((double) n_tmp));
-                position_visited[index] = 1;
-                auto lambda = [&] (vector<double> z) -> double {
-                    vector<double> y = map_to_real(z);
-                    double tmp_term = (gaussian_linear_term(z) - problem.linearTerm(x,y));
-                    /* if (fabs(tmp_term) > 1e-7) { */
-                    /*     cout << tmp_term; */
-                    /* } */
-                    return tmp_term * monomial(m1 + m2, z);
-                };
-                tmp_vec[index] += gauss.quadnd(lambda);
-            }
-        }
+    for (int index = 0; index < n_tmp; ++index) {
+        vector<int> m = this->ind2mult(index, nf);
+        auto lambda = [&] (vector<double> z) -> double {
+            vector<double> y = map_to_real(z);
+            double tmp_term = (gaussian_linear_term(z) - problem.linearTerm(x,y));
+            return tmp_term * monomial(m, z);
+        };
+        tmp_vec[index] += gauss.quadnd(lambda);
     }
-    if(VERBOSE) end_progress_bar();
 
     vector< vector<double> > prod_mat(nb, vector<double>(nb, 0.));
     for (int i = 0; i < nb; ++i) {
