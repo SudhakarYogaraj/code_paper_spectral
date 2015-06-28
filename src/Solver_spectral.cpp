@@ -145,25 +145,60 @@ vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator&
     // Vector of coefficients of the projection
     vector<double> coefficients(nb, 0.);
 
-    // Loop over all the monomials
+    // Vector of multi-indices
+    vector< vector<int> > m(nb);
+
+    // Vector of mapped indices of lower degrees
+    vector<int> mi(nb);
+
+    // Nonzero element in m - mapped_m
+    vector<int> delta(nb);
+
     for (int i = 0; i < nb; ++i) {
 
-        // Multi-index associated with i
-        vector<int> m = ind2mult(i, nf);
+            // Multi-index associated with j
+            m[i] = ind2mult(i, nf);
 
-        // Loop over the points of the quadrature
-        for (int j = 0; j < ni; ++j) {
+            // Mapping that associates for each multi-index one of lower degree.
+            for (delta[i] = 0; i != 0 && m[i][delta[i]] == 0; ++delta[i]) {}
 
-            // Evaluate monomial in point
-            double mon_val = monomial(m, quad_points[j]);
+            // Initialization of mapped multi-index
+            vector<int> mm = m[i];
 
-            // Update coefficient
-            coefficients[i] += f_discretized[j] * mon_val;
+            // Decrease degree by 1
+            mm[delta[i]] --;
+
+            // Mapped linear index
+            mi[i] = mult2ind(mm);
+    }
+
+    // Loop over the points of the quadrature
+    for (int i = 0; i < ni; ++i) {
+
+        // Quadrature point
+        vector<double> quad_point = quad_points[i];
+
+        // Evaluate monomials in point
+        vector<double> mon_val(nb, 1.);
+
+        // Evaluation by incrementation of the degree
+        for (int j = 1; j < nb; ++j) {
+            mon_val[j] = mon_val[mi[j]] * quad_point[delta[j]];
         }
 
-        // Scaling due to change of variable
+        // Loop over all the monomials
+        for (int j = 0; j < nb; ++j) {
+
+            // Update coefficient
+            coefficients[j] += f_discretized[i] * mon_val[j];
+        }
+    }
+
+    // Scaling due to change of variable
+    for (int i = 0; i < nb; ++i) {
         coefficients[i] *= sqrt(sqrt(det_cov));
     }
+
     return coefficients;
 }
 
