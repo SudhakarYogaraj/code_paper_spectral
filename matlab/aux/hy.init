@@ -1,2 +1,2 @@
-static double Problem::stardiv_h(vector<double> x, vector<double> y) {
+double Problem::stardiv_h(vector<double> x, vector<double> y) {
     double result = 0.;
