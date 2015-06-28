@@ -204,10 +204,10 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     }
 
     // Discretization of h
-    /* h_discretized = discretize(problem, x, gauss, problem.stardiv_h); */
+    h_discretized = discretize(problem, x, gauss, Problem::stardiv_h);
 
     // Coefficients of the projection of the functions
-    /* vector<double> coefficients_h; */
+    vector<double> coefficients_h;
     vector< vector<double> > coefficients(ns);
     vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns));
 
@@ -223,25 +223,8 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
         coefficients[i] = project(nf, degree, gauss, a_discretized[i]);
     }
 
-    vector<double> coefficients_h(nb, 0.);
-
-    if(VERBOSE) cout << "* Calculating the right-hand side of the linear system." << endl << endl;
-    for (int i = 0; i < nb; ++i) {
-        if(VERBOSE) progress_bar(((double) i )/((double) nb));
-        vector<int> multIndex = ind2mult(i, nf);
-
-        auto lambda_h = [&] (vector<double> z) -> double {
-            vector<double> y = this->map_to_real(z);
-            return problem.stardiv_h(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z) );
-        };
-
-        double result_h = gauss.quadnd(lambda_h) * sqrt(sqrt(det_cov));;
-
-        coefficients_h[i] = result_h;
-    }
-    if(VERBOSE) end_progress_bar();
-
-    /* exit(0); */
+    // Projection of h
+    coefficients_h = project(nf, degree, gauss, h_discretized);
 
     // Mapping to Hermite basis
     for (int i = 0; i < ns; ++i) {
