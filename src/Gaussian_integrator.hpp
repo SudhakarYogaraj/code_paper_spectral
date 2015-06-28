@@ -23,9 +23,10 @@ class Gaussian_integrator {
             return result;
         }
 
-    private:
         std::vector< std::vector<double> > nodes;
         std::vector<double> weights;
+
+    private:
         int nVars;
 };
 #endif

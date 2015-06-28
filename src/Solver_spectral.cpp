@@ -63,6 +63,12 @@ vector<double> Solver_spectral::map_to_real(vector<double> z) {
     return result;
 }
 
+/*! Update the statistics of the Gaussian related to Hermite functions
+ *
+ * This function updates the statistics of the Gaussian from which the Hermite
+ * functions are calculated. In simple words, the Hermite functions are
+ * concentrated where the density of the Gaussian is non-zero.
+ */
 void Solver_spectral::update_stats(Problem &problem, vector<double> var_scaling) {
 
     // Update of bias and covariance
@@ -90,10 +96,84 @@ void Solver_spectral::update_stats(Problem &problem, vector<double> var_scaling)
     }
 }
 
+vector<double> Solver_spectral::discretize(Problem &problem, vector<double> x, Gaussian_integrator& gauss, double(*f)(vector<double>, vector<double> )) {
+
+    // Weights and points of the integrator.
+    vector< vector<double> > quad_points = gauss.nodes;
+    vector<double>  quad_weights = gauss.weights;
+
+    // Number of integration points
+    int ni = gauss.weights.size();
+
+    // Discretization of a at gridpoints
+    vector<double> f_discretized(ni, 1.);
+
+    // Computation of the function to integrate at the gridpoints.
+    for (int j = 0; j < ni; ++j) {
+
+        // Integration point and rescaled version for integrattion
+        vector<double> z = quad_points[j];
+        vector<double> y = map_to_real(z);
+
+        // Scaling to pass to Schrodinger equation;
+        f_discretized[j] *= sqrt(problem.rho(x,y));
+
+        // Scaling needed for the integration;
+        f_discretized[j] /= sqrt(gaussian(z));
+
+        // Discretization of a
+        f_discretized[j] *= f(x,y);
+
+        // Weight of the integration
+        f_discretized[j] *= quad_weights[j];
+    }
+
+    return f_discretized;
+}
+
+vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator& gauss, vector<double> f_discretized) {
+
+    // Number of polynomials
+    int nb = bin(degree + nf, nf);
+
+    // Number of integration points
+    int ni = gauss.weights.size();
+
+    // Nodes of the gaussian quadrature
+    vector< vector<double> > quad_points = gauss.nodes;
+
+    // Vector of coefficients of the projection
+    vector<double> coefficients(nb, 0.);
+
+    // Loop over all the monomials
+    for (int i = 0; i < nb; ++i) {
+
+        // Multi-index associated with i
+        vector<int> m = ind2mult(i, nf);
+
+        // Loop over the points of the quadrature
+        for (int j = 0; j < ni; ++j) {
+
+            // Evaluate monomial in point
+            double mon_val = monomial(m, quad_points[j]);
+
+            // Update coefficient
+            coefficients[i] += f_discretized[j] * mon_val;
+        }
+
+        // Scaling due to change of variable
+        coefficients[i] *= sqrt(sqrt(det_cov));
+    }
+    return coefficients;
+}
+
 SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double t) {
 
     // Vectors to store the coefficients of the sde
     SDE_coeffs sde_coeffs;
+
+    // Integrator
+    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     // Parameters of the problem
     int nf = problem.nf;
@@ -106,54 +186,47 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     // Update statistics of Gaussian
     this->update_stats(problem, var_scaling);
 
-    // Integrator
-    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
+    // Discretization of the functions of the problem
+    vector<double> h_discretized;
+    vector< vector<double> >a_discretized(ns);
+    vector< vector< vector<double> > > dax_discretized(ns, vector< vector<double> > (ns));
+
+    // Computation of the discretized functions
+    for (int i = 0; i < ns; i++) {
+
+        // Discretization of dx/da
+        for (int j = 0; j < ns; j++) {
+            dax_discretized[i][j] = discretize(problem, x, gauss, problem.fxsplit[i][j]);
+        }
+
+        // Discretization of the function a
+        a_discretized[i] = discretize(problem, x, gauss, problem.fsplit[i]);
+    }
+
+    // Discretization of h
+    h_discretized = discretize(problem, x, gauss, Problem::stardiv_h);
+
+    // Coefficients of the projection of the functions
+    vector<double> coefficients_h;
+    vector< vector<double> > coefficients(ns);
+    vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns));
 
     // Expansion of right-hand side of the Poisson equation
-    vector< vector<double> > coefficients(ns, vector<double>(nb, 0.));
-    vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
-    vector<double> coefficients_h(nb, 0.);
-    if(VERBOSE) cout << "* Calculating the right-hand side of the linear system." << endl << endl;
-    for (int i = 0; i < nb; ++i) {
-        if(VERBOSE) progress_bar(((double) i )/((double) nb));
-        vector<int> multIndex = ind2mult(i, nf);
+    for (int i = 0; i < ns; ++i) {
 
-        vector<double> v0(ns,0.);
-        vector< vector<double> > m0(ns, vector<double> (ns,0.));
-
-        // bi(x) = herm_mS(x) * sqrt(gaussian_mS(x)) = herm((x-m)/s) * sqrt(gaussian((x-m)/s) / det(s))
-        // where herm = normalized hermite poly
-        // gaussian = mean 0 var 1 gaussian
-        // 2 factors: x det(s) for scaling of domain / sqrt(det(s)) for scaling of hf
-        auto lambda = [&] (vector<double> z) -> vector<double> {
-            vector<double> y = this->map_to_real(z);
-            return problem.a(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z) );
-        };
-        auto lambda_dx = [&] (vector<double> z) -> vector< vector<double> > {
-            vector<double> y = this->map_to_real(z);
-            return problem.dax(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z) );
-        };
-        auto lambda_h = [&] (vector<double> z) -> double {
-            vector<double> y = this->map_to_real(z);
-            return problem.stardiv_h(x,y) * monomial(multIndex, z) * sqrt( problem.rho(x,y) / gaussian(z) );
-        };
-        // relation stardiv hmm formula.
-
-        // ! Hermite polynomials don't have scaling (H(x,s) = H(x/s, 1))
-        vector<double> result = gauss.quadnd(lambda, v0) * sqrt(sqrt(det_cov));
-        vector< vector<double> > result_dx = gauss.quadnd(lambda_dx, m0) * sqrt(sqrt(det_cov));
-        double result_h = gauss.quadnd(lambda_h) * sqrt(sqrt(det_cov));;
-
-        for (int j = 0; j < ns; ++j) {
-            coefficients[j][i] = result[j];
-            for (int k = 0; k < ns; ++k) {
-                coefficients_dx[j][k][i] = result_dx[j][k];
-            }
+        // Projection of da/dx
+        for (int j = 0; j < ns; j++) {
+            coefficients_dx[i][j] = project(nf, degree, gauss, dax_discretized[i][j]);
         }
-        coefficients_h[i] = result_h;
-    }
-    if(VERBOSE) end_progress_bar();
 
+        // Projection of a
+        coefficients[i] = project(nf, degree, gauss, a_discretized[i]);
+    }
+
+    // Projection of h
+    coefficients_h = project(nf, degree, gauss, h_discretized);
+
+    // Mapping to Hermite basis
     for (int i = 0; i < ns; ++i) {
         for (int j = 0; j < ns; ++j) {
             coefficients_dx[i][j] = basis2herm(coefficients_dx[i][j],nf,degree);

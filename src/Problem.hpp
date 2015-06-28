@@ -21,6 +21,7 @@ class Problem {
 
         // Initial condition for the slow process
         std::vector<double> x0;
+        std::vector<double> sigmas;
 
         // Potential for gradient structure
         std::vector<double> phi(std::vector<double> x, std::vector<double> y);
@@ -69,5 +70,8 @@ class Problem {
 
         // Initialization of the problem
         void init();
+
+        double (*fsplit[2]) (std::vector<double> x, std::vector<double> y);
+        double (*fxsplit[2][2]) (std::vector<double> x, std::vector<double> y);
 };
 #endif

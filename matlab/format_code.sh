@@ -8,8 +8,10 @@ done
 dou="v.sub lin.sub rho.sub hy.sub"
 vec="vy.sub g.sub f.sub h.sub drif.sub diff.sub"
 mat="gx.sub fx.sub fy.sub"
+spl="fsplit.sub fxsplit.sub"
 
 # Formatting for double, vector, and matrix outputs
+sed -i 's/^  .*=/    return /g' $spl
 sed -i 's/^  [^=]*/    result /g' $dou
 sed -i 's/^  [^\[]*\[[0-9]\{1,2\}\]\(\[[0-9]\{1,2\}\]\)/    result\1/g' $vec
 sed -i 's/^  [^\[]*\(\[[0-9]\{1,2\}\]\)\(\[[0-9]\{1,2\}\]\)/    result\1\2/g' $mat
