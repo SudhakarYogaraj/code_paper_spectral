@@ -1,3 +1,2 @@
-
-vector< vector<double> > Problem::grad_h(vector<double> x, vector<double> y) {
-    vector< vector<double> > result(this->nf, vector<double>(this->nf, 0.));
+static double Problem::stardiv_h(vector<double> x, vector<double> y) {
+    double result = 0.;
