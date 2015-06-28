@@ -178,6 +178,50 @@ fprintf(f10, ccode(fy));
 fprintf(f11, ccode(drif));
 fprintf(f12, ccode(diffu));
 
+command_nf = ['sed -i "s/\(this->nf =\) [0-9]*/\1 ', num2str(nf), '/g" problem.init'];
+command_ns = ['sed -i "s/\(this->ns =\) [0-9]*/\1 ', num2str(ns), '/g" problem.init'];
+system(command_nf);
+system(command_ns);
+
+% Feature
+fsplit = fopen('tmp/fsplit.gen','w');
+for i = 1:ns
+    fprintf(fsplit, 'double a%d (vector<double> x, vector<double> y) {\n', i);
+    % fprintf(fsplit, '    double result;\n', i, j);
+    fprintf(fsplit, ccode(f(i)));
+    % fprintf(fsplit, '\n    return result;', i, j);
+    fprintf(fsplit, '\n}\n\n');
+end
+
+fprintf(fsplit, 'double (*fsplit[%d]) (vector<double> x, vector<double> y);\n\n', i);
+% fprintf(fsplit, '    vector<double> result(this->ns,0.);\n\n', i);
+for i = 1:ns
+    fprintf(fsplit, 'fsplit[%d] = a%d;\n', i-1, i);
+end
+fprintf(fsplit, '\n');
+
+%fprintf(fsplit,'}\n\n');
+
+fxsplit = fopen('tmp/fxsplit.gen','w');
+for i = 1:ns
+    for j = 1:ns
+        fprintf(fxsplit, 'double dxa%d%d (vector<double> x, vector<double> y) {\n', i, j);
+        % fprintf(fxsplit, '    double result;\n', i, j);
+        fprintf(fxsplit, ccode(fx(i,j)));
+        % fprintf(fxsplit, '\n    return result;\n', i, j);
+        fprintf(fxsplit, '\n}\n\n');
+    end
+end
+
+fprintf(fxsplit, 'double (*fxsplit[%d][%d]) (vector<double> x, vector<double> y);\n\n', ns, ns);
+% fprintf(fxsplit, '    vector< vector<double> >  result(this->ns, vector<double> (this->ns, 0.);\n\n', i);
+for i = 1:ns
+    for j = 1:ns
+        fprintf(fxsplit, 'fxsplit[%d][%d] = dxa%d%d;\n', i-1, j-1, i, j);
+    end
+end
+%fprintf(fxsplit,'}\n\n');
+
 fclose(f0); system('echo -e "" >> tmp/gx.gen');
 fclose(f1); system('echo -e "" >> tmp/v.gen');
 fclose(f2); system('echo -e "" >> tmp/vy.gen');
@@ -191,10 +235,7 @@ fclose(f9); system('echo -e "" >> tmp/rho.gen');
 fclose(f10); system('echo -e "" >> tmp/fy.gen');
 fclose(f11); system('echo -e "" >> tmp/drif.gen');
 fclose(f12); system('echo -e "" >> tmp/diff.gen');
-
-command_nf = ['sed -i "s/\(this->nf =\) [0-9]*/\1 ', num2str(nf), '/g" problem.init'];
-command_ns = ['sed -i "s/\(this->ns =\) [0-9]*/\1 ', num2str(ns), '/g" problem.init'];
-system(command_nf);
-system(command_ns);
+fclose(fsplit);
+fclose(fxsplit);
 
 exit(0);
