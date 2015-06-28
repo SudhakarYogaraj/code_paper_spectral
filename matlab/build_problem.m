@@ -104,6 +104,11 @@ for i = 1:ns
     end
 end
 
+stardivh = sym('0');
+for i = 1:nf
+    stardivh = stardivh + simplify(vy(i)*h(i) - hy(i,i));
+end
+
 % Associated rhs
 for i = 1:ns
     f(i) = - simplify( Lw(g(i)) )
@@ -171,7 +176,7 @@ fprintf(f3, ccode(g));
 fprintf(f4, ccode(f));
 fprintf(f5, ccode(fx));
 fprintf(f6, ccode(h));
-fprintf(f7, ccode(hy));
+fprintf(f7, ccode(stardivh));
 fprintf(f8, ccode(lin));
 fprintf(f9, ccode(rho));
 fprintf(f10, ccode(fy));

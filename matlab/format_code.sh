@@ -5,9 +5,9 @@ for file in *.gen; do
     cp $file `echo $file | sed 's/gen/sub/g'`
 done
 
-dou="v.sub lin.sub rho.sub"
+dou="v.sub lin.sub rho.sub hy.sub"
 vec="vy.sub g.sub f.sub h.sub drif.sub diff.sub"
-mat="gx.sub fx.sub hy.sub fy.sub"
+mat="gx.sub fx.sub fy.sub"
 spl="fsplit.sub fxsplit.sub"
 
 # Formatting for double, vector, and matrix outputs
