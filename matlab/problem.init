@@ -11,7 +11,7 @@ void Problem::init() {
 
     this->init_functions();
     this->t_end = 1.;
-    this->nf = 2;
+    this->nf = 3;
     this->ns = 2;
     this->x0 = vector<double>(ns,1.2);
     this->lambdas = {2};
