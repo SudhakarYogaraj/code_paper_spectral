@@ -9,6 +9,7 @@ using namespace std;
 
 void Problem::init() {
 
+    this->init_functions();
     this->t_end = 1.;
     this->nf = 2;
     this->ns = 2;
