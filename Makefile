@@ -19,7 +19,7 @@ DEP_FILES := $(addprefix $(DEP_DIR)/,$(notdir $(CPP_FILES:.cpp=.d)))
 OBJ_FILES := $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cpp=.o)))
 
 # Target executable
-TARGET = $(shell git rev-parse --abbrev-ref HEAD).exec
+TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
 
 # Program to generate dependencies
 MAKEDEPEND = $(CXX) $(CXXFLAGS) -MM -o $(DEP_DIR)/$*.d $<
@@ -49,7 +49,7 @@ clean:
 	rm -f $(TARGET) $(OBJ_FILES)
 
 # Delete dependencies
-clean-dep: 
+clean-dep:
 	rm -f $(DEP_FILES)
 
 # Delete problem-specific temporary files

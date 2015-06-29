@@ -70,6 +70,7 @@ class Problem {
 
         // Initialization of the problem
         void init();
+        void init_functions();
 
         double (*fsplit[2]) (std::vector<double> x, std::vector<double> y);
         double (*fxsplit[2][2]) (std::vector<double> x, std::vector<double> y);
