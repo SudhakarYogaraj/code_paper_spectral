@@ -12,6 +12,182 @@
 
 using namespace std;
 
+SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double t) {
+
+    // Vectors to store the coefficients of the sde
+    SDE_coeffs sde_coeffs;
+
+    // Integrator
+    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
+
+    // Parameters of the problem
+    int nf = problem.nf;
+    int ns = problem.ns;
+    int nb = bin(degree + nf, nf);
+
+    // User defined rescaling of the eigenvalues
+    vector<double> var_scaling = {0.8, 0.7};
+
+    // Update statistics of Gaussian
+    this->update_stats(problem, var_scaling);
+
+    // Discretization of the functions of the problem
+    vector<double> h_discretized;
+    vector< vector<double> >a_discretized(ns);
+    vector< vector< vector<double> > > dax_discretized(ns, vector< vector<double> > (ns));
+
+    // Computation of the discretized functions
+    for (int i = 0; i < ns; i++) {
+
+        // Discretization of dx/da
+        for (int j = 0; j < ns; j++) {
+            dax_discretized[i][j] = discretize(problem, x, gauss, problem.fxsplit[i][j]);
+        }
+
+        // Discretization of the function a
+        a_discretized[i] = discretize(problem, x, gauss, problem.fsplit[i]);
+    }
+
+    // Discretization of h
+    h_discretized = discretize(problem, x, gauss, Problem::stardiv_h);
+
+    // Coefficients of the projection of the functions
+    vector<double> coefficients_h;
+    vector< vector<double> > coefficients(ns);
+    vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns));
+
+    // Expansion of right-hand side of the Poisson equation
+    for (int i = 0; i < ns; ++i) {
+
+        // Projection of da/dx
+        for (int j = 0; j < ns; j++) {
+            coefficients_dx[i][j] = project(nf, degree, gauss, dax_discretized[i][j], 1);
+        }
+
+        // Projection of a
+        coefficients[i] = project(nf, degree, gauss, a_discretized[i], 1);
+    }
+
+    // Projection of h
+    coefficients_h = project(nf, degree, gauss, h_discretized, 1);
+
+    // Mapping to Hermite basis
+    for (int i = 0; i < ns; ++i) {
+        for (int j = 0; j < ns; ++j) {
+            coefficients_dx[i][j] = basis2herm(coefficients_dx[i][j],nf,degree);
+        }
+        coefficients[i] = basis2herm(coefficients[i],nf,degree);
+    }
+    coefficients_h = basis2herm(coefficients_h,nf,degree);
+
+    // Solution of the Poisson equation
+    vector< vector<double> > solution(ns, vector<double>(nb,0.));
+    vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
+
+
+    // Discretized difference of linear terms
+
+    vector< vector<double> > quad_points = gauss.nodes;
+    vector<double>  quad_weights = gauss.weights;
+    int ni = gauss.weights.size();
+
+    vector<double> diff_discretized(ni, 1.);
+
+    for (int j = 0; j < ni; ++j) {
+
+        vector<double> z = quad_points[j];
+        vector<double> y = map_to_real(z);
+
+        diff_discretized[j] = gaussian_linear_term(z) - problem.linearTerm(x,y);
+        diff_discretized[j] *= quad_weights[j];
+    }
+
+    // Projection against monomials
+    vector<double> tmp_vec = project(nf, 2*degree, gauss, diff_discretized, 0);
+
+    // Generating Galerkin matrix based on these
+    vector< vector<double> > prod_mat(nb, vector<double>(nb, 0.));
+
+    for (int i = 0; i < nb; ++i) {
+        vector<int> m1 = ind2mult(i, nf);
+        for (int j = 0; j < nb; ++j) {
+            vector<int> m2 = ind2mult(j, nf);
+            int index = mult2ind(m1 + m2);
+            prod_mat[i][j] = tmp_vec[index];
+        }
+    }
+
+    if(VERBOSE) cout << "* Creating the matrix of the linear system." << endl << endl;
+    vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.));
+    vector< vector<double> > mat(nb, vector<double>(nb, 0.));
+    for (int i = 0; i < nb; ++i) {
+        if(VERBOSE) progress_bar(( (double) (i*nb) )/( (double) (nb*(2*nb + 1)) ));
+        for (int j = 0; j < nb; ++j) {
+            for (int k = 0; k < nb; ++k) {
+                tmp_mat[i][j] += hermiteCoeffs_nd[j][k]*prod_mat[i][k];
+            }
+        }
+    }
+    for (int i = 0; i < nb; ++i) {
+        if(VERBOSE) progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(2*nb+1)) ));
+        vector<int> m1 = ind2mult(i, nf);
+        /* FIXME: sigmas? (urbain, Thu 28 May 2015 18:15:19 BST) */
+        /* FIXME: Normalization (urbain, Thu 28 May 2015 20:55:46 BST) */
+
+        for (int j = 0; j < nf; ++j) {
+            mat[i][i] += m1[j]/this->eig_val_cov[j];
+        }
+        for (int j = 0; j <= i; ++j) {
+            for (int k = 0; k < nb; ++k) {
+                mat[i][j] += hermiteCoeffs_nd[i][k]*tmp_mat[k][j];
+            }
+            mat[j][i] = mat[i][j];
+        }
+    }
+    if(VERBOSE) end_progress_bar();
+
+    if(VERBOSE) cout << "* Solving linear system." << endl;
+    for (int i = 0; i < ns; ++i) {
+        solution[i] = solve(mat, coefficients[i]);
+        for (int j = 0; j < ns; ++j) {
+            solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
+        }
+    }
+    if(VERBOSE) cout << "done!" << endl;
+
+    // Calculation of the coefficients of the simplified equation
+    vector<double> F1(ns, 0.);
+    vector<double> F2(ns, 0.);
+    vector< vector <double> > A0(ns, vector<double>(ns,0.));
+
+    // Calculation of the coefficients of the effective equation
+    for (int i = 0; i < nb; ++i) {
+
+        // First part of the drift coefficient
+        for (int j = 0; j < ns; ++j) {
+            for (int k = 0; k < ns; ++k)
+                F1[j] += solution_dx[j][k][i]*coefficients[k][i];
+        }
+
+        // Second part of the drift coefficient
+        for (int j = 0; j < ns; ++j) {
+            F2[j] += solution[j][i]*coefficients_h[i];
+        }
+
+        // Diffusion coefficient
+        for (int j = 0; j < ns; ++j) {
+            for (int k = 0; k < ns; ++k) {
+                A0[j][k] += 2*solution[j][i]*coefficients[k][i];
+            }
+        }
+    }
+
+    sde_coeffs.diff =  cholesky(symmetric(A0));
+    sde_coeffs.drif = F1 + F2;
+
+    return sde_coeffs;
+}
+
 /*! Function that calculates the 0-order term in the Schrodinger equation
  *
  * Assuming that L is the generator of an OU process with
@@ -131,7 +307,7 @@ vector<double> Solver_spectral::discretize(Problem &problem, vector<double> x, G
     return f_discretized;
 }
 
-vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator& gauss, vector<double> f_discretized) {
+vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator& gauss, vector<double> f_discretized, int rescale) {
 
     // Number of polynomials
     int nb = bin(degree + nf, nf);
@@ -195,178 +371,11 @@ vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator&
     }
 
     // Scaling due to change of variable
-    for (int i = 0; i < nb; ++i) {
+    for (int i = 0; i < nb && rescale; ++i) {
         coefficients[i] *= sqrt(sqrt(det_cov));
     }
 
     return coefficients;
-}
-
-SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double t) {
-
-    // Vectors to store the coefficients of the sde
-    SDE_coeffs sde_coeffs;
-
-    // Integrator
-    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
-
-    // Parameters of the problem
-    int nf = problem.nf;
-    int ns = problem.ns;
-    int nb = bin(degree + nf, nf);
-
-    // User defined rescaling of the eigenvalues
-    vector<double> var_scaling = {0.8, 0.7};
-
-    // Update statistics of Gaussian
-    this->update_stats(problem, var_scaling);
-
-    // Discretization of the functions of the problem
-    vector<double> h_discretized;
-    vector< vector<double> >a_discretized(ns);
-    vector< vector< vector<double> > > dax_discretized(ns, vector< vector<double> > (ns));
-
-    // Computation of the discretized functions
-    for (int i = 0; i < ns; i++) {
-
-        // Discretization of dx/da
-        for (int j = 0; j < ns; j++) {
-            dax_discretized[i][j] = discretize(problem, x, gauss, problem.fxsplit[i][j]);
-        }
-
-        // Discretization of the function a
-        a_discretized[i] = discretize(problem, x, gauss, problem.fsplit[i]);
-    }
-
-    // Discretization of h
-    h_discretized = discretize(problem, x, gauss, Problem::stardiv_h);
-
-    // Coefficients of the projection of the functions
-    vector<double> coefficients_h;
-    vector< vector<double> > coefficients(ns);
-    vector< vector <vector<double> > > coefficients_dx(ns, vector< vector<double> >(ns));
-
-    // Expansion of right-hand side of the Poisson equation
-    for (int i = 0; i < ns; ++i) {
-
-        // Projection of da/dx
-        for (int j = 0; j < ns; j++) {
-            coefficients_dx[i][j] = project(nf, degree, gauss, dax_discretized[i][j]);
-        }
-
-        // Projection of a
-        coefficients[i] = project(nf, degree, gauss, a_discretized[i]);
-    }
-
-    // Projection of h
-    coefficients_h = project(nf, degree, gauss, h_discretized);
-
-    // Mapping to Hermite basis
-    for (int i = 0; i < ns; ++i) {
-        for (int j = 0; j < ns; ++j) {
-            coefficients_dx[i][j] = basis2herm(coefficients_dx[i][j],nf,degree);
-        }
-        coefficients[i] = basis2herm(coefficients[i],nf,degree);
-    }
-    coefficients_h = basis2herm(coefficients_h,nf,degree);
-
-    // Solution of the Poisson equation
-    vector< vector<double> > solution(ns, vector<double>(nb,0.));
-    vector< vector < vector<double> > > solution_dx(ns, vector< vector<double> >(ns, vector<double>(nb, 0.)));
-
-    int n_tmp  = bin(2*degree + nf, nf);
-    vector<double> tmp_vec(n_tmp, 0.);
-    vector<int> position_visited(n_tmp, 0);
-    if(VERBOSE) cout << "* Calculating the necessary products < L mi , mj >." << endl << endl;
-    for (int index = 0; index < n_tmp; ++index) {
-        vector<int> m = this->ind2mult(index, nf);
-        auto lambda = [&] (vector<double> z) -> double {
-            vector<double> y = map_to_real(z);
-            double tmp_term = (gaussian_linear_term(z) - problem.linearTerm(x,y));
-            return tmp_term * monomial(m, z);
-        };
-        tmp_vec[index] += gauss.quadnd(lambda);
-    }
-
-    vector< vector<double> > prod_mat(nb, vector<double>(nb, 0.));
-    for (int i = 0; i < nb; ++i) {
-        vector<int> m1 = ind2mult(i, nf);
-        for (int j = 0; j < nb; ++j) {
-            vector<int> m2 = ind2mult(j, nf);
-            int index = mult2ind(m1 + m2);
-            prod_mat[i][j] = tmp_vec[index];
-        }
-    }
-
-    if(VERBOSE) cout << "* Creating the matrix of the linear system." << endl << endl;
-    vector< vector<double> > tmp_mat(nb, vector<double>(nb, 0.));
-    vector< vector<double> > mat(nb, vector<double>(nb, 0.));
-    for (int i = 0; i < nb; ++i) {
-        if(VERBOSE) progress_bar(( (double) (i*nb) )/( (double) (nb*(2*nb + 1)) ));
-        for (int j = 0; j < nb; ++j) {
-            for (int k = 0; k < nb; ++k) {
-                tmp_mat[i][j] += hermiteCoeffs_nd[j][k]*prod_mat[i][k];
-            }
-        }
-    }
-    for (int i = 0; i < nb; ++i) {
-        if(VERBOSE) progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(2*nb+1)) ));
-        vector<int> m1 = ind2mult(i, nf);
-        /* FIXME: sigmas? (urbain, Thu 28 May 2015 18:15:19 BST) */
-        /* FIXME: Normalization (urbain, Thu 28 May 2015 20:55:46 BST) */
-
-        for (int j = 0; j < nf; ++j) {
-            mat[i][i] += m1[j]/this->eig_val_cov[j];
-        }
-        for (int j = 0; j <= i; ++j) {
-            for (int k = 0; k < nb; ++k) {
-                mat[i][j] += hermiteCoeffs_nd[i][k]*tmp_mat[k][j];
-            }
-            mat[j][i] = mat[i][j];
-        }
-    }
-    if(VERBOSE) end_progress_bar();
-
-    if(VERBOSE) cout << "* Solving linear system." << endl;
-    for (int i = 0; i < ns; ++i) {
-        solution[i] = solve(mat, coefficients[i]);
-        for (int j = 0; j < ns; ++j) {
-            solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
-        }
-    }
-    if(VERBOSE) cout << "done!" << endl;
-
-    // Calculation of the coefficients of the simplified equation
-    vector<double> F1(ns, 0.);
-    vector<double> F2(ns, 0.);
-    vector< vector <double> > A0(ns, vector<double>(ns,0.));
-
-    // Calculation of the coefficients of the effective equation
-    for (int i = 0; i < nb; ++i) {
-
-        // First part of the drift coefficient
-        for (int j = 0; j < ns; ++j) {
-            for (int k = 0; k < ns; ++k)
-                F1[j] += solution_dx[j][k][i]*coefficients[k][i];
-        }
-
-        // Second part of the drift coefficient
-        for (int j = 0; j < ns; ++j) {
-            F2[j] += solution[j][i]*coefficients_h[i];
-        }
-
-        // Diffusion coefficient
-        for (int j = 0; j < ns; ++j) {
-            for (int k = 0; k < ns; ++k) {
-                A0[j][k] += 2*solution[j][i]*coefficients[k][i];
-            }
-        }
-    }
-
-    sde_coeffs.diff =  cholesky(symmetric(A0));
-    sde_coeffs.drif = F1 + F2;
-
-    return sde_coeffs;
 }
 
 /*! Constructor of the spectral solver
