@@ -189,43 +189,40 @@ system(command_nf);
 system(command_ns);
 
 % Feature
-fsplit = fopen('tmp/fsplit.gen','w');
+split = fopen('tmp/split.gen','w');
+
+% Auxiliary functions
 for i = 1:ns
-    fprintf(fsplit, 'double a%d (vector<double> x, vector<double> y) {\n', i);
-    % fprintf(fsplit, '    double result;\n', i, j);
-    fprintf(fsplit, ccode(f(i)));
-    % fprintf(fsplit, '\n    return result;', i, j);
-    fprintf(fsplit, '\n}\n\n');
+    fprintf(split, 'double a%d (vector<double> x, vector<double> y) {\n', i);
+    fprintf(split, ccode(f(i)));
+    fprintf(split, '\n}\n\n');
 end
 
-fprintf(fsplit, 'double (*fsplit[%d]) (vector<double> x, vector<double> y);\n\n', i);
-% fprintf(fsplit, '    vector<double> result(this->ns,0.);\n\n', i);
-for i = 1:ns
-    fprintf(fsplit, 'fsplit[%d] = a%d;\n', i-1, i);
-end
-fprintf(fsplit, '\n');
-
-%fprintf(fsplit,'}\n\n');
-
-fxsplit = fopen('tmp/fxsplit.gen','w');
 for i = 1:ns
     for j = 1:ns
-        fprintf(fxsplit, 'double dxa%d%d (vector<double> x, vector<double> y) {\n', i, j);
-        % fprintf(fxsplit, '    double result;\n', i, j);
-        fprintf(fxsplit, ccode(fx(i,j)));
-        % fprintf(fxsplit, '\n    return result;\n', i, j);
-        fprintf(fxsplit, '\n}\n\n');
+        fprintf(split, 'double dxa%d%d (vector<double> x, vector<double> y) {\n', i, j);
+        fprintf(split, ccode(fx(i,j)));
+        fprintf(split, '\n}\n\n');
     end
 end
 
-fprintf(fxsplit, 'double (*fxsplit[%d][%d]) (vector<double> x, vector<double> y);\n\n', ns, ns);
-% fprintf(fxsplit, '    vector< vector<double> >  result(this->ns, vector<double> (this->ns, 0.);\n\n', i);
+% Function to init functions 
+fprintf(split, 'void Problem::init_functions() {\n\n');
+
+for i = 1:ns
+    fprintf(split, '    fsplit[%d] = a%d;\n', i-1, i);
+end
+
+fprintf(split, '\n');
+
 for i = 1:ns
     for j = 1:ns
-        fprintf(fxsplit, 'fxsplit[%d][%d] = dxa%d%d;\n', i-1, j-1, i, j);
+        fprintf(split, '    fxsplit[%d][%d] = dxa%d%d;\n', i-1, j-1, i, j);
     end
 end
-%fprintf(fxsplit,'}\n\n');
+
+fprintf(split, '}');
+
 
 fclose(f0); system('echo -e "" >> tmp/gx.gen');
 fclose(f1); system('echo -e "" >> tmp/v.gen');
@@ -240,7 +237,6 @@ fclose(f9); system('echo -e "" >> tmp/rho.gen');
 fclose(f10); system('echo -e "" >> tmp/fy.gen');
 fclose(f11); system('echo -e "" >> tmp/drif.gen');
 fclose(f12); system('echo -e "" >> tmp/diff.gen');
-fclose(fsplit);
-fclose(fxsplit);
+fclose(split);
 
 exit(0);
