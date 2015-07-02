@@ -6,7 +6,7 @@
 
 # Compiler and flags
 CXX    = clang++
-CXXFLAGS = -O3 -std=c++11 -Wall
+CXXFLAGS = -O3 -Ofast -fassociative-math -ffast-math -std=c++11 -Wall
 
 # Directories
 DEP_DIR = dep
