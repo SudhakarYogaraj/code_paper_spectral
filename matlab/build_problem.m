@@ -15,7 +15,7 @@ pi = sym('pi');
 ns = 2;
 
 % Fast variables
-nf = 3;
+nf = 2;
 
 % Creation of symbolic variables
 x  = sym(zeros(1, ns));
@@ -34,7 +34,7 @@ for k = 1:nf; y(k) = sym(sprintf('y%d', k-1), 'real'); end
 % Potential
 % v = y(1)^2/2 + y(2)^2/2 + y(3)^2/2
 % v = y(1)^4/4 - y(1)^2/2 + (y(2)-2)^2/2 + y(3)^4
-v = 0.5 * ((y(1) - 1)^4 + (y(2)-1)^2 + 0.2*(y(1) - 1)*(y(2) -1)) + 2*(y(3) + 1)^2
+v = 0.5 * ((y(1) - 1)^4 + (y(2)-1)^2 + 0.2*(y(1) - 1)*(y(2) -1)); % + 2*(y(3) + 1)^2
 % v = y(1)^2 + y(2)^2
 % v = y(1)*y(1) + log(pi)/2.
 % v = y(1)^4/4 - y(1)^2/2;
@@ -43,14 +43,14 @@ v = 0.5 * ((y(1) - 1)^4 + (y(2)-1)^2 + 0.2*(y(1) - 1)*(y(2) -1)) + 2*(y(3) + 1)^
 s = sqrt(2);
 
 % Solution of the cell problem
-g(1) = cos(x(1)) * sin(y(1)*y(3));
-g(2) = cos(x(2) + y(3)) * sin(y(1) + y(2));
+g(1) = cos(x(1)) * sin(y(1)*y(2));
+g(2) = cos(x(2) + y(2)) * sin(y(1) + y(2));
 % g(2) = cos(x(1)) * sin(y(2) + y(1));
 
 % Non-leading order drift of fast process
 h(1) = cos(x(1)) * cos(y(1))  * cos(y(2));
 h(2) = cos(x(1) + x(2)) * cos(y(1) + y(2));
-h(3) = cos(x(3)) * cos(y(3));
+% h(3) = cos(x(3)) * cos(y(3));
 
 %% DEPENDENT VARIABLES
 
@@ -207,7 +207,7 @@ for i = 1:ns
     end
 end
 
-% Function to init functions 
+% Function to init functions
 fprintf(split, 'void Problem::init_functions() {\n\n');
 
 for i = 1:ns
