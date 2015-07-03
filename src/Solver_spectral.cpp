@@ -41,15 +41,15 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
 
         // Discretization of dx/da
         for (int j = 0; j < ns; j++) {
-            dax_discretized[i][j] = discretize(problem, x, gauss, problem.fxsplit[i][j]);
+            dax_discretized[i][j] = discretize(problem, x, gauss, problem.dxa[i][j]);
         }
 
         // Discretization of the function a
-        a_discretized[i] = discretize(problem, x, gauss, problem.fsplit[i]);
+        a_discretized[i] = discretize(problem, x, gauss, problem.a[i]);
     }
 
     // Discretization of h
-    h_discretized = discretize(problem, x, gauss, Problem::stardiv_h);
+    h_discretized = discretize(problem, x, gauss, problem.stardiv_h);
 
     // Coefficients of the projection of the functions
     vector<double> coefficients_h;
