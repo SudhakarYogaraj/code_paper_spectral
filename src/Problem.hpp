@@ -24,27 +24,9 @@ class Problem {
         std::vector<double> sigmas;
 
         // Potential for gradient structure
-        std::vector<double> phi(std::vector<double> x, std::vector<double> y);
-        std::vector< std::vector<double> > phi_x(std::vector<double> x, std::vector<double> y);
-        double potential(std::vector<double> x, std::vector<double> y);
-        std::vector<double> grad(std::vector<double> x, std::vector<double> y);
-        double linearTerm(std::vector<double> x, std::vector<double> y);
-        double rho(std::vector<double> x, std::vector<double> y);
-
-        // Drift coefficient of the slow process
-        std::vector<double> a(std::vector<double> x, std::vector<double> y); // f0 in Pavliotis-Stuart
-
-        // Derivatives of a(,)
-        std::vector< std::vector<double> > dax(std::vector<double> x, std::vector<double> y);
-        std::vector< std::vector<double> > day(std::vector<double> x, std::vector<double> y);
 
         // FOR SPECTRAL
         // Non-leading order part of drift in the fast process
-        std::vector<double>  fast_drift_h(std::vector<double> x, std::vector<double> y);
-        std::vector< std::vector<double> > grad_h(std::vector<double> x, std::vector<double> y);
-        static double stardiv_h(std::vector<double> x, std::vector<double> y);
-        std::vector<double> lambdas;
-        std::vector<double> betas;
         std::vector<double> bias;
         std::vector<double> eig_val_cov;
         std::vector< std::vector<double> > eig_vec_cov;
@@ -61,18 +43,26 @@ class Problem {
         // version. The first nf components correspond to the initial
         // variables, whereas the last nf components correspend to the
         // auxiliary variables.
-        std::vector<double> drif(std::vector<double> x, std::vector<double> y);
-        std::vector<double> diff(std::vector<double> x, std::vector<double> y);
-
-        // Drift and diffusion coefficients of the solution
-        std::vector<double> soldrif(std::vector<double> x);
-        std::vector< std::vector<double> > soldiff(std::vector<double> x);
 
         // Initialization of the problem
         void init();
         void init_functions();
 
-        double (*fsplit[2]) (std::vector<double> x, std::vector<double> y);
-        double (*fxsplit[2][2]) (std::vector<double> x, std::vector<double> y);
+        double (*potential) (std::vector<double> x, std::vector<double> y);
+        double (*linearTerm) (std::vector<double> x, std::vector<double> y);
+        double (*rho) (std::vector<double> x, std::vector<double> y);
+        double (*stardiv_h) (std::vector<double> x, std::vector<double> y);
+        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> dyv;
+        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> h;
+        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> a;
+        std::vector< std::vector<double (*) (std::vector<double> x, std::vector<double> y)> > dxa;
+        std::vector< std::vector<double (*) (std::vector<double> x, std::vector<double> y)> > dya;
+        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> phi;
+        std::vector< std::vector<double (*) (std::vector<double> x, std::vector<double> y)> > dxphi;
+        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> drif;
+        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> diff;
+
+        std::vector<double> soldrif(std::vector<double> x);
+        std::vector< std::vector<double> > soldiff(std::vector<double> x);
 };
 #endif

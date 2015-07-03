@@ -7,7 +7,7 @@ It makes use of the python Sympy library.
 """
 
 import os
-import math
+# import math
 import sympy
 import sympy.printing
 
@@ -120,7 +120,7 @@ for i in range(nf):
     diff[i] = s
 
 # Output file
-output = open('tmp/output.cpp', 'w')
+output = open('tmp/output.gen', 'w')
 
 
 def print_double(symbol, fun_name):
@@ -134,25 +134,31 @@ def print_double(symbol, fun_name):
     output.write("    return result; \n}\n\n")
 
 
-def allocate_function_pointer(fun_base, n, m=0):
-    for i in range(n):
+def allocate_function_pointer(fun_base, n=0, m=0):
+    if(n == 0):
+        # Case of scalar output
+        output.write("    {} = {}_n;\n".format(fun_base, fun_base))
 
-        # Case where output is vector
-        if (m == 0):
-            output.write("    {}[{}] = ".format(fun_base, i))
-            output.write("{}{};\n".format(fun_base,  i))
+    elif(n > 0):
+        for i in range(n):
 
-        elif(m > 0):
-            for j in range(m):
-                output.write("    {}[{}][{}] = ".format(fun_base, i, j))
-                output.write("{}{}{};\n".format(fun_base, i, j))
+            # Case where output is vector
+            if (m == 0):
+                output.write("    {}[{}] = ".format(fun_base, i))
+                output.write("{}{};\n".format(fun_base,  i))
+
+            # Matrix case
+            elif(m > 0):
+                for j in range(m):
+                    output.write("    {}[{}][{}] = ".format(fun_base, i, j))
+                    output.write("{}{}{};\n".format(fun_base, i, j))
 
     output.write("\n")
 
-print_double(stardivh, "Problem::stardivh")
-print_double(v, "Problem::potential")
-print_double(lin, "Problem::linearTerm")
-print_double(rho, "Problem::rho")
+print_double(stardivh, "stardiv_h_n")
+print_double(v, "potential_n")
+print_double(lin, "linearTerm_n")
+print_double(rho, "rho_n")
 
 for i in range(ns):
     print_double(g[i], "phi{}".format(i))
@@ -173,63 +179,17 @@ for i in range(2*nf):
 
 # Function that allocates function pointers
 output.write("void Problem::init_functions() {\n\n")
+allocate_function_pointer("stardiv_h")
+allocate_function_pointer("rho")
+allocate_function_pointer("linearTerm")
+allocate_function_pointer("potential")
+allocate_function_pointer("dyv", nf)
+allocate_function_pointer("h", nf)
 allocate_function_pointer("a", ns)
-allocate_function_pointer("phi", ns)
 allocate_function_pointer("dxa", ns, ns)
+allocate_function_pointer("dya", ns, nf)
+allocate_function_pointer("phi", ns)
 allocate_function_pointer("dxphi", ns, ns)
 allocate_function_pointer("drif", 2*nf)
 allocate_function_pointer("diff", 2*nf)
-allocate_function_pointer("dya", ns, nf)
 output.write("}")
-
-
-# for i in range(ns):
-#     output.write("    fsplit[{}] = a{};\n".format(i, i))
-
-# output.write("\n")
-# for i in range(ns):
-#     for j in range(ns):
-#         output.write("    fxsplit[{}][{}] = dxa{}{};\n".format(i, j, i, j))
-
-# output.write("}")
-
-# Function declarations
-# gx_init = "vector< vector<double> > Problem::phi_x\
-# (vector<double> x, vector<double> y) {\n\
-# "
-
-# vy_init = "vector<double> Problem::grad\
-# (vector<double> x, vector<double> y) {\n\
-# vector< vector<double> > result(ns,vector<double>(ns,0.));"
-
-# g_init = "vector<double> Problem::phi\
-# (vector<double> x, vector<double> y) {\n\
-# "
-
-# f_init = "vector<double> Problem::a\
-# (vector<double> x, vector<double> y) {\n\
-# "
-
-# fx_init = "vector< vector<double> > Problem::dax\
-# (vector<double> x, vector<double> y) {\n\
-# "
-
-# h_init = "vector<double> Problem::fast_drift_h\
-# (vector<double> x, vector<double> y) {\n\
-# "
-
-# rho_init = "double Problem::rho\
-# (vector<double> x, vector<double> y) {\n\
-# "
-
-# fy_init = "vector< vector<double> > Problem::day\
-# (vector<double> x, vector<double> y) {\n\
-# "
-
-# drif_init = "vector<double> Problem::drif\
-# (vector<double> x, vector<double> y) {\n\
-# "
-
-# diff_init = "vector<double> Problem::diff\
-# (vector<double> x, vector<double> y) {\n\
-# "
