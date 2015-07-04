@@ -15,58 +15,77 @@ import sympy.printing
 # Create directory for temporary files
 os.system("mkdir -p tmp")
 
-# Slow variables
+# USER INPUT: Number of slow and fast variables
 ns = 2
-
-# Fast variables
 nf = 2
-
-# Creation of symbolic variables
-x = [sympy.Symbol('x%d' % i) for i in range(ns)]
-y = [sympy.Symbol('y%d' % i) for i in range(nf)]
-g = [0.]*ns
-f = [0.]*ns
-h = [0.]*nf
-vy = [0.]*nf
-hy = [[0.]*nf for i in range(nf)]
-gx = [[0.]*ns for i in range(ns)]
-fx = [[0.]*ns for i in range(ns)]
-
-v = 0.5 * ((y[0] - 1) ** 4 + (y[1] - 1) ** 2 + 0.2*(y[0] - 1) * (y[1] - 1))
+# END OF USER INPUT
 
 # Coefficient of the BM
 s = sympy.sqrt(2)
-
-# Solution of the cell problem
-g[0] = sympy.cos(x[0]) * sympy.sin(y[0]*y[1])
-g[1] = sympy.cos(x[0] + x[1]) * sympy.sin(y[0] + y[1])
-
-# Non-leading order drift of fast process
-h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.cos(y[1])
-h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1])
-# h[0] = sympy.Symbol('0')
-# h[1] = sympy.Symbol('0')
-
-# DEPENDENT VARIABLES
-
-# Term that appears in the generator
 S = s * s
 
-# Derivative of the potential
+# Creation of symbolic Variables
+x = [sympy.Symbol('x%d' % i) for i in range(ns)]
+y = [sympy.Symbol('y%d' % i) for i in range(nf)]
+
+# Solution of the Poisson equation
+g = [0.]*ns
+gx = [[0.]*ns for i in range(ns)]
+
+# Right-hand side of Poisson equation
+f = [0.]*ns
+fx = [[0.]*ns for i in range(ns)]
+fy = [[0.]*nf for i in range(ns)]
+
+# Derivatives of potential
+vy = [0.]*nf
+vyy = [[0.]*nf for i in range(nf)]
+
+# Auxiliary drift term in fast process
+h = [0.]*nf
+hy = [[0.]*nf for i in range(nf)]
+
+# Extended drift and diffusion coefficients
+drif = [0.] * (2*nf)
+diff = [0.] * (2*nf)
+
+# USER INPUT: solution of the cell problem
+g[0] = sympy.cos(x[0]) * sympy.sin(y[0]*y[1])
+g[1] = sympy.cos(x[0] + x[1]) * sympy.sin(y[0] + y[1])
+# END OF USER INPUT
+
+for i in range(ns):
+    for j in range(ns):
+        gx[i][j] = sympy.diff(g[i], x[j])
+
+# USER INPUT: Non-leading order drift of fast process
+h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.cos(y[1])
+h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1])
+# END OF USER INPUT
+
+stardivh = 0
+for i in range(nf):
+    stardivh += vy[i] * h[i] - sympy.diff(h[i], y[i])
+stardivh = sympy.simplify(stardivh)
+
+# USER INPUT: Potential
+v = 0.5 * ((y[0] - 1) ** 4 + (y[1] - 1) ** 2 + 0.2*(y[0] - 1) * (y[1] - 1))
+# END OF USER INPUT
 for i in range(nf):
     vy[i] = sympy.diff(v, y[i])
+    for j in range(nf):
+        vyy[i][j] = sympy.diff(vy[i], y[j])
 
-# Non-normalized invariant measure
+# Invariant density
 rho = sympy.exp(-v)
 rho_l = sympy.lambdify(y, rho)
-
+bounds = [-np.inf, np.inf]
 if nf == 1:
-    rho = rho/integ.quad(rho_l, [-np.inf, np.inf])
+    rho = rho/integ.quad(rho_l, bounds)
 elif nf == 2:
-    rho = rho/integ.quad(rho_l, [-np.inf, np.inf], [-np.inf, np.inf])
+    rho = rho/integ.quad(rho_l, bounds, bounds)
 elif nf == 3:
-    rho = rho/integ.quad(rho_l, [-np.inf, np.inf],
-                         [-np.inf, np.inf], [-np.inf, np.inf])
+    rho = rho/integ.quad(rho_l, bounds, bounds, bounds)
 
 # Right-hand side of Poisson equation
 for i in range(ns):
@@ -74,57 +93,28 @@ for i in range(ns):
         f[i] -= 0.5 * sympy.diff(S * rho * sympy.diff(g[i], y[j]), y[j]) / rho
         f[i] = sympy.simplify(f[i])
 
-# Linear term
+for i in range(ns):
+    for j in range(ns):
+        fx[i][j] = sympy.diff(f[i], x[j])
+    for j in range(nf):
+        fy[i][j] = sympy.diff(f[i], y[j])
+
+# Linear term of the Brownian motion
 lin = 0
 for i in range(nf):
     lin += sympy.simplify(0.25 * S * sympy.diff(v, y[i], 2))
     lin -= sympy.simplify(0.125 * S * sympy.diff(v, y[i])**2)
 
-# Derivative of h
-for i in range(nf):
-    print h[i]
-    for j in range(nf):
-        hy[i][j] = sympy.diff(h[i], y[j])
-        print hy[i][j]
-        print hy
 
-print hy
-
-# differential of g
-for i in range(ns):
-    for j in range(ns):
-        gx[i][j] = sympy.diff(g[i], x[j])
-
-# differential of f
-for i in range(ns):
-    for j in range(ns):
-        fx[i][j] = sympy.diff(f[i], x[j])
-
-# Stardivergence
+# Adjoint divergence of h
 stardivh = 0
 for i in range(nf):
-    stardivh += vy[i] * h[i] - hy[i][i]
+    stardivh += vy[i] * h[i] - sympy.diff(h[i], y[i])
 stardivh = sympy.simplify(stardivh)
 
-# VARIABLES FOR THE HMM
-
-vyy = [[0.]*nf for i in range(nf)]
-fy = [[0.]*nf for i in range(ns)]
-drif = [0.] * (2*nf)
-diff = [0.] * (2*nf)
 
 # Extension of the y vector
 y = [sympy.Symbol('y%d' % i) for i in range(2*nf)]
-
-# y-derivative of f
-for i in range(ns):
-    for j in range(nf):
-        fy[i][j] = sympy.diff(f[i], y[j])
-
-# Second derivative of potential
-for i in range(nf):
-    for j in range(nf):
-        vyy[i][j] = sympy.diff(vy[i], y[j])
 
 # Construction of the drift
 for i in range(nf):
@@ -140,6 +130,7 @@ for i in range(nf):
 output = open('tmp/output.gen', 'w')
 
 
+# Print all the necessary functions
 def print_double(symbol, fun_name):
 
     # Generate strings for function declaration

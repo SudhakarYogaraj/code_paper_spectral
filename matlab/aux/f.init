@@ -1,3 +1,0 @@
-
-vector<double> Problem::a(vector<double> x, vector<double> y) {
-    vector<double> result(this->ns,0.);
