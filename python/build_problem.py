@@ -7,7 +7,8 @@ It makes use of the python Sympy library.
 """
 
 import os
-# import math
+import numpy as np
+import mpmath as integ
 import sympy
 import sympy.printing
 
@@ -37,12 +38,14 @@ v = 0.5 * ((y[0] - 1) ** 4 + (y[1] - 1) ** 2 + 0.2*(y[0] - 1) * (y[1] - 1))
 s = sympy.sqrt(2)
 
 # Solution of the cell problem
-g[0] = sympy.cos(x[0]) * sympy.sin(y[0])
-g[1] = sympy.cos(x[1]) * sympy.sin(y[0] + y[1])
+g[0] = sympy.cos(x[0]) * sympy.sin(y[0]*y[1])
+g[1] = sympy.cos(x[0] + x[1]) * sympy.sin(y[0] + y[1])
 
 # Non-leading order drift of fast process
-h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.cos(y[1])
-h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1])
+h[0] = sympy.Symbol('0')
+h[1] = sympy.Symbol('0')
+# h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.cos(y[1])
+# h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1])
 
 # DEPENDENT VARIABLES
 
@@ -55,6 +58,15 @@ for i in range(nf):
 
 # Non-normalized invariant measure
 rho = sympy.exp(-v)
+rho_l = sympy.lambdify(y, rho)
+
+if nf == 1:
+    rho = rho/integ.quad(rho_l, [-np.inf, np.inf])
+elif nf == 2:
+    rho = rho/integ.quad(rho_l, [-np.inf, np.inf], [-np.inf, np.inf])
+elif nf == 3:
+    rho = rho/integ.quad(rho_l, [-np.inf, np.inf],
+                         [-np.inf, np.inf], [-np.inf, np.inf])
 
 # Right-hand side of Poisson equation
 for i in range(ns):
@@ -66,7 +78,7 @@ for i in range(ns):
 lin = 0
 for i in range(nf):
     lin += sympy.simplify(0.25 * S * sympy.diff(v, y[i], 2))
-    lin -= sympy.simplify(0.125 * S * sympy.diff(v, y[i]))
+    lin -= sympy.simplify(0.125 * S * sympy.diff(v, y[i])**2)
 
 # Derivative of h
 for i in range(nf):
@@ -86,7 +98,8 @@ for i in range(ns):
 # Stardivergence
 stardivh = 0
 for i in range(nf):
-    stardivh += sympy.simplify(vy[i] * h[i] - hy[i][i])
+    stardivh += vy[i] * h[i] - hy[i][i]
+stardivh = sympy.simplify(stardivh)
 
 
 # VARIABLES FOR THE HMM
@@ -106,7 +119,7 @@ for i in range(ns):
 
 # Second derivative of potential
 for i in range(nf):
-    for i in range(nf):
+    for j in range(nf):
         vyy[i][j] = sympy.diff(vy[i], y[j])
 
 # Construction of the drift
@@ -134,27 +147,6 @@ def print_double(symbol, fun_name):
     output.write("    return result; \n}\n\n")
 
 
-def allocate_function_pointer(fun_base, n=0, m=0):
-    if(n == 0):
-        # Case of scalar output
-        output.write("    {} = {}_n;\n".format(fun_base, fun_base))
-
-    elif(n > 0):
-        for i in range(n):
-
-            # Case where output is vector
-            if (m == 0):
-                output.write("    {}[{}] = ".format(fun_base, i))
-                output.write("{}{};\n".format(fun_base,  i))
-
-            # Matrix case
-            elif(m > 0):
-                for j in range(m):
-                    output.write("    {}[{}][{}] = ".format(fun_base, i, j))
-                    output.write("{}{}{};\n".format(fun_base, i, j))
-
-    output.write("\n")
-
 print_double(stardivh, "stardiv_h_n")
 print_double(v, "potential_n")
 print_double(lin, "linearTerm_n")
@@ -176,6 +168,28 @@ for i in range(nf):
 for i in range(2*nf):
     print_double(drif[i], "drif{}".format(i))
     print_double(diff[j], "diff{}".format(i))
+
+
+def allocate_function_pointer(fun_base, n=0, m=0):
+    if(n == 0):
+        # Case of scalar output
+        output.write("    {} = {}_n;\n".format(fun_base, fun_base))
+
+    elif(n > 0):
+        for i in range(n):
+
+            # Case where output is vector
+            if (m == 0):
+                output.write("    {}[{}] = ".format(fun_base, i))
+                output.write("{}{};\n".format(fun_base,  i))
+
+            # Matrix case
+            elif(m > 0):
+                for j in range(m):
+                    output.write("    {}[{}][{}] = ".format(fun_base, i, j))
+                    output.write("{}{}{};\n".format(fun_base, i, j))
+
+    output.write("\n")
 
 # Function that allocates function pointers
 output.write("void Problem::init_functions() {\n\n")

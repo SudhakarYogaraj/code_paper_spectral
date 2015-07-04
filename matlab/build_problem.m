@@ -44,7 +44,7 @@ s = sqrt(2);
 
 % Solution of the cell problem
 g(1) = cos(x(1)) * sin(y(1)*y(2));
-g(2) = cos(x(2) + y(2)) * sin(y(1) + y(2));
+g(2) = cos(x(1) + x(2)) * sin(y(1) + y(2));
 % g(2) = cos(x(1)) * sin(y(2) + y(1));
 
 % Non-leading order drift of fast process
