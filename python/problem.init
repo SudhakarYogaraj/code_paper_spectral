@@ -36,6 +36,11 @@ void Problem::init() {
     diff = vector<double (*) (vector<double> x, vector<double> y)> (2*nf);
 
     this->init_functions();
+    Gaussian_integrator gauss = Gaussian_integrator(100, nf);
+    auto lambda = [&] (vector<double> y) -> double {
+        return rho(x0,y)/gaussian(y);
+    };
+    cout << "Normalizing constant: " << gauss.quadnd(lambda) << endl;
 }
 
 // Calculation of the sqrt_cov and mean of the invariant measure.
