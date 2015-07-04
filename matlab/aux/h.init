@@ -1,3 +1,0 @@
-
-vector<double> Problem::fast_drift_h(vector<double> x, vector<double> y) {
-    vector<double> result(this->nf);

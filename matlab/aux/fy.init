@@ -1,3 +1,0 @@
-
-vector< vector<double> > Problem::day(vector<double> x, vector<double> y) {
-    vector< vector<double> > result(this->ns,vector<double>(this->nf,0.));
