@@ -126,8 +126,9 @@ vector<double> Problem::soldrif(vector<double> x) {
         vector<double> y = rescale(z);
         vector<double> tmp(ns, 0.);
         for (int i = 0; i < ns; ++i) {
+            tmp[i] += phi[i](x,y) * stardiv_h(x,y);
             for (int j = 0; j < ns; ++j) {
-                tmp[i] += dxphi[i][j](x,y) * a[j](x,y) + phi[i](x,y) * stardiv_h(x,y);
+                tmp[i] += dxphi[i][j](x,y) * a[j](x,y);
             }
         }
         return tmp*(rho(x,y)/gaussian(z));

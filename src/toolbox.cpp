@@ -66,8 +66,8 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
                 if (A[i][i] - sum < -1e-14) {
                     cout << "Warning: matrix is not positive definite: (" << A[i][i] - sum << ")." << endl;
                     if (A[i][i] - sum < -1e-12) {
-                        /* cout << "Error occured during Cholesky factorization of line " << i << "." << endl; */
-                        /* exit(0); */
+                        cout << "Error occured during Cholesky factorization of line " << i << "." << endl;
+                        exit(0);
                     }
                 }
                 else {
