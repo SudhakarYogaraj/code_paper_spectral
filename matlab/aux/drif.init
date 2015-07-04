@@ -1,3 +1,0 @@
-
-vector<double> Problem::drif(vector<double> x, vector<double> y) {
-    vector<double> result(2*this->nf,0.);

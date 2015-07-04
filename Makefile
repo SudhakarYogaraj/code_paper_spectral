@@ -41,10 +41,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@sed -i "s#^\([^.]*\.o\)#$(OBJ_DIR)/\1#g" $(DEP_DIR)/$*.d
 
 # Build problem (generates Problem.cpp)
-matlab:
-	make -C matlab
-
-python:
+problem:
 	make -C python
 
 # Detele oject files and executable
@@ -57,12 +54,10 @@ clean-dep:
 
 # Delete problem-specific temporary files
 clean-problem:
-	make clean -C matlab
 	make clean -C python
 
 # Delete all temporary files
 clean-all:
 	rm -f $(TARGET) $(OBJ_FILES)
 	rm -f $(DEP_FILES)
-	make clean -C matlab
 	make clean -C python
