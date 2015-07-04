@@ -15,10 +15,10 @@ import sympy.printing
 # Create directory for temporary files
 os.system("mkdir -p tmp")
 
-# USER INPUT 1: Number of slow and fast variables
+# USER INPUT: Number of slow and fast variables
 ns = 2
 nf = 2
-# END OF USER INPUT 1
+# END OF USER INPUT
 
 # Coefficient of the BM
 s = sympy.sqrt(2)
@@ -49,27 +49,28 @@ hy = [[0.]*nf for i in range(nf)]
 drif = [0.] * (2*nf)
 diff = [0.] * (2*nf)
 
-# USER INPUT 2: solution of the cell problem
+# USER INPUT: solution of the cell problem
 g[0] = sympy.cos(x[0]) * sympy.sin(y[0]*y[1])
 g[1] = sympy.cos(x[0] + x[1]) * sympy.sin(y[0] + y[1])
-# END OF USER INPUT 2
+# END OF USER INPUT
 
 for i in range(ns):
     for j in range(ns):
         gx[i][j] = sympy.diff(g[i], x[j])
 
-# USER INPUT 3: Non-leading order drift of fast process
+# USER INPUT: Non-leading order drift of fast process
 h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.cos(y[1])
 h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1])
-# END OF USER INPUT 3
+# END OF USER INPUT
 
 stardivh = 0
 for i in range(nf):
     stardivh += vy[i] * h[i] - sympy.diff(h[i], y[i])
 stardivh = sympy.simplify(stardivh)
 
-# Potential
+# USER INPUT: Potential
 v = 0.5 * ((y[0] - 1) ** 4 + (y[1] - 1) ** 2 + 0.2*(y[0] - 1) * (y[1] - 1))
+# END OF USER INPUT
 for i in range(nf):
     vy[i] = sympy.diff(v, y[i])
     for j in range(nf):
@@ -79,9 +80,12 @@ for i in range(nf):
 rho = sympy.exp(-v)
 rho_l = sympy.lambdify(y, rho)
 bounds = [-np.inf, np.inf]
-if nf == 1: rho = rho/integ.quad(rho_l, bounds)
-elif nf == 2: rho = rho/integ.quad(rho_l, bounds, bounds)
-elif nf == 3: rho = rho/integ.quad(rho_l, bounds, bounds, bounds)
+if nf == 1:
+    rho = rho/integ.quad(rho_l, bounds)
+elif nf == 2:
+    rho = rho/integ.quad(rho_l, bounds, bounds)
+elif nf == 3:
+    rho = rho/integ.quad(rho_l, bounds, bounds, bounds)
 
 # Right-hand side of Poisson equation
 for i in range(ns):
