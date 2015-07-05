@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
         for (unsigned int i = 0; i < estimator_degrees.size(); ++i) {
 
             // Create new solver
-            Solver_spectral solver_spectral = Solver_spectral(estimator_degrees[i], 30, problem.nf);
+            Solver_spectral solver_spectral = Solver_spectral(estimator_degrees[i], 100, problem.nf);
 
             // Update of the statistics of the invariant measure
             problem.update_stats(problem.x0);

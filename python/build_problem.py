@@ -7,8 +7,7 @@ It makes use of the python Sympy library.
 """
 
 import os
-import numpy as np
-import mpmath as integ
+import mpmath
 import sympy
 import sympy.printing
 
@@ -16,8 +15,8 @@ import sympy.printing
 os.system("mkdir -p tmp")
 
 # USER INPUT: Number of slow and fast variables
-ns = 2
-nf = 2
+ns = 1
+nf = 1
 # END OF USER INPUT
 
 # Coefficient of the BM
@@ -50,8 +49,8 @@ drif = [0.] * (2*nf)
 diff = [0.] * (2*nf)
 
 # USER INPUT: solution of the cell problem
-g[0] = sympy.cos(x[0]) * sympy.sin(y[0]*y[1])
-g[1] = sympy.cos(x[0] + x[1]) * sympy.sin(y[0] + y[1])
+g[0] = sympy.cos(x[0]) * sympy.sin(y[0])
+# g[1] = sympy.cos(x[0] + x[1]) * sympy.sin(y[0] + y[1])
 # END OF USER INPUT
 
 for i in range(ns):
@@ -59,8 +58,10 @@ for i in range(ns):
         gx[i][j] = sympy.diff(g[i], x[j])
 
 # USER INPUT: Non-leading order drift of fast process
-h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.cos(y[1])
-h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1])
+# h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.cos(y[1])
+# h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1])
+h[0] = sympy.Symbol('0')
+# h[1] = sympy.Symbol('0')
 # END OF USER INPUT
 
 stardivh = 0
@@ -69,7 +70,8 @@ for i in range(nf):
 stardivh = sympy.simplify(stardivh)
 
 # USER INPUT: Potential
-v = 0.5 * ((y[0] - 1) ** 4 + (y[1] - 1) ** 2 + 0.2*(y[0] - 1) * (y[1] - 1))
+# v = 0.5 * ((y[0] - 1) ** 2 + (y[1] - 1) ** 2 + 0.2*(y[0] - 1) * (y[1] - 1))
+v = 0.5 * (y[0] - 1) ** 2
 # END OF USER INPUT
 for i in range(nf):
     vy[i] = sympy.diff(v, y[i])
@@ -79,13 +81,13 @@ for i in range(nf):
 # Invariant density
 rho = sympy.exp(-v)
 rho_l = sympy.lambdify(y, rho)
-bounds = [-np.inf, np.inf]
+bounds = [-mpmath.inf, mpmath.inf]
 if nf == 1:
-    rho = rho/integ.quad(rho_l, bounds)
+    rho = rho/mpmath.quad(rho_l, bounds)
 elif nf == 2:
-    rho = rho/integ.quad(rho_l, bounds, bounds)
+    rho = rho/mpmath.quad(rho_l, bounds, bounds)
 elif nf == 3:
-    rho = rho/integ.quad(rho_l, bounds, bounds, bounds)
+    rho = rho/mpmath.quad(rho_l, bounds, bounds, bounds)
 
 # Right-hand side of Poisson equation
 for i in range(ns):
@@ -186,8 +188,36 @@ def allocate_function_pointer(fun_base, n=0, m=0):
 
     output.write("\n")
 
-# Function that allocates function pointers
 output.write("void Problem::init_functions() {\n\n")
+
+# Declaration of the number of variables
+output.write("    ns = {};\n".format(ns))
+output.write("    nf = {};\n\n".format(nf))
+
+# Declaration of function pointers
+output.write("dyv = vector<double (*) (vector<double> x,\
+             vector<double> y)> (nf);\n")
+output.write("h = vector<double (*) (vector<double> x,\
+             vector<double> y)> (nf);\n")
+output.write("a = vector<double (*) (vector<double> x,\
+             vector<double> y)> (ns);\n")
+output.write("dxa = vector< vector<double (*) (vector<double> x,\
+             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
+             vector<double> y)> (ns));\n")
+output.write("dya = vector< vector<double (*) (vector<double> x,\
+             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
+             vector<double> y)> (nf));\n")
+output.write("phi = vector<double (*) (vector<double> x,\
+             vector<double> y)> (ns);\n")
+output.write("dxphi = vector< vector<double (*) (vector<double> x,\
+             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
+             vector<double> y)> (ns));\n")
+output.write("drif = vector<double (*) (vector<double> x,\
+             vector<double> y)> (2*nf);\n")
+output.write("diff = vector<double (*) (vector<double> x,\
+             vector<double> y)> (2*nf);\n")
+
+# Allocation of function pointers
 allocate_function_pointer("stardiv_h")
 allocate_function_pointer("rho")
 allocate_function_pointer("linearTerm")
