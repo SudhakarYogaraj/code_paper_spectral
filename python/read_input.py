@@ -1,38 +1,38 @@
-# Select lines in user input
-inputs = ["", "", "", ""]
-finput = open('user_input.py', 'r')
-lines = finput.readlines()
-finput.close()
+def set_in_file(keyword):
 
-index_input = 0
-in_input = False
+    # Open files and read lines
+    input_lines = open('user_input.py').readlines()
+    output_lines = open('build_problem.py').readlines()
 
-for line in lines:
-    if line.startswith("# USER INPUT"):
-        in_input = True
-    if in_input == 1:
-        inputs[index_input] += line
-    if line.startswith("# END"):
-        in_input = False
-        index_input += 1
+    # Open output file in 'write' mode
+    foutput = open('build_problem.py', 'w')
 
-# Read lines of build_problem.py
-fbuild = open('build_problem.py', 'r')
-lines = fbuild.readlines()
-fbuild.close()
+    # Boolean to know if we are within one piece
+    in_input_text = False
 
-# Write input in build_problem.py
-fbuild = open('build_problem.py', 'w')
+    # Input corresponding to keyword
+    user_input = ""
 
-index_input = 0
-in_input = False
+    # Read in input file
+    for line in input_lines:
+        if line.startswith("# user input : " + keyword):
+            in_input_text = True
+        if in_input_text:
+            user_input += line
+        if line.startswith("# end"):
+            in_input_text = False
 
-for line in lines:
-    if line.startswith('# USER INPUT'):
-        in_input = True
-    if not in_input:
-        fbuild.write(line)
-    if line.startswith('# END OF USER INPUT'):
-        fbuild.write(inputs[index_input])
-        in_input = False
-        index_input += 1
+    # Write in output file
+    for line in output_lines:
+        if line.startswith("# user input : " + keyword):
+            in_input_text = True
+        if not in_input_text:
+            foutput.write(line)
+        if line.startswith("# end") & in_input_text:
+            in_input_text = False
+            foutput.write(user_input)
+
+keywords = ["solution", "second order drift", "potential", "dimensions"]
+
+for keyword in keywords:
+    set_in_file(keyword)
