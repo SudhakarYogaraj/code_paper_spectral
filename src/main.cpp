@@ -53,6 +53,7 @@ int main(int argc, char* argv[]) {
 
     // OUTPUT 1: GRAPH TIME - PRECISION FOR SPECTRAL METHOD
 
+    output1 = 1;
     if (output1) {
 
         vector<int> estimator_degrees = {2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
@@ -94,7 +95,7 @@ int main(int argc, char* argv[]) {
     for (unsigned int j = 0; j < p_values.size(); ++j) {
 
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
-        Solver_spectral solver_spectral = Solver_spectral(10, 20, problem.nf);
+        Solver_spectral solver_spectral = Solver_spectral(10, 100, problem.nf);
 
         // Approximate and exact solutions
         vector< vector<double> > xt_hmm(sizet,vector<double>(problem.ns,0.));
