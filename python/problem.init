@@ -11,6 +11,7 @@ void Problem::init() {
 
     this->init_functions();
 
+    this->normalization = 1.;
     this->t_end = 1.;
     this->x0 = vector<double>(ns,1.2);
     this->bias = vector<double>(nf, 0.);
@@ -24,22 +25,24 @@ void Problem::init() {
         sqrt_cov[i][i] = 1.;
         eig_vec_cov[i][i] = 1.;
     }
-
-    Gaussian_integrator gauss = Gaussian_integrator(100, nf);
-    auto lambda = [&] (vector<double> y) -> double {
-        return rho(x0,y)/gaussian(y);
-    };
-    cout << "Normalizing constant: " << gauss.quadnd(lambda) << endl;
 }
 
 // Calculation of the sqrt_cov and mean of the invariant measure.
 // The outer loop serves to obtain a more accurate result.
 void Problem::update_stats(vector<double> x) {
 
+    Gaussian_integrator gauss_plus = Gaussian_integrator(100, nf);
     Gaussian_integrator gauss = Gaussian_integrator(30, nf);
 
     int n_iterations = 5, i = 0;
     for (int n = 0; n < n_iterations; ++n) {
+
+        // Normalization constant
+        auto lambda = [&] (vector<double> z) -> double {
+            vector<double> y = rescale(z);
+            return det_sqrt_cov * zrho(x0,y)/gaussian(z);
+        };
+        normalization = gauss_plus.quadnd(lambda); 
 
         // Calculation of the bias of 'rho'
         bias = vector<double> (nf, 0.);
@@ -143,3 +146,6 @@ vector< vector<double> > Problem::soldiff(vector<double> x) {
     return result;
 }
 
+double Problem::rho(vector<double> x, vector<double> y) {
+    return zrho(x,y)/normalization;
+}

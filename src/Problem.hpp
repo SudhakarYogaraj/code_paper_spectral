@@ -35,6 +35,9 @@ class Problem {
         std::vector< std::vector<double> > inv_cov;
         double det_sqrt_cov;
 
+        double rho(std::vector<double> x, std::vector<double> y);
+        double normalization;
+
         void update_stats(std::vector<double> x);
         std::vector<double> rescale(std::vector<double> y);
 
@@ -50,7 +53,7 @@ class Problem {
 
         double (*potential) (std::vector<double> x, std::vector<double> y);
         double (*linearTerm) (std::vector<double> x, std::vector<double> y);
-        double (*rho) (std::vector<double> x, std::vector<double> y);
+        double (*zrho) (std::vector<double> x, std::vector<double> y);
         double (*stardiv_h) (std::vector<double> x, std::vector<double> y);
         std::vector<double (*) (std::vector<double> x, std::vector<double> y)> dyv;
         std::vector<double (*) (std::vector<double> x, std::vector<double> y)> h;
