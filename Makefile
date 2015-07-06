@@ -2,11 +2,11 @@
 .SUFFIXES:
 
 # Declare phone targets (always out of date)
-.PHONY: all clean clean-dep clean-problem clean-all problem
+.PHONY: all clean clean-dep clean-problem clean-all matlab python
 
 # Compiler and flags
 CXX    = clang++
-CXXFLAGS = -O3 -std=c++11 -Wall
+CXXFLAGS = -O3 -Ofast -fassociative-math -ffast-math -std=c++11 -Wall
 
 # Directories
 DEP_DIR = dep
@@ -42,7 +42,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Build problem (generates Problem.cpp)
 problem:
-	make -C matlab
+	make -C python
 
 # Detele oject files and executable
 clean:
@@ -54,10 +54,10 @@ clean-dep:
 
 # Delete problem-specific temporary files
 clean-problem:
-	make clean -C matlab
+	make clean -C python
 
 # Delete all temporary files
 clean-all:
 	rm -f $(TARGET) $(OBJ_FILES)
 	rm -f $(DEP_FILES)
-	make clean -C matlab
+	make clean -C python
