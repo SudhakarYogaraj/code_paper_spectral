@@ -1,7 +1,7 @@
 .SUFFIXES:
 .PHONY: clean
 
-target = ../src/Problem.cpp
+target = ../cpp/src/Problem.cpp
 sub = tmp/built.cpp
 gen = tmp/output.gen
 build = build_problem.py
