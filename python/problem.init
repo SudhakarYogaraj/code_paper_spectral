@@ -10,12 +10,10 @@ using namespace std;
 void Problem::init() {
 
     this->init_functions();
+
+    this->normalization = 1.;
     this->t_end = 1.;
-    this->nf = 2;
-    this->ns = 2;
     this->x0 = vector<double>(ns,1.2);
-    this->lambdas = {2};
-    this->betas   = {sqrt(2)};
     this->bias = vector<double>(nf, 0.);
     this->eig_val_cov = vector<double>(nf, 1.);
     this->sqrt_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
@@ -33,10 +31,18 @@ void Problem::init() {
 // The outer loop serves to obtain a more accurate result.
 void Problem::update_stats(vector<double> x) {
 
+    Gaussian_integrator gauss_plus = Gaussian_integrator(100, nf);
     Gaussian_integrator gauss = Gaussian_integrator(30, nf);
 
     int n_iterations = 5, i = 0;
     for (int n = 0; n < n_iterations; ++n) {
+
+        // Normalization constant
+        auto lambda = [&] (vector<double> z) -> double {
+            vector<double> y = rescale(z);
+            return det_sqrt_cov * zrho(x0,y)/gaussian(z);
+        };
+        normalization = gauss_plus.quadnd(lambda); 
 
         // Calculation of the bias of 'rho'
         bias = vector<double> (nf, 0.);
@@ -110,7 +116,13 @@ vector<double> Problem::soldrif(vector<double> x) {
     Gaussian_integrator gauss = Gaussian_integrator(100,this->nf);
     auto lambda = [&] (vector<double> z) -> vector<double> {
         vector<double> y = rescale(z);
-        vector<double> tmp = phi_x(x,y) * a(x,y) + phi(x,y) * stardiv_h(x,y);
+        vector<double> tmp(ns, 0.);
+        for (int i = 0; i < ns; ++i) {
+            tmp[i] += phi[i](x,y) * stardiv_h(x,y);
+            for (int j = 0; j < ns; ++j) {
+                tmp[i] += dxphi[i][j](x,y) * a[j](x,y);
+            }
+        }
         return tmp*(rho(x,y)/gaussian(z));
     };
     result = gauss.quadnd(lambda, result) * det_sqrt_cov;
@@ -123,15 +135,17 @@ vector< vector<double> > Problem::soldiff(vector<double> x) {
     auto lambda = [&] (vector<double> z) -> vector< vector<double> > {
         vector<double> y = rescale(z);
         vector< vector<double> > tens_prod(this->ns, vector<double>(this->ns, 0.));
-        vector<double> slowdrift = this->a(x,y);
-        vector<double> solution  = this->phi(x,y);
         for (int i = 0; i < this->ns; ++i) {
             for (int j = 0; j < this->ns; ++j) {
-                tens_prod[i][j] = 2*slowdrift[i]*solution[j]*(this->rho(x,y)/gaussian(z));
+                tens_prod[i][j] = 2*a[i](x,y)*phi[j](x,y)*(rho(x,y)/gaussian(z));
             }
         }
         return tens_prod;
     };
     result = cholesky(symmetric( gauss.quadnd(lambda, result) * det_sqrt_cov ));
     return result;
+}
+
+double Problem::rho(vector<double> x, vector<double> y) {
+    return zrho(x,y)/normalization;
 }

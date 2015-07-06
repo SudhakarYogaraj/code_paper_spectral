@@ -66,14 +66,16 @@ void Solver_hmm::estimator(Problem &problem, \
         // Initialization of the fast variables
         yAux[0] = yInit;
 
-        vector<double> drift;
-        vector<double> diffu;
+        vector<double> drift(2*problem.nf);
+        vector<double> diffu(2*problem.nf);
 
         // Euler-Maruyama method for the fast processes:
         for (unsigned int j = 0; j < yAux.size() - 1; j++) {
 
-            drift = problem.drif(xt, yAux[j]);
-            diffu = problem.diff(xt, yAux[j]);
+            for (int k = 0; k < 2*problem.nf; ++k) {
+                drift[k] = problem.drif[k](xt, yAux[j]);
+                diffu[k] = problem.diff[k](xt, yAux[j]);
+            }
 
             for (int k = 0; k < 2*problem.nf; k++)
             {
@@ -94,14 +96,22 @@ void Solver_hmm::estimator(Problem &problem, \
 
         // First component of each vector
         for (int index = 0; index <= this->np; index++) {
-            sumsAux2[0] = sumsAux2[0] + problem.a(xt, yAux[index]);
-            sumsAux1[0] = sumsAux1[0] + problem.dax(xt, yAux[index]);
+            for (int k = 0; k < problem.ns; ++k) {
+                sumsAux2[0][k] = sumsAux2[0][k] + problem.a[k](xt, yAux[index]);
+                for (int l = 0; l < problem.ns; ++l) {
+                    sumsAux1[0][k][l] = sumsAux1[0][k][l] + problem.dxa[k][l](xt, yAux[index]);
+                }
+            }
         }
 
         // Recursion to obtain the other components
         for (int index = 1; index < this->nt + this->n; index++) {
-            sumsAux1[index] = sumsAux1[index-1] + problem.dax(xt, yAux[index + this->np]) - problem.dax(xt, yAux[index-1]);
-            sumsAux2[index] = sumsAux2[index-1] + problem.a(xt, yAux[index + this->np]) - problem.a(xt, yAux[index-1]);
+            for (int k = 0; k < problem.ns; ++k) {
+                sumsAux2[index][k] = sumsAux2[index-1][k] + problem.a[k](xt, yAux[index + this->np]) - problem.a[k](xt, yAux[index-1]);
+                for (int l = 0; l < problem.ns; ++l) {
+                    sumsAux1[index][k][l] = sumsAux1[index-1][k][l] + problem.dxa[k][l](xt, yAux[index + this->np]) - problem.dxa[k][l](xt, yAux[index-1]);
+                }
+            }
         }
 
         // Drift term by the HMM
@@ -112,7 +122,12 @@ void Solver_hmm::estimator(Problem &problem, \
         for (int j = this->nt; j < this->nt + this->n; j++) {
 
             // evaluation of data
-            vector< vector<double> > dya_j = problem.day(xt, yAux[j]);
+            vector< vector<double> > dya_j(problem.ns, vector<double> (problem.nf));
+            for (int k = 0; k < problem.ns; ++k) {
+                for (int l = 0; l < problem.nf; ++l) {
+                    dya_j[k][l] = problem.dya[k][l](xt, yAux[j]);
+                }
+            }
 
             // first term
             for (int i1 = 0; i1 < problem.ns; i1++) {
@@ -123,8 +138,8 @@ void Solver_hmm::estimator(Problem &problem, \
             // second term: improved
             for (int i1 = 0; i1 < problem.ns; i1++) {
                 for (int i2 = 0; i2 < problem.ns; i2++) {
-                    fim2[i1] += this->micro_dt*problem.a(xt, \
-                            yAux[j])[i2]*sumsAux1[j][i1][i2];
+                    fim2[i1] += this->micro_dt*problem.a[i2](xt, \
+                            yAux[j])*sumsAux1[j][i1][i2];
                 }
             }
         }
@@ -141,8 +156,8 @@ void Solver_hmm::estimator(Problem &problem, \
         for (int i1 = 0; i1 < problem.ns; i1++) {
             for (int i2 = 0; i2 < problem.ns; i2++) {
                 for (int j = this->nt; j < this->nt + this->n; j++) {
-                    him[i1][i2] += this->micro_dt*problem.a(xt, \
-                            yAux[j])[i1]*sumsAux2[j][i2];
+                    him[i1][i2] += this->micro_dt*problem.a[i1](xt, \
+                            yAux[j])*sumsAux2[j][i2];
                 }
                 him[i1][i2] = 2*him[i1][i2]/this->n;
             }
