@@ -110,7 +110,7 @@ for i in range(nf):
     drif[i] = -vy[i]
     drif[nf+i] = h[i]
     for j in range(nf):
-        drif[nf+i] -= vyy[i][j] * y[j]
+        drif[nf+i] -= vyy[i][j] * y[j+nf]
 
 for i in range(nf):
     diff[i] = s
