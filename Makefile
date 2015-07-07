@@ -29,3 +29,8 @@ clean-cpp:
 # Delete problem-specific temporary files
 clean-problem:
 	make clean -C python
+
+# Clean all non-git files
+clean-all:
+	git clean -dfx
+

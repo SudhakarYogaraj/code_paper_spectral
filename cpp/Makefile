@@ -24,8 +24,13 @@ TARGET = ../$(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
 # Program to generate dependencies
 MAKEDEPEND = $(CXX) $(CXXFLAGS) -MM -o $(DEP_DIR)/$*.d $<
 
+# Ensure that directories exist and build executable
+all :
+	mkdir -p dep obj
+	make target
+
 # Build executable
-all : $(TARGET)
+target : $(TARGET)
 
 # Rule fo the target executable
 $(TARGET) : $(OBJ_FILES)
