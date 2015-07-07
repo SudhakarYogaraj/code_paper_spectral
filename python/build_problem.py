@@ -14,8 +14,8 @@ import sympy.printing
 os.system("mkdir -p tmp")
 
 # user input : dimensions
-ns = 1
-nf = 1
+ns = 2
+nf = 2
 # end
 
 # Coefficient of the BM
@@ -48,7 +48,9 @@ drif = [0.] * (2*nf)
 diff = [0.] * (2*nf)
 
 # user input : solution
-g[0] = sympy.cos(x[0] + y[0])
+# g[0] = sympy.cos(x[0] + y[0])
+g[0] = sympy.cos(x[0]) * sympy.sin(y[0]);
+g[1] = sympy.cos(x[0]) * sympy.sin(y[0] + y[1]);
 # end
 
 for i in range(ns):
@@ -56,7 +58,11 @@ for i in range(ns):
         gx[i][j] = sympy.diff(g[i], x[j])
 
 # user input : second order drift
-h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.exp(y[0])
+# h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.exp(y[0])
+h[0] = sympy.cos(x[0]) * sympy.cos(y[0])  * sympy.cos(y[1]);
+h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1]);
+# h[0] = sympy.Symbol('0');
+# h[1] = sympy.Symbol('0');
 # end
 
 stardivh = 0
@@ -65,7 +71,8 @@ for i in range(nf):
 stardivh = sympy.simplify(stardivh)
 
 # user input : potential
-v = 0.5 * (y[0] - 1) ** 2
+# v = 0.5 * (y[0] - 1) ** 2
+v = 0.5 * ((y[0] - 1) ** 4 + (y[1]-1) ** 2 + 0.2*(y[0] - 1)*(y[1] -1))
 # end
 
 for i in range(nf):
@@ -110,7 +117,7 @@ for i in range(nf):
     drif[i] = -vy[i]
     drif[nf+i] = h[i]
     for j in range(nf):
-        drif[nf+i] -= vyy[i][j] * y[j]
+        drif[nf+i] -= vyy[i][j] * y[j+nf]
 
 for i in range(nf):
     diff[i] = s
@@ -182,27 +189,27 @@ output.write("    ns = {};\n".format(ns))
 output.write("    nf = {};\n\n".format(nf))
 
 # Declaration of function pointers
-output.write("dyv = vector<double (*) (vector<double> x,\
+output.write("    dyv = vector<double (*) (vector<double> x,\
              vector<double> y)> (nf);\n")
-output.write("h = vector<double (*) (vector<double> x,\
+output.write("    h = vector<double (*) (vector<double> x,\
              vector<double> y)> (nf);\n")
-output.write("a = vector<double (*) (vector<double> x,\
+output.write("    a = vector<double (*) (vector<double> x,\
              vector<double> y)> (ns);\n")
-output.write("dxa = vector< vector<double (*) (vector<double> x,\
+output.write("    dxa = vector< vector<double (*) (vector<double> x,\
              vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
              vector<double> y)> (ns));\n")
-output.write("dya = vector< vector<double (*) (vector<double> x,\
+output.write("    dya = vector< vector<double (*) (vector<double> x,\
              vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
              vector<double> y)> (nf));\n")
-output.write("phi = vector<double (*) (vector<double> x,\
+output.write("    phi = vector<double (*) (vector<double> x,\
              vector<double> y)> (ns);\n")
-output.write("dxphi = vector< vector<double (*) (vector<double> x,\
+output.write("    dxphi = vector< vector<double (*) (vector<double> x,\
              vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
              vector<double> y)> (ns));\n")
-output.write("drif = vector<double (*) (vector<double> x,\
+output.write("    drif = vector<double (*) (vector<double> x,\
              vector<double> y)> (2*nf);\n")
-output.write("diff = vector<double (*) (vector<double> x,\
-             vector<double> y)> (2*nf);\n")
+output.write("    diff = vector<double (*) (vector<double> x,\
+             vector<double> y)> (2*nf);\n\n")
 
 # Allocation of function pointers
 allocate_function_pointer("stardiv_h")
