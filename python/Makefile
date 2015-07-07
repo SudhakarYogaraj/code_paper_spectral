@@ -7,6 +7,12 @@ gen = tmp/output.gen
 build = build_problem.py
 input = user_input.py
 
+all :
+	mkdir -p tmp
+	make target
+
+target : $(target)
+
 $(target) : problem.init $(sub)
 	cat $^ > $@
 
