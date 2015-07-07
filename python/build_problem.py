@@ -61,6 +61,8 @@ for i in range(ns):
 # h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.exp(y[0])
 h[0] = sympy.cos(x[0]) * sympy.cos(y[0])  * sympy.cos(y[1]);
 h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1]);
+# h[0] = sympy.Symbol('0');
+# h[1] = sympy.Symbol('0');
 # end
 
 stardivh = 0
@@ -115,7 +117,7 @@ for i in range(nf):
     drif[i] = -vy[i]
     drif[nf+i] = h[i]
     for j in range(nf):
-        drif[nf+i] -= vyy[i][j] * y[j]
+        drif[nf+i] -= vyy[i][j] * y[j+nf]
 
 for i in range(nf):
     diff[i] = s
