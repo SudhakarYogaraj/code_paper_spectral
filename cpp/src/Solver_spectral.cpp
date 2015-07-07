@@ -74,11 +74,11 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     // Mapping to Hermite basis
     for (int i = 0; i < ns; ++i) {
         for (int j = 0; j < ns; ++j) {
-            coefficients_dx[i][j] = basis2herm(coefficients_dx[i][j]);
+            coefficients_dx[i][j] = hermiteCoeffs_nd * coefficients_dx[i][j];
         }
-        coefficients[i] = basis2herm(coefficients[i]);
+        coefficients[i] = hermiteCoeffs_nd * coefficients[i];
     }
-    coefficients_h = basis2herm(coefficients_h);
+    coefficients_h = hermiteCoeffs_nd * coefficients_h;
 
     // Solution of the Poisson equation
     vector< vector<double> > solution(ns, vector<double>(nb,0.));
@@ -523,32 +523,6 @@ double Solver_spectral::monomial(vector<int> mult, vector<double> x) {
     }
     return result;
 }
-
-/*! Function that computes the inner product <f, hi> from the inner products
- *  against monomials
- * 
- *  The argunments taken by the functions are the coefficients <f, mi> of the
- *  projections against the monomials.
- */
-vector<double> Solver_spectral::basis2herm (vector<double> bcoeffs) {
-    vector<double> result(bcoeffs.size(), 0.);
-    for (unsigned int i = 0; i < bcoeffs.size(); ++i) {
-        for (unsigned int j = 0; j <= i; ++j) {
-            result[i] += hermiteCoeffs_nd[i][j] * bcoeffs[j];
-        }
-    }
-    return result;
-}
-
-/* vector<double> Solver_spectral::basis2herm (vector<double> bcoeffs, int n, int ns) { */
-/*     vector<double> result(bcoeffs.size(), 0.); */
-/*     for (unsigned int i = 0; i < bcoeffs.size(); ++i) { */
-/*         for (unsigned int j = 0; j <= i; ++j) { */
-/*             result[i] += hermiteCoeffs_nd[i][j] * bcoeffs[j]; */
-/*         } */
-/*     } */
-/*     return result; */
-/* } */
 
 /*! Function to compute hermite coefficients
  *
