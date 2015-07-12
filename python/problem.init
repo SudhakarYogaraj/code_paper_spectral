@@ -42,7 +42,7 @@ void Problem::update_stats(vector<double> x) {
             vector<double> y = rescale(z);
             return det_sqrt_cov * zrho(x0,y)/gaussian(z);
         };
-        normalization = gauss_plus.quadnd(lambda); 
+        normalization = gauss_plus.quadnd(lambda);
 
         // Calculation of the bias of 'rho'
         bias = vector<double> (nf, 0.);

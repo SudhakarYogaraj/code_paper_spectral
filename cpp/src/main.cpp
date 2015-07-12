@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
 
-    int output1 = 0;
+    int output1 = 1;
 
     // Initialization of the problem
     Problem problem;
