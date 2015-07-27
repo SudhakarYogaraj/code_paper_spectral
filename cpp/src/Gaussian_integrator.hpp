@@ -28,6 +28,11 @@ class Gaussian_integrator {
         std::vector<double> weights;
 
     private:
+
+        // Number of dimensions
         int nVars;
+
+        // Product of quadrature rules
+        void quad_prod(std::vector<int> sizes, std::vector< std::vector<double> >& nodes, std::vector<double>& weights);
 };
 #endif

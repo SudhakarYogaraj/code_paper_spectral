@@ -39,6 +39,101 @@ static vector<double> nodes_64 = { 1.38302244987009724116e-01, 4.149888241210786
 static vector<double> weights_64 = { 2.71377424941303977947e-01, 2.32994786062678046649e-01, 1.71685842349083702001e-01, 1.08498349306186840632e-01, 5.87399819640994345496e-02, 2.72031289536889184544e-02, 1.07560405098791370492e-02, 3.62258697853445876057e-03, 1.03632909950757766343e-03, 2.50983698513062486093e-04, 5.12592913578627466080e-05, 8.78849923085035918142e-06, 1.25834025103118457615e-06, 1.49553293672724706114e-07, 1.46512531647610935494e-08, 1.17361674232154934349e-09, 7.61521725014545135318e-11, 3.95917776694772392711e-12, 1.62834073070972036212e-13, 5.21862372659084752279e-15, 1.28009339132243804163e-16, 2.35188471067581911698e-18, 3.15225456650378141599e-20, 2.98286278427985115448e-22, 1.91170688330064282993e-24, 7.86179778892591036891e-27, 1.92910359546496685035e-29, 2.54966089911299925654e-32, 1.55739062462976380226e-35, 3.42113801125574050436e-39, 1.67974799010815921869e-43, 5.53570653585694282057e-49 };
 
 
+void get_gh_quadrature(int nNodes, vector<double>& nodes, vector<double>& weights) {
+
+    // Unscaled nodes and weights
+    vector<double> x;
+    vector<double> w;
+
+    switch (nNodes) {
+        case 2: x = nodes_2; w = weights_2; break;
+        case 4: x = nodes_4; w = weights_4; break;
+        case 6: x = nodes_6; w = weights_6; break;
+        case 8: x = nodes_8; w = weights_8; break;
+        case 10: x = nodes_10; w = weights_10; break;
+        case 16: x = nodes_16; w = weights_16; break;
+        case 20: x = nodes_20; w = weights_20; break;
+        case 30: x = nodes_30; w = weights_30; break;
+        case 32: x = nodes_32; w = weights_32; break;
+        case 64: x = nodes_64; w = weights_64; break;
+        case 100: x = nodes_100; w = weights_100; break;
+        default: cout << "Invalid number of nodes for Gauss-hermite integration" << endl; exit(0);
+    }
+
+    // Initialization of nodes and weights
+    nodes = vector<double> (nNodes);
+    weights = vector<double> (nNodes);
+
+    // Add symmetric
+    for (int i = 0; i < nNodes/2; ++i) {
+        nodes[i] = x[i];
+        weights[i] = w[i];
+        nodes[i + nNodes/2] = -x[i];
+        weights[i + nNodes/2] = w[i];
+    }
+
+    // Scaling to get rid of factors
+    for (int i = 0; i < nNodes; ++i) {
+        weights[i] /= sqrt(PI);
+        nodes[i] *= sqrt(2);
+    }
+}
+
+// Product of quadratures
+void Gaussian_integrator::quad_prod(vector<int> sizes, vector< vector<double> >& nodes, vector<double>& weights) {
+
+    // Dimension
+    int dim = sizes.size();
+
+    // Number of nodes of product
+    int n = 1;
+    for (int i = 0; i < dim; ++i)
+        n *= sizes[i];
+
+    // Store nodes and weights of all the quadrature rules used
+    vector< vector<double> > all_nodes(dim);
+    vector< vector<double> > all_weights(dim);
+
+    for (int i = 0; i < dim; ++i)
+        get_gh_quadrature(sizes[i], all_nodes[i], all_weights[i]);
+
+    // Initialize
+    nodes = vector< vector<double> > (n, vector<double> (dim, 0.));
+    weights = vector<double> (n, 1.);
+
+    // Compute nodes and weights of product
+    for (int i = 0; i < n; ++i) {
+        /* cout << "i = " << i << endl; */
+        for (int j = 0, aux = i; j < dim; ++j) {
+            nodes[i][j] = all_nodes[j][aux % sizes[j]];
+            weights[i] *= all_weights[j][aux % sizes[j]];
+            aux = aux / sizes[j];
+        }
+    }
+}
+
+Gaussian_integrator::Gaussian_integrator(int nNodes, int nVars) {
+
+    vector<double> nodes_1d(nNodes);
+    vector<double> weights_1d(nNodes);
+
+    // Classic method
+    get_gh_quadrature(nNodes, nodes_1d, weights_1d);
+
+    // Sequence of grids
+    vector<int> seq(nVars, nNodes);
+    quad_prod(seq, nodes, weights);
+}
+
+double Gaussian_integrator::quadnd(function<double(vector<double>)> f) {
+    double result = 0.;
+    for (unsigned int i = 0; i < nodes.size(); ++i) {
+        result += f(nodes[i]) * weights[i];
+    }
+    return result;
+}
+
+
 
 // Genz-Keister nested grides
 /* static vector<double> gk24_nodes_1 = 0.0000000000000000; */
@@ -213,80 +308,3 @@ static vector<double> weights_64 = { 2.71377424941303977947e-01, 2.3299478606267
 /*         w[41] =   0.87544909871323873E-23; */
 /*         w[42] =   0.546191947478318097E-37; */
 
-void get_gh_quadrature(int nNodes, vector<double>& nodes, vector<double>& weights) {
-    switch (nNodes) {
-        case 2: nodes = nodes_2; weights = weights_2; break;
-        case 4: nodes = nodes_4; weights = weights_4; break;
-        case 6: nodes = nodes_6; weights = weights_6; break;
-        case 8: nodes = nodes_8; weights = weights_8; break;
-        case 10: nodes = nodes_10; weights = weights_10; break;
-        case 16: nodes = nodes_16; weights = weights_16; break;
-        case 20: nodes = nodes_20; weights = weights_20; break;
-        case 30: nodes = nodes_30; weights = weights_30; break;
-        case 32: nodes = nodes_32; weights = weights_32; break;
-        case 64: nodes = nodes_64; weights = weights_64; break;
-        case 100: nodes = nodes_100; weights = weights_100; break;
-        default: cout << "Invalid number of nodes for Gauss-hermite integration" << endl; exit(0);
-    }
-}
-
-Gaussian_integrator::Gaussian_integrator(int nNodes, int nVars) {
-
-    vector<double> nodes_1d(nNodes);
-    vector<double> weights_1d(nNodes);
-
-    // Classic method
-    get_gh_quadrature(nNodes, nodes_1d, weights_1d);
-
-    // Smolyak algorithm
-    /* vector<int> ssequence = {2, 4, 8, 16, 32, 64}; */
-
-    //
-
-    for (int i = 0; i < nNodes/2; ++i) {
-        nodes_1d[i + nNodes/2] = -nodes_1d[i];
-        weights_1d[i + nNodes/2] = weights_1d[i];
-    }
-
-    int nPoints = pow(nNodes, nVars);
-    vector< vector<double> > x(nPoints, vector<double>(nVars,0.));
-    vector<double> w(nPoints, 1.);
-    for (int i = 0; i < nPoints; ++i) {
-        int tmp = i;
-        for (int j = 0; j < nVars; ++j) {
-            x[i][j] = nodes_1d[tmp%nNodes];
-            w[i] *= weights_1d[tmp%nNodes];
-            tmp = tmp/nNodes;
-        }
-    }
-
-    // Scaling to get rid of factors
-    for (int i = 0; i < nPoints; ++i) {
-
-        // Scaling of the weights
-        w[i] /= pow(sqrt(PI),nVars);
-
-        // Scaling of the points
-        for (int j = 0; j < nVars; ++j) {
-            x[i][j] *= sqrt(2);
-        }
-    }
-
-    this->nodes = x;
-    this->weights = w;
-    this->nVars = nVars;
-}
-
-/*! Smolyak algorithm for sparse Gauss-Hermite integration
- */
-void set_nodes(vector<int> n_points) {
-
-}
-
-double Gaussian_integrator::quadnd(function<double(vector<double>)> f) {
-    double result = 0.;
-    for (unsigned int i = 0; i < nodes.size(); ++i) {
-        result += f(nodes[i]) * weights[i];
-    }
-    return result;
-}
