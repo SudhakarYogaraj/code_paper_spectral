@@ -1,5 +1,6 @@
 ## Addition to the default .gitignore
 Problem.cpp
+build_problem.py
 *.exec
 dep
 obj

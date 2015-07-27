@@ -1,3 +1,5 @@
+import os
+
 def set_in_file(keyword):
 
     # Open files and read lines
@@ -32,6 +34,10 @@ def set_in_file(keyword):
             in_input_text = False
             foutput.write(user_input)
 
+# Copy build_problem_init.py
+os.system("cp build_problem_init.py build_problem.py")
+
+# Substitute user input in build_problem.py
 keywords = ["solution", "second order drift", "potential", "dimensions"]
 
 for keyword in keywords:

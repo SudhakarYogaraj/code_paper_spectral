@@ -5,7 +5,7 @@ target = ../cpp/src/Problem.cpp
 sub = tmp/built.cpp
 gen = tmp/output.gen
 build = build_problem.py
-input = user_input.py
+input = user_input.py build_problem_init.py
 
 all :
 	mkdir -p tmp
