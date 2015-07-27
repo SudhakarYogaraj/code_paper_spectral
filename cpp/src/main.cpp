@@ -8,6 +8,15 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
 
+    /* vector< vector<int> > test = interval_multi_indices(4,2,3); */
+    /* for (int i = 0; i < test.size(); ++i) { */
+    /*     for (int j = 0; j < test[i].size(); ++j) { */
+    /*         cout << test[i][j] << ", "; */
+    /*     } */
+    /*     cout << endl; */
+    /* } */
+    /* exit(0); */
+
     int output1 = 1;
 
     // Initialization of the problem
@@ -66,7 +75,7 @@ int main(int argc, char* argv[]) {
         for (unsigned int i = 0; i < estimator_degrees.size(); ++i) {
 
             // Create new solver
-            Solver_spectral solver_spectral = Solver_spectral(estimator_degrees[i], 100, problem.nf);
+            Solver_spectral solver_spectral = Solver_spectral(estimator_degrees[i], 30, problem.nf);
 
             // Update of the statistics of the invariant measure
             problem.update_stats(problem.x0);

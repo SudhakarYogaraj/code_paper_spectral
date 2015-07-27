@@ -9,6 +9,7 @@
 #include "templates.hpp"
 #include "io.hpp"
 #include "global.hpp"
+#include "combinatorics.hpp"
 
 #include <iostream>
 #include <iomanip>

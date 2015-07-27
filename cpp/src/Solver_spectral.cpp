@@ -1,7 +1,7 @@
 /* TODO: Problem with exact sigma (urbain, Wed 20 May 2015 21:00:20 BST) */
 
 #include "structures.hpp"
-#include "toolbox.hpp"
+#include "linear_algebra.hpp"
 #include "Problem.hpp"
 #include "Gaussian_integrator.hpp"
 #include "Solver_spectral.hpp"

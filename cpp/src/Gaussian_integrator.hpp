@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include "templates.hpp"
+#include "combinatorics.hpp"
 
 class Gaussian_integrator {
     public:
