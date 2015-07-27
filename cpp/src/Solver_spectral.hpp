@@ -5,6 +5,7 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include <unordered_map>
 
 #include "Gaussian_integrator.hpp"
 #include "Problem.hpp"
@@ -22,6 +23,28 @@ class Solver_spectral {
 
     private:
 
+        struct Hash_multi_index {
+
+            // "Hashing" function for multi_indices. Associate a unique integer to
+            // any multi-index with |m|_inf < base.
+            size_t operator() (const std::vector<int>& multi_index) const {
+
+                // The base, which limits the validity of the hash function.
+                int base = 100;
+
+                int tmp = 0;
+                for (unsigned int i = 0; i < multi_index.size(); ++i) {
+                    tmp += multi_index[i] * pow(base, i);
+                }
+
+                return std::hash<int>()(tmp);
+            }
+        };
+
+        // Cached multi-indices
+        std::vector< std::vector<int> > ind2mult;
+        std::unordered_map<std::vector<int>, int, Hash_multi_index> mult2ind;
+
         // Number of dimension to solve on
         int nf;
 
@@ -35,11 +58,6 @@ class Solver_spectral {
 
         // Basis used for the method
         double monomial(std::vector<int> mult, std::vector<double> x);
-
-        // Auxiliary functions to convert multi-indices to linear indices, and
-        // vice-versa.
-        int mult2ind(std::vector<int> m);
-        std::vector<int> ind2mult(int ind, int n);
 
         // Calculate coefficients of Hermite polynomials.
         void hermite_coefficients (int degree, std::vector< std::vector<double> >& matrix);

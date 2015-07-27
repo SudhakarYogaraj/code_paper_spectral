@@ -109,10 +109,10 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     vector< vector<double> > prod_mat(nb, vector<double>(nb, 0.));
 
     for (int i = 0; i < nb; ++i) {
-        vector<int> m1 = ind2mult(i, nf);
+        vector<int> m1 = ind2mult[i];
         for (int j = 0; j < nb; ++j) {
-            vector<int> m2 = ind2mult(j, nf);
-            int index = mult2ind(m1 + m2);
+            vector<int> m2 = ind2mult[j];
+            int index = mult2ind[m1 + m2];
             prod_mat[i][j] = tmp_vec[index];
         }
     }
@@ -130,7 +130,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     }
     for (int i = 0; i < nb; ++i) {
         if(VERBOSE) progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(2*nb+1)) ));
-        vector<int> m1 = ind2mult(i, nf);
+        vector<int> m1 = ind2mult[i];
         /* FIXME: sigmas? (urbain, Thu 28 May 2015 18:15:19 BST) */
         /* FIXME: Normalization (urbain, Thu 28 May 2015 20:55:46 BST) */
 
@@ -333,7 +333,7 @@ vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator&
     for (int i = 0; i < nb; ++i) {
 
             // Multi-index associated with j
-            m[i] = ind2mult(i, nf);
+            m[i] = ind2mult[i];
 
             // Mapping that associates for each multi-index one of lower degree.
             for (delta[i] = 0; i != 0 && m[i][delta[i]] == 0; ++delta[i]) {}
@@ -345,7 +345,7 @@ vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator&
             mm[delta[i]] --;
 
             // Mapped linear index
-            mi[i] = mult2ind(mm);
+            mi[i] = mult2ind[mm];
     }
 
     // Loop over the points of the quadrature
@@ -390,6 +390,12 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
     // Number of fast processes
     this->nf = n_vars;
 
+    // Initialize multi-indices
+    ind2mult = lower_multi_indices(nf, 2*degree);
+    for (unsigned int i = 0; i < ind2mult.size(); ++i) {
+        mult2ind.emplace(ind2mult[i], i);
+    }
+
     // Dimension of the approximation space
     int nb = bin(degree + n_vars, n_vars);
 
@@ -405,12 +411,12 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
     for (int i = 0; i < nb; ++i) {
 
         // Multi-index corresponding to linear index i
-        vector<int> m1 = ind2mult(i,n_vars);
+        vector<int> m1 = ind2mult[i];
 
         for (int j = 0; j < nb; ++j) {
 
             // Multi-index corresponding to linear index j
-            vector<int> m2 = ind2mult(j,n_vars);
+            vector<int> m2 = ind2mult[j];
 
             // Calculation of the coefficients of x^m2 in h^m1
             matnd[i][j] = 1.;
@@ -426,88 +432,6 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
     this->nNodes = nNodes;
     this->hermiteCoeffs_1d = mat1d;
     this->hermiteCoeffs_nd = matnd;
-}
-
-/*! Compute linear index from multi-index
- *
- * This functions computes the linear index associated with a given multi-index.
- * Note that the ordering chosen is such that the resulting multi-index does not
- * depend on the degree of polynomial approximation.
- */
-int Solver_spectral::mult2ind(vector<int> m) {
-
-    // Number of variables
-    int n = m.size();
-
-    // Univariate case
-    if(n == 1) {
-        return m[0];
-    }
-
-    // Degree of m
-    int degree = 0;
-
-    // Calculation of the degree
-    for (int i = 0; i < m.size(); ++i) {
-        degree += m[i];
-    }
-
-    // Case degree == 0
-    if (degree == 0) {
-        return 0;
-    }
-
-    // Dimension of the space of degree (degree - 1)
-    int result = bin((degree-1) + n, n);
-
-    // Remove last element of m
-    m.pop_back();
-
-    return result + mult2ind(m);
-}
-
-/*! Compute multi-index from linear index
- *
- * This function computes the multi-index corresponding to the linear index
- * passed in argument. The arguments are
- * - ind: the linear index,
- * - n: size of the multiindex.
- */
-vector<int> Solver_spectral::ind2mult(int ind, int n) {
-
-    // Univariate case
-    if (n == 1) {
-        return vector<int>(1,ind);
-    }
-
-    // Degree of the corresponding multi-index
-    int degree = 0;
-
-    // Calculation of the degree
-    while ( bin(degree + n, n) <= ind) {
-        degree ++;
-    }
-
-    // Case when degree == 0
-    if (degree == 0) {
-        return vector<int>(n,0);
-    }
-
-    // Dimension of the space of strictly lower degree
-    int dim = bin((degree-1) + n, n);
-
-    // Initialization of the vector that will contain the result
-    vector<int> result = ind2mult(ind - dim, n-1);
-
-    // Add an element at the end
-    result.push_back(degree);
-
-    // Calculate value of last element
-    for (int i = 0; i < n-1; ++i) {
-        result[n-1] -= result[i];
-    }
-
-    return result;
 }
 
 /*! Function to evaluate monomial in a point
