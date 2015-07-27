@@ -5,7 +5,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include "toolbox.hpp"
+#include "linear_algebra.hpp"
 
 // Functions to list multi-indices
 std::vector< std::vector<int> > equal_multi_indices(int n, int d);

@@ -1,5 +1,5 @@
 #include "structures.hpp"
-#include "toolbox.hpp"
+#include "linear_algebra.hpp"
 #include "templates.hpp"
 #include "Problem.hpp"
 #include "Solver_hmm.hpp"
