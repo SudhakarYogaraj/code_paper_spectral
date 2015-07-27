@@ -14,6 +14,14 @@ int bin(int n, int k) {
     return res;
 }
 
+// Standard normal gaussian
+double gaussian(vector<double> y) {
+    double result = 1.;
+    for (unsigned int i = 0; i < y.size(); ++i) {
+        result *= exp(-y[i]*y[i]/2)/(sqrt(2*PI));
+    }
+    return result;
+}
 
 // Enumeration of the n-dimensional multi-indices i such that |i| = d
 vector< vector<int> > equal_multi_indices(int n, int d) {
