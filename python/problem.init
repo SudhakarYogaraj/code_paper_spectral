@@ -1,7 +1,7 @@
 #include "Problem.hpp"
 #include "templates.hpp"
 #include "Gaussian_integrator.hpp"
-#include "toolbox.hpp"
+#include "linear_algebra.hpp"
 #include "io.hpp"
 #include "global.hpp"
 
