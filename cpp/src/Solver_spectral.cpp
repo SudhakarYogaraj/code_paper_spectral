@@ -26,7 +26,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, vector<double> x, double
     int nb = bin(degree + nf, nf);
 
     // User defined rescaling of the eigenvalues
-    vector<double> var_scaling = {0.8, 0.7};
+    vector<double> var_scaling = {0.5, 0.4};
 
     // Update statistics of Gaussian
     this->update_stats(problem, var_scaling);

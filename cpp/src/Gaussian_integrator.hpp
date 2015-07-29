@@ -11,6 +11,8 @@
 #include "combinatorics.hpp"
 
 class Gaussian_integrator {
+
+
     public:
         Gaussian_integrator(int nNodes, int nVars);
 
@@ -27,6 +29,8 @@ class Gaussian_integrator {
         std::vector< std::vector<double> > nodes;
         std::vector<double> weights;
 
+        static void test_integrator();
+
     private:
 
         // Number of dimensions
@@ -34,5 +38,9 @@ class Gaussian_integrator {
 
         // Product of quadrature rules
         void quad_prod(std::vector<int> sizes, std::vector< std::vector<double> >& nodes, std::vector<double>& weights);
+
+
+        // Smolyak algorithm
+        void Smolyak(std::vector< std::vector<double> >& nodes, std::vector<double>& weights);
 };
 #endif
