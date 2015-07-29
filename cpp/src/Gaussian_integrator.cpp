@@ -4,7 +4,6 @@
 using namespace std;
 
 // Gauss-Hermite rules
-
 static vector<double> nodes_6 = { 2.35060497367449222281e+00, 4.36077411927616508688e-01, 1.33584907401369694976e+00 };
 static vector<double> weights_6 = { 4.53000990550884564102e-03, 7.24629595224392524086e-01, 1.57067320322856643914e-01 };
 
@@ -45,7 +44,12 @@ void get_gh_quadrature(int nNodes, vector<double>& nodes, vector<double>& weight
     vector<double> x;
     vector<double> w;
 
+    // Initialization of nodes and weights
+    nodes = vector<double> (nNodes);
+    weights = vector<double> (nNodes);
+
     switch (nNodes) {
+        case 1: nodes = {0.}; weights = {1.}; return; break;
         case 2: x = nodes_2; w = weights_2; break;
         case 4: x = nodes_4; w = weights_4; break;
         case 6: x = nodes_6; w = weights_6; break;
@@ -57,12 +61,8 @@ void get_gh_quadrature(int nNodes, vector<double>& nodes, vector<double>& weight
         case 32: x = nodes_32; w = weights_32; break;
         case 64: x = nodes_64; w = weights_64; break;
         case 100: x = nodes_100; w = weights_100; break;
-        default: cout << "Invalid number of nodes for Gauss-hermite integration" << endl; exit(0);
+        default: cout << "Invalid number of nodes (" << nNodes << ") for Gauss-hermite integration" << endl; exit(0);
     }
-
-    // Initialization of nodes and weights
-    nodes = vector<double> (nNodes);
-    weights = vector<double> (nNodes);
 
     // Add symmetric
     for (int i = 0; i < nNodes/2; ++i) {
@@ -103,7 +103,6 @@ void Gaussian_integrator::quad_prod(vector<int> sizes, vector< vector<double> >&
 
     // Compute nodes and weights of product
     for (int i = 0; i < n; ++i) {
-        /* cout << "i = " << i << endl; */
         for (int j = 0, aux = i; j < dim; ++j) {
             nodes[i][j] = all_nodes[j][aux % sizes[j]];
             weights[i] *= all_weights[j][aux % sizes[j]];
@@ -112,17 +111,58 @@ void Gaussian_integrator::quad_prod(vector<int> sizes, vector< vector<double> >&
     }
 }
 
+void Gaussian_integrator::Smolyak(vector< vector<double> >& snodes, vector<double>& sweights) {
+
+    snodes = vector< vector<double> > (0);
+    sweights = vector<double>(0);
+
+    vector<int> indices = {0, 1, 2, 3, 4, 5, 6};
+    vector<int> sizes = {1, 2, 4, 8, 16, 32, 64};
+
+    // Using notations of
+    // https://dbarajassolano.wordpress.com/2012/01/26/on-sparse-grid-quadratures/
+    int q = indices.size() - 1;
+    int N = this->nVars;
+
+    // Enumeration of multi_indinces
+    vector< vector<int> > enum_indices = interval_multi_indices(N, q - N + 1, q);
+
+    // Auxiliary vectors
+    vector< vector<double> > aux_nodes;
+    vector<double> aux_weights;
+
+    for (unsigned int i = 0; i < enum_indices.size(); ++i) {
+
+        vector<int> this_index = enum_indices[i];
+        vector<int> this_sizes(this_index.size());
+
+        for (int j = 0; j < this_index.size(); ++j)
+            this_sizes[j] = sizes[this_index[j]];
+
+        int sum_index = accumulate(this_index.begin(), this_index.end(), 0.);
+        double weight_mod = pow(-1, q - sum_index) * bin (N - 1, q - sum_index);
+
+        quad_prod(this_sizes, aux_nodes, aux_weights);
+        aux_weights = aux_weights * weight_mod;
+
+        nodes.insert(nodes.end(), aux_nodes.begin(), aux_nodes.end());
+        weights.insert(weights.end(), aux_weights.begin(), aux_weights.end());
+    }
+}
+
 Gaussian_integrator::Gaussian_integrator(int nNodes, int nVars) {
 
     vector<double> nodes_1d(nNodes);
     vector<double> weights_1d(nNodes);
 
-    // Classic method
-    get_gh_quadrature(nNodes, nodes_1d, weights_1d);
+    this->nVars = nVars;
 
-    // Sequence of grids
-    vector<int> seq(nVars, nNodes);
-    quad_prod(seq, nodes, weights);
+    if (nNodes == 0)
+        Smolyak(nodes, weights);
+    else {
+        vector<int> seq(nVars, nNodes);
+        quad_prod(seq, nodes, weights);
+    }
 }
 
 double Gaussian_integrator::quadnd(function<double(vector<double>)> f) {
@@ -133,178 +173,38 @@ double Gaussian_integrator::quadnd(function<double(vector<double>)> f) {
     return result;
 }
 
+void Gaussian_integrator::test_integrator() {
 
+    int n = 3;
+    int d = 20;
 
-// Genz-Keister nested grides
-/* static vector<double> gk24_nodes_1 = 0.0000000000000000; */
-/* static vector<double> gk24_weights_1 = 1.7724538509055159E+00; */
+    Gaussian_integrator smolyak = Gaussian_integrator(0, 3);
+    Gaussian_integrator gauss64 = Gaussian_integrator(64, 3);
 
-/* static vector<double> gk24_nodes_3 = */
-/* static vector<double> gk24_weights_3 = */
+    vector< vector<int> > enum_indices = lower_multi_indices(n,d);
+    for (int i = 0; i < enum_indices.size(); ++i) {
+        vector<int> index = enum_indices[i];
+        cout << "Multi-index: ";
+        for (int j = 0; j < index.size(); ++j)
+            cout << enum_indices[i][j] << " ";
+        cout << endl;
 
-/*         w[ 0] = */
+        double integral_s = 0.;
+        for (int j = 0; j < smolyak.nodes.size(); ++j) {
+            double eval_monomial = 1.;
+            for (int k = 0; k < index.size(); ++k)
+                eval_monomial *= pow(smolyak.nodes[j][k], index[k]);
+            integral_s += eval_monomial * smolyak.weights[j];
+        }
+        cout << "Integral Smolyak: " << integral_s << endl;
 
-/*     elif n==3 : */
-
-/*         x[ 0] =  -1.2247448713915889; */
-/*         x[ 1] =   0.0000000000000000; */
-/*         x[ 2] =   1.2247448713915889; */
-
-/*         w[ 0] =   2.9540897515091930E-01; */
-/*         w[ 1] =   1.1816359006036772E+00; */
-/*         w[ 2] =   2.9540897515091930E-01; */
-
-/*     elif n==9 : */
-
-/*         x[ 0] =  -2.9592107790638380; */
-/*         x[ 1] =  -2.0232301911005157; */
-/*         x[ 2] =  -1.2247448713915889; */
-/*         x[ 3] =  -0.52403354748695763; */
-/*         x[ 4] =   0.0000000000000000; */
-/*         x[ 5] =   0.52403354748695763; */
-/*         x[ 6] =   1.2247448713915889; */
-/*         x[ 7] =   2.0232301911005157; */
-/*         x[ 8] =   2.9592107790638380; */
-
-/*         w[ 0] =   1.6708826306882348E-04; */
-/*         w[ 1] =   1.4173117873979098E-02; */
-/*         w[ 2] =   1.6811892894767771E-01; */
-/*         w[ 3] =   4.7869428549114124E-01; */
-/*         w[ 4] =   4.5014700975378197E-01; */
-/*         w[ 5] =   4.7869428549114124E-01; */
-/*         w[ 6] =   1.6811892894767771E-01; */
-/*         w[ 7] =   1.4173117873979098E-02; */
-/*         w[ 8] =   1.6708826306882348E-04; */
-
-/*     elif n==19 : */
-
-/*         x[ 0] =  -4.4995993983103881; */
-/*         x[ 1] =  -3.6677742159463378; */
-/*         x[ 2] =  -2.9592107790638380; */
-/*         x[ 3] =  -2.2665132620567876; */
-/*         x[ 4] =  -2.0232301911005157; */
-/*         x[ 5] =  -1.8357079751751868; */
-/*         x[ 6] =  -1.2247448713915889; */
-/*         x[ 7] =  -0.87004089535290285; */
-/*         x[ 8] =  -0.52403354748695763; */
-/*         x[ 9] =   0.0000000000000000; */
-/*         x[10] =   0.52403354748695763; */
-/*         x[11] =   0.87004089535290285; */
-/*         x[12] =   1.2247448713915889; */
-/*         x[13] =   1.8357079751751868; */
-/*         x[14] =   2.0232301911005157; */
-/*         x[15] =   2.2665132620567876; */
-/*         x[16] =   2.9592107790638380; */
-/*         x[17] =   3.6677742159463378; */
-/*         x[18] =   4.4995993983103881; */
-
-/*         w[ 0] =   1.5295717705322357E-09; */
-/*         w[ 1] =   1.0802767206624762E-06; */
-/*         w[ 2] =   1.0656589772852267E-04; */
-/*         w[ 3] =   5.1133174390883855E-03; */
-/*         w[ 4] =  -1.1232438489069229E-02; */
-/*         w[ 5] =   3.2055243099445879E-02; */
-/*         w[ 6] =   1.1360729895748269E-01; */
-/*         w[ 7] =   1.0838861955003017E-01; */
-/*         w[ 8] =   3.6924643368920851E-01; */
-/*         w[ 9] =   5.3788160700510168E-01; */
-/*         w[10] =   3.6924643368920851E-01; */
-/*         w[11] =   1.0838861955003017E-01; */
-/*         w[12] =   1.1360729895748269E-01; */
-/*         w[13] =   3.2055243099445879E-02; */
-/*         w[14] =  -1.1232438489069229E-02; */
-/*         w[15] =   5.1133174390883855E-03; */
-/*         w[16] =   1.0656589772852267E-04; */
-/*         w[17] =   1.0802767206624762E-06; */
-/*         w[18] =   1.5295717705322357E-09; */
-
-/*     elif n==43 : */
-
-/*         x[ 0] = -10.167574994881873; */
-/*         x[ 1] =  -7.231746029072501; */
-/*         x[ 2] =  -6.535398426382995; */
-/*         x[ 3] =  -5.954781975039809; */
-/*         x[ 4] =  -5.434053000365068; */
-/*         x[ 5] =  -4.952329763008589; */
-/*         x[ 6] =  -4.4995993983103881; */
-/*         x[ 7] =  -4.071335874253583; */
-/*         x[ 8] =  -3.6677742159463378; */
-/*         x[ 9] =  -3.295265921534226; */
-/*         x[10] =  -2.9592107790638380; */
-/*         x[11] =  -2.633356763661946; */
-/*         x[12] =  -2.2665132620567876; */
-/*         x[13] =  -2.089340389294661; */
-/*         x[14] =  -2.0232301911005157; */
-/*         x[15] =  -1.8357079751751868; */
-/*         x[16] =  -1.583643465293944; */
-/*         x[17] =  -1.2247448713915889; */
-/*         x[18] =  -0.87004089535290285; */
-/*         x[19] =  -0.52403354748695763; */
-/*         x[20] =  -0.196029453662011; */
-/*         x[21] =   0.0000000000000000; */
-/*         x[22] =   0.196029453662011; */
-/*         x[23] =   0.52403354748695763; */
-/*         x[24] =   0.87004089535290285; */
-/*         x[25] =   1.2247448713915889; */
-/*         x[26] =   1.583643465293944; */
-/*         x[27] =   1.8357079751751868; */
-/*         x[28] =   2.0232301911005157; */
-/*         x[29] =   2.089340389294661; */
-/*         x[30] =   2.2665132620567876; */
-/*         x[31] =   2.633356763661946; */
-/*         x[32] =   2.9592107790638380; */
-/*         x[33] =   3.295265921534226; */
-/*         x[34] =   3.6677742159463378; */
-/*         x[35] =   4.071335874253583; */
-/*         x[36] =   4.4995993983103881; */
-/*         x[37] =   4.952329763008589; */
-/*         x[38] =   5.434053000365068; */
-/*         x[39] =   5.954781975039809; */
-/*         x[40] =   6.535398426382995; */
-/*         x[41] =   7.231746029072501; */
-/*         x[42] =  10.167574994881873; */
-
-/*         w[ 0] =   0.546191947478318097E-37; */
-/*         w[ 1] =   0.87544909871323873E-23; */
-/*         w[ 2] =   0.992619971560149097E-19; */
-/*         w[ 3] =   0.122619614947864357E-15; */
-/*         w[ 4] =   0.421921851448196032E-13; */
-/*         w[ 5] =   0.586915885251734856E-11; */
-/*         w[ 6] =   0.400030575425776948E-09; */
-/*         w[ 7] =   0.148653643571796457E-07; */
-/*         w[ 8] =   0.316018363221289247E-06; */
-/*         w[ 9] =   0.383880761947398577E-05; */
-/*         w[10] =   0.286802318064777813E-04; */
-/*         w[11] =   0.184789465688357423E-03; */
-/*         w[12] =   0.150909333211638847E-02; */
-/*         w[13] = - 0.38799558623877157E-02; */
-/*         w[14] =   0.67354758901013295E-02; */
-/*         w[15] =   0.139966252291568061E-02; */
-/*         w[16] =   0.163616873493832402E-01; */
-/*         w[17] =   0.450612329041864976E-01; */
-/*         w[18] =   0.928711584442575456E-01; */
-/*         w[19] =   0.145863292632147353E+00; */
-/*         w[20] =   0.164880913687436689E+00; */
-/*         w[21] =   0.579595986101181095E-01; */
-/*         w[22] =   0.164880913687436689E+00; */
-/*         w[23] =   0.145863292632147353E+00; */
-/*         w[24] =   0.928711584442575456E-01; */
-/*         w[25] =   0.450612329041864976E-01; */
-/*         w[26] =   0.163616873493832402E-01; */
-/*         w[27] =   0.139966252291568061E-02; */
-/*         w[28] =   0.67354758901013295E-02; */
-/*         w[29] = - 0.38799558623877157E-02; */
-/*         w[30] =   0.150909333211638847E-02; */
-/*         w[31] =   0.184789465688357423E-03; */
-/*         w[32] =   0.286802318064777813E-04; */
-/*         w[33] =   0.383880761947398577E-05; */
-/*         w[34] =   0.316018363221289247E-06; */
-/*         w[35] =   0.148653643571796457E-07; */
-/*         w[36] =   0.400030575425776948E-09; */
-/*         w[37] =   0.586915885251734856E-11; */
-/*         w[38] =   0.421921851448196032E-13; */
-/*         w[39] =   0.122619614947864357E-15; */
-/*         w[40] =   0.992619971560149097E-19; */
-/*         w[41] =   0.87544909871323873E-23; */
-/*         w[42] =   0.546191947478318097E-37; */
-
+        double integral_g = 0.;
+        for (int j = 0; j < gauss64.nodes.size(); ++j) {
+            double eval_monomial = 1.;
+            for (int k = 0; k < index.size(); ++k)
+                eval_monomial *= pow(gauss64.nodes[j][k], index[k]);
+            integral_g += eval_monomial * gauss64.weights[j];
+        }
+        cout << "Integral Gauss64: " << integral_g << endl;
+    }
+}
