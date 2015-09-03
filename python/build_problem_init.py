@@ -7,6 +7,7 @@ It makes use of the python Sympy library.
 """
 
 import os
+import sys
 import sympy
 import sympy.printing
 
@@ -111,8 +112,8 @@ for i in range(nf):
     diff[i] = s
 
 # Output file
-output = open('tmp/output.gen', 'w')
-
+print sys.argv[1]
+output = open(sys.argv[1], 'w')
 
 # Print all the necessary functions
 def print_double(symbol, fun_name):
