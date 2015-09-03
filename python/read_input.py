@@ -1,13 +1,24 @@
 import os
+import sys
 
-def set_in_file(keyword):
+# Keywords to substitute
+keywords = ["solution", "second order drift", "potential", "dimensions"]
+
+# Only 1 input file
+input_file = sys.argv[1]
+output_file = sys.argv[2]
+
+# Copy build_problem_init.py
+os.system("cp build_problem_init.py " + output_file)
+
+for keyword in keywords:
 
     # Open files and read lines
-    input_lines = open('user_input.py').readlines()
-    output_lines = open('build_problem.py').readlines()
+    input_lines = open(input_file).readlines()
+    output_lines = open(output_file).readlines()
 
     # Open output file in 'write' mode
-    foutput = open('build_problem.py', 'w')
+    foutput = open(output_file, 'w')
 
     # Boolean to know if we are within one piece
     in_input_text = False
@@ -34,11 +45,5 @@ def set_in_file(keyword):
             in_input_text = False
             foutput.write(user_input)
 
-# Copy build_problem_init.py
-os.system("cp build_problem_init.py build_problem.py")
-
-# Substitute user input in build_problem.py
-keywords = ["solution", "second order drift", "potential", "dimensions"]
-
-for keyword in keywords:
-    set_in_file(keyword)
+    # Close output file
+    foutput.close()
