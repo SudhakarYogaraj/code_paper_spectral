@@ -7,10 +7,11 @@
 # Build the whole project
 all :
 	make -C python
+	cp python/outputs/${ARGS}.cpp cpp/src/Problem.cpp
 	make -C cpp
 
 # Build only the cpp part
-cpp : 
+cpp :
 	make -C cpp
 
 # Build problem (generates Problem.cpp)
@@ -33,4 +34,3 @@ clean-problem:
 # Clean all non-git files
 clean-all:
 	git clean -dfx
-

@@ -1,30 +1,37 @@
 .SUFFIXES:
 .PHONY: clean
 
-target = ../cpp/src/Problem.cpp
-sub = tmp/built.cpp
-gen = tmp/output.gen
-build = build_problem.py
-input = user_input.py build_problem_init.py
+# Directories
+IN_DIR = inputs
+OUT_DIR = outputs
+AUX_DIR = tmp
+
+# Files
+IN := $(wildcard $(IN_DIR)/*.py)
+OUT := $(addprefix $(OUT_DIR)/,$(notdir $(IN:.py=.cpp)))
+SUB := $(addprefix $(AUX_DIR)/,$(notdir $(IN:.py=.sub)))
+GEN := $(addprefix $(AUX_DIR)/,$(notdir $(IN:.py=.gen)))
+BUILD := $(addprefix $(AUX_DIR)/,$(notdir $(IN)))
+.SECONDARY: $(OUT) $(SUB)
 
 all :
-	mkdir -p tmp
-	make target
+	mkdir -p $(AUX_DIR) $(OUT_DIR)
+	make -j4 target
 
-target : $(target)
+target : $(OUT)
 
-$(target) : problem.init $(sub)
+$(OUT_DIR)/%.cpp : problem.init $(AUX_DIR)/%.sub
 	cat $^ > $@
 
-$(sub) : $(gen)
-	sed 's/\<y\(\([0-9]\|[0-9][0-9]\)\)/y\[\1\]/g' $(gen) > $(sub)
-	sed -i 's/\<x\(\([0-9]\|[0-9][0-9]\)\)/x\[\1\]/g' $(sub)
+$(AUX_DIR)/%.sub : $(AUX_DIR)/%.gen
+	sed 's/\<y\(\([0-9]\|[0-9][0-9]\)\)/y\[\1\]/g' $< > $@
+	sed -i 's/\<x\(\([0-9]\|[0-9][0-9]\)\)/x\[\1\]/g' $@
 
-$(gen) : $(build)
-	python $<
+$(AUX_DIR)/%.gen : $(AUX_DIR)/%.py
+	python $< $@
 
-$(build) : $(input)
-	python read_input.py
+$(AUX_DIR)/%.py : $(IN_DIR)/%.py
+	python read_input.py $< $@
 
-clean:
-	rm -f $(gen) $(sub) $(target)
+clean :
+	rm -f $(SUB) $(SUB) $(GEN) $(BUILD)
