@@ -7,6 +7,7 @@ It makes use of the python Sympy library.
 """
 
 import os
+import sys
 import sympy
 import sympy.printing
 
@@ -111,8 +112,8 @@ for i in range(nf):
     diff[i] = s
 
 # Output file
-output = open('tmp/output.gen', 'w')
-
+print sys.argv[1]
+output = open(sys.argv[1], 'w')
 
 # Print all the necessary functions
 def print_double(symbol, fun_name):
@@ -177,27 +178,15 @@ output.write("    ns = {};\n".format(ns))
 output.write("    nf = {};\n\n".format(nf))
 
 # Declaration of function pointers
-output.write("    dyv = vector<double (*) (vector<double> x,\
-             vector<double> y)> (nf);\n")
-output.write("    h = vector<double (*) (vector<double> x,\
-             vector<double> y)> (nf);\n")
-output.write("    a = vector<double (*) (vector<double> x,\
-             vector<double> y)> (ns);\n")
-output.write("    dxa = vector< vector<double (*) (vector<double> x,\
-             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
-             vector<double> y)> (ns));\n")
-output.write("    dya = vector< vector<double (*) (vector<double> x,\
-             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
-             vector<double> y)> (nf));\n")
-output.write("    phi = vector<double (*) (vector<double> x,\
-             vector<double> y)> (ns);\n")
-output.write("    dxphi = vector< vector<double (*) (vector<double> x,\
-             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
-             vector<double> y)> (ns));\n")
-output.write("    drif = vector<double (*) (vector<double> x,\
-             vector<double> y)> (2*nf);\n")
-output.write("    diff = vector<double (*) (vector<double> x,\
-             vector<double> y)> (2*nf);\n\n")
+output.write("    dyv = vector<double (*) (vector<double> x, vector<double> y)> (nf);\n")
+output.write("    h = vector<double (*) (vector<double> x, vector<double> y)> (nf);\n")
+output.write("    a = vector<double (*) (vector<double> x, vector<double> y)> (ns);\n")
+output.write("    dxa = vector< vector<double (*) (vector<double> x, vector<double> y)> >(ns, vector<double (*) (vector<double> x, vector<double> y)> (ns));\n")
+output.write("    dya = vector< vector<double (*) (vector<double> x, vector<double> y)> >(ns, vector<double (*) (vector<double> x, vector<double> y)> (nf));\n")
+output.write("    phi = vector<double (*) (vector<double> x, vector<double> y)> (ns);\n")
+output.write("    dxphi = vector< vector<double (*) (vector<double> x, vector<double> y)> >(ns, vector<double (*) (vector<double> x, vector<double> y)> (ns));\n")
+output.write("    drif = vector<double (*) (vector<double> x, vector<double> y)> (2*nf);\n")
+output.write("    diff = vector<double (*) (vector<double> x, vector<double> y)> (2*nf);\n\n")
 
 # Allocation of function pointers
 allocate_function_pointer("stardiv_h")

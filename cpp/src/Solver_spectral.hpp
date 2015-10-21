@@ -56,9 +56,6 @@ class Solver_spectral {
         double gaussian_linear_term(std::vector<double> z);
         std::vector<double> map_to_real(std::vector<double> z);
 
-        // Basis used for the method
-        double monomial(std::vector<int> mult, std::vector<double> x);
-
         // Calculate coefficients of Hermite polynomials.
         void hermite_coefficients (int degree, std::vector< std::vector<double> >& matrix);
 
