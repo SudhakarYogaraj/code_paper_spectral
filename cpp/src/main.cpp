@@ -70,6 +70,7 @@ int main(int argc, char* argv[]) {
 
             // Create new solver
             Solver_spectral solver_spectral = Solver_spectral(estimator_degrees[i], 100, problem.nf);
+            Solver_exact solver_exact;
 
             // Update of the statistics of the invariant measure
             problem.update_stats(problem.x0);
@@ -79,8 +80,8 @@ int main(int argc, char* argv[]) {
             estimator_time[i] = toc();
 
             // Erorr
-            vector<double> Ddrif = (ci.drif - problem.soldrif(problem.x0));
-            vector< vector<double> > Ddiff = (ci.diff - problem.soldiff(problem.x0));
+            vector<double> Ddrif = (ci.drif - solver_exact.soldrif(problem,problem.x0));
+            vector< vector<double> > Ddiff = (ci.diff - solver_exact.soldiff(problem,problem.x0));
             estimator_error[i] = fabs(Ddrif);// + fabs(Ddiff);
 
             // Summary of iteration
@@ -97,6 +98,7 @@ int main(int argc, char* argv[]) {
 
     for (unsigned int j = 0; j < p_values.size(); ++j) {
 
+        Solver_exact solver_exact;
         Solver_hmm solver_hmm = Solver_hmm(p_values[j], 1);
         Solver_spectral solver_spectral = Solver_spectral(10, 100, problem.nf);
 
@@ -133,8 +135,8 @@ int main(int argc, char* argv[]) {
             c_spectral = solver_spectral.estimator(problem, xt_spectral[i], t[i]);
 
             // Exact drift and diffusion coefficients
-            vector<double> Ddrif = (c_hmm.drif - problem.soldrif(xt_hmm[i]));
-            vector< vector<double> > Ddiff = (c_hmm.diff - problem.soldiff(xt_hmm[i]));
+            vector<double> Ddrif = (c_hmm.drif - solver_exact.soldrif(problem,xt_hmm[i]));
+            vector< vector<double> > Ddiff = (c_hmm.diff - solver_exact.soldiff(problem,xt_hmm[i]));
             error_hmm += 1./sizet*(fabs(Ddrif) + fabs(Ddiff));
             double errorDrift_hmm = fabs(Ddrif);
             double errorDiff_hmm  = fabs(Ddiff);
@@ -155,15 +157,15 @@ int main(int argc, char* argv[]) {
             /* } */
             /* cout << "----" << endl; */
 
-            Ddrif = c_spectral.drif - problem.soldrif(xt_spectral[i]);
-            Ddiff = c_spectral.diff - problem.soldiff(xt_spectral[i]);
+            Ddrif = c_spectral.drif - solver_exact.soldrif(problem,xt_spectral[i]);
+            Ddiff = c_spectral.diff - solver_exact.soldiff(problem,xt_spectral[i]);
             error_spectral += 1./sizet*(fabs(Ddrif) + fabs(Ddiff));
             double errorDrift_spectral = fabs(Ddrif);
             double errorDiff_spectral  = fabs(Ddiff);
 
             // Computation of the exact coefficients based on the exact solution
-            vector<double> exact_drif = problem.soldrif(x_exact[i]);
-            vector< vector<double> > exact_diff = problem.soldiff(x_exact[i]);
+            vector<double> exact_drif = solver_exact.soldrif(problem, x_exact[i]);
+            vector< vector<double> > exact_diff = solver_exact.soldiff(problem, x_exact[i]);
 
             x_exact[i+1] = x_exact[i];
             xt_hmm[i+1] = xt_hmm[i];
