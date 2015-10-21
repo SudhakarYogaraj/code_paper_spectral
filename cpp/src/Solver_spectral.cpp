@@ -434,20 +434,6 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
     this->hermiteCoeffs_nd = matnd;
 }
 
-/*! Function to evaluate monomial in a point
- *
- * This function returns the evaluation of a monomial, parametrized by its
- * multi-index, in a point.
- */
-double Solver_spectral::monomial(vector<int> mult, vector<double> x) {
-
-    double result = 1.;
-    for (unsigned int i = 0; i < mult.size(); ++i) {
-        result *= ipow(x[i], mult[i]);
-    }
-    return result;
-}
-
 /*! Function to compute hermite coefficients
  *
  * This fills the matrix passed in argument with the hermite coefficients of
