@@ -111,41 +111,6 @@ vector<double> Problem::rescale(vector<double> y) {
     return (result + bias);
 }
 
-vector<double> Problem::soldrif(vector<double> x) {
-    vector<double> result(this->ns,0.);
-    Gaussian_integrator gauss = Gaussian_integrator(100,this->nf);
-    auto lambda = [&] (vector<double> z) -> vector<double> {
-        vector<double> y = rescale(z);
-        vector<double> tmp(ns, 0.);
-        for (int i = 0; i < ns; ++i) {
-            tmp[i] += phi[i](x,y) * stardiv_h(x,y);
-            for (int j = 0; j < ns; ++j) {
-                tmp[i] += dxphi[i][j](x,y) * a[j](x,y);
-            }
-        }
-        return tmp*(rho(x,y)/gaussian(z));
-    };
-    result = gauss.quadnd(lambda, result) * det_sqrt_cov;
-    return result;
-}
-
-vector< vector<double> > Problem::soldiff(vector<double> x) {
-    Gaussian_integrator gauss = Gaussian_integrator(100,this->nf);
-    vector< vector<double> > result(this->ns,vector<double>(this->ns,0.));
-    auto lambda = [&] (vector<double> z) -> vector< vector<double> > {
-        vector<double> y = rescale(z);
-        vector< vector<double> > tens_prod(this->ns, vector<double>(this->ns, 0.));
-        for (int i = 0; i < this->ns; ++i) {
-            for (int j = 0; j < this->ns; ++j) {
-                tens_prod[i][j] = 2*a[i](x,y)*phi[j](x,y)*(rho(x,y)/gaussian(z));
-            }
-        }
-        return tens_prod;
-    };
-    result = cholesky(symmetric( gauss.quadnd(lambda, result) * det_sqrt_cov ));
-    return result;
-}
-
 double Problem::rho(vector<double> x, vector<double> y) {
     return zrho(x,y)/normalization;
 }
