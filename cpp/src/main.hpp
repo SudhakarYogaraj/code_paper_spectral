@@ -4,12 +4,15 @@
 #include "structures.hpp"
 #include "tictoc.hpp"
 #include "Problem.hpp"
-#include "Solver_spectral.hpp"
-#include "Solver_hmm.hpp"
 #include "templates.hpp"
 #include "io.hpp"
 #include "global.hpp"
 #include "combinatorics.hpp"
+
+// Solvers
+#include "Solver_spectral.hpp"
+#include "Solver_hmm.hpp"
+#include "Solver_exact.hpp"
 
 #include <iostream>
 #include <iomanip>

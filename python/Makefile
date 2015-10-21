@@ -34,4 +34,4 @@ $(AUX_DIR)/%.py : $(IN_DIR)/%.py
 	python read_input.py $< $@
 
 clean :
-	rm -f $(SUB) $(SUB) $(GEN) $(BUILD)
+	rm -f $(SUB) $(SUB) $(GEN) $(BUILD) $(OUT)

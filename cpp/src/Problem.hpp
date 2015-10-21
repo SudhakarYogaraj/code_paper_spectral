@@ -64,8 +64,5 @@ class Problem {
         std::vector< std::vector<double (*) (std::vector<double> x, std::vector<double> y)> > dxphi;
         std::vector<double (*) (std::vector<double> x, std::vector<double> y)> drif;
         std::vector<double (*) (std::vector<double> x, std::vector<double> y)> diff;
-
-        std::vector<double> soldrif(std::vector<double> x);
-        std::vector< std::vector<double> > soldiff(std::vector<double> x);
 };
 #endif
