@@ -114,3 +114,4 @@ vector<double> Problem::rescale(vector<double> y) {
 double Problem::rho(vector<double> x, vector<double> y) {
     return zrho(x,y)/normalization;
 }
+
