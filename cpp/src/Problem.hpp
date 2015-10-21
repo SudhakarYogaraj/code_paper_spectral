@@ -21,25 +21,6 @@ class Problem {
 
         // Initial condition for the slow process
         std::vector<double> x0;
-        std::vector<double> sigmas;
-
-        // Potential for gradient structure
-
-        // FOR SPECTRAL
-        // Non-leading order part of drift in the fast process
-        std::vector<double> bias;
-        std::vector<double> eig_val_cov;
-        std::vector< std::vector<double> > eig_vec_cov;
-        std::vector< std::vector<double> > sqrt_cov;
-        std::vector< std::vector<double> > covariance;
-        std::vector< std::vector<double> > inv_cov;
-        double det_sqrt_cov;
-
-        double rho(std::vector<double> x, std::vector<double> y);
-        double normalization;
-
-        void update_stats(std::vector<double> x);
-        std::vector<double> rescale(std::vector<double> y);
 
         // FOR HMM
         // Drift and diffusion terms of the fast system, in its transformed
