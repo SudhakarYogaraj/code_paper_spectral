@@ -1,10 +1,10 @@
 /* TODO: Problem with exact sigma (urbain, Wed 20 May 2015 21:00:20 BST) */
 
 #include "structures.hpp"
-#include "linear_algebra.hpp"
-#include "Solver_spectral.hpp"
+#include "toolbox/linear_algebra.hpp"
+#include "solvers/Solver_spectral.hpp"
 #include "templates.hpp"
-#include "io.hpp"
+#include "io/io.hpp"
 #include "global.hpp"
 #include <iomanip>
 

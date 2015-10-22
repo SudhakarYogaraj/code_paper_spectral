@@ -5,13 +5,16 @@
 .PHONY: all clean clean-dep problem clean-problem
 
 # Compiler and flags
-CXX    = clang++
-CXXFLAGS = -O3 -Ofast -fassociative-math -ffast-math -std=c++11 -Wall
+CXX = clang++
+CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
+
+# Problem file
+PRB = src/problem/Problem.cpp
 
 # C++ source files and location of .o files
-CPP_FILES := src/Problem.cpp $(wildcard src/*.cpp)
-DEP_FILES := $(addprefix dep/,$(notdir $(CPP_FILES:.cpp=.d)))
-OBJ_FILES := $(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
+CPP_FILES := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp) $(PRB)
+DEP_FILES := $(subst src,dep, $(CPP_FILES:.cpp=.d))
+OBJ_FILES := $(subst src,obj, $(CPP_FILES:.cpp=.o))
 
 # Target executable
 TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
@@ -25,8 +28,8 @@ all :
 	@make --no-print-directory target
 
 prebuild :
-	mkdir -p dep obj out
-	cp python/outputs/${ARGS}.cpp src/Problem.cpp
+	@mkdir -p out $(dir $(DEP_FILES) $(OBJ_FILES))
+	cp python/outputs/${ARGS}.cpp $(PRB)
 
 target : $(TARGET)
 
@@ -47,7 +50,7 @@ problem:
 	make -C python
 
 clean:
-	rm -f $(TARGET) $(OBJ_FILES) $(DEP_FILES) src/Problem.cpp
+	rm -f $(TARGET) $(OBJ_FILES) $(DEP_FILES) $(PRB)
 
 clean-problem:
 	make clean -C python

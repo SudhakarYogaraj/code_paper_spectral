@@ -1,5 +1,5 @@
-#include "io.hpp"
-#include "linear_algebra.hpp"
+#include "io/io.hpp"
+#include "toolbox/linear_algebra.hpp"
 
 using namespace std;
 

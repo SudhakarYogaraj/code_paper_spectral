@@ -1,10 +1,10 @@
-#include "Analyser.hpp"
-#include "Problem.hpp"
+#include "problem/Analyser.hpp"
+#include "problem/Problem.hpp"
 
 #include "templates.hpp"
-#include "Gaussian_integrator.hpp"
-#include "linear_algebra.hpp"
-#include "io.hpp"
+#include "toolbox/Gaussian_integrator.hpp"
+#include "toolbox/linear_algebra.hpp"
+#include "io/io.hpp"
 #include "global.hpp"
 
 using namespace std;
