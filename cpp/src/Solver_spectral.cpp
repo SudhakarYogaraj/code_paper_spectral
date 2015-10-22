@@ -2,8 +2,6 @@
 
 #include "structures.hpp"
 #include "linear_algebra.hpp"
-#include "Problem.hpp"
-#include "Gaussian_integrator.hpp"
 #include "Solver_spectral.hpp"
 #include "templates.hpp"
 #include "io.hpp"
@@ -12,7 +10,7 @@
 
 using namespace std;
 
-SDE_coeffs Solver_spectral::estimator(Problem &problem, Analyser &analyser, vector<double> x, double t) {
+SDE_coeffs Solver_spectral::estimator(vector<double> x, double t) {
 
     // Vectors to store the coefficients of the sde
     SDE_coeffs sde_coeffs;
@@ -21,15 +19,15 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, Analyser &analyser, vect
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
     // Parameters of the problem
-    int nf = problem.nf;
-    int ns = problem.ns;
+    int nf = problem->nf;
+    int ns = problem->ns;
     int nb = bin(degree + nf, nf);
 
     // User defined rescaling of the eigenvalues
     vector<double> var_scaling = {0.5, 0.4};
 
     // Update statistics of Gaussian
-    this->update_stats(problem, analyser, var_scaling);
+    this->update_stats(var_scaling);
 
     // Discretization of the functions of the problem
     vector<double> h_discretized;
@@ -41,15 +39,15 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, Analyser &analyser, vect
 
         // Discretization of dx/da
         for (int j = 0; j < ns; j++) {
-            dax_discretized[i][j] = discretize(problem, analyser, x, gauss, problem.dxa[i][j]);
+            dax_discretized[i][j] = discretize(x, gauss, problem->dxa[i][j]);
         }
 
         // Discretization of the function a
-        a_discretized[i] = discretize(problem, analyser, x, gauss, problem.a[i]);
+        a_discretized[i] = discretize(x, gauss, problem->a[i]);
     }
 
     // Discretization of h
-    h_discretized = discretize(problem, analyser, x, gauss, problem.stardiv_h);
+    h_discretized = discretize(x, gauss, problem->stardiv_h);
 
     // Coefficients of the projection of the functions
     vector<double> coefficients_h;
@@ -98,7 +96,7 @@ SDE_coeffs Solver_spectral::estimator(Problem &problem, Analyser &analyser, vect
         vector<double> z = quad_points[j];
         vector<double> y = map_to_real(z);
 
-        diff_discretized[j] = gaussian_linear_term(z) - problem.linearTerm(x,y);
+        diff_discretized[j] = gaussian_linear_term(z) - problem->linearTerm(x,y);
         diff_discretized[j] *= quad_weights[j];
     }
 
@@ -245,12 +243,12 @@ vector<double> Solver_spectral::map_to_real(vector<double> z) {
  * functions are calculated. In simple words, the Hermite functions are
  * concentrated where the density of the Gaussian is non-zero.
  */
-void Solver_spectral::update_stats(Problem &problem, Analyser &analyser, vector<double> var_scaling) {
+void Solver_spectral::update_stats(vector<double> var_scaling) {
 
     // Update of bias and covariance
-    this->bias = analyser.bias;
-    this->eig_vec_cov = analyser.eig_vec_cov;
-    this->eig_val_cov = analyser.eig_val_cov;
+    this->bias = analyser->bias;
+    this->eig_vec_cov = analyser->eig_vec_cov;
+    this->eig_val_cov = analyser->eig_val_cov;
 
     // Apply user-defined extra-scaling
     for (int i = 0; i < nf; ++i) {
@@ -272,7 +270,7 @@ void Solver_spectral::update_stats(Problem &problem, Analyser &analyser, vector<
     }
 }
 
-vector<double> Solver_spectral::discretize(Problem &problem, Analyser& analyser, vector<double> x, Gaussian_integrator& gauss, double(*f)(vector<double>, vector<double> )) {
+vector<double> Solver_spectral::discretize(vector<double> x, Gaussian_integrator& gauss, double(*f)(vector<double>, vector<double> )) {
 
     // Weights and points of the integrator.
     vector< vector<double> > quad_points = gauss.nodes;
@@ -292,7 +290,7 @@ vector<double> Solver_spectral::discretize(Problem &problem, Analyser& analyser,
         vector<double> y = map_to_real(z);
 
         // Scaling to pass to Schrodinger equation;
-        f_discretized[j] *= sqrt(analyser.rho(x,y));
+        f_discretized[j] *= sqrt(analyser->rho(x,y));
 
         // Scaling needed for the integration;
         f_discretized[j] /= sqrt(gaussian(z));
@@ -385,10 +383,13 @@ vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator&
  * - The number of nodes to use in the Gauss-Hermite quadrature,
  * - The number of variables in the fast processes.
  */
-Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
+Solver_spectral::Solver_spectral(Problem *p, Analyser *a, int degree, int nNodes) {
+
+    problem = p;
+    analyser = a;
 
     // Number of fast processes
-    this->nf = n_vars;
+    this->nf = problem->nf;
 
     // Initialize multi-indices
     ind2mult = lower_multi_indices(nf, 2*degree);
@@ -397,7 +398,7 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
     }
 
     // Dimension of the approximation space
-    int nb = bin(degree + n_vars, n_vars);
+    int nb = bin(degree + problem->nf, problem->nf);
 
     // Matrices that will contain the coefficients of the 1- and multi- dimensional
     // Hermite polynomials
@@ -421,7 +422,7 @@ Solver_spectral::Solver_spectral(int degree, int nNodes, int n_vars) {
             // Calculation of the coefficients of x^m2 in h^m1
             matnd[i][j] = 1.;
 
-            for (int k = 0; k < n_vars; ++k) {
+            for (int k = 0; k < problem->nf; ++k) {
                 matnd[i][j] *= mat1d[m1[k]][m2[k]];
             }
         }

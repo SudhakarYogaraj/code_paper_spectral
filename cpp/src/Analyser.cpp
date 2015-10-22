@@ -11,31 +11,36 @@ using namespace std;
 
 // Consntructor of the analyser. The only parameter is the problem that
 // the analyser will follow.
-Analyser::Analyser(Problem p) {
+Analyser::Analyser(Problem *p) {
 
     // Assign variables derived from problem
     problem = p;
-    nf = problem.nf;
+    nf = problem->nf;
 
     // Initialize other variables to reasonable values
     normalization = 1.;
     det_sqrt_cov = 1.;
 
-    bias = vector<double>(problem.nf, 0.);
-    eig_val_cov = vector<double>(problem.nf, 1.);
+    bias = vector<double>(problem->nf, 0.);
+    eig_val_cov = vector<double>(problem->nf, 1.);
 
     covariance = vector< vector<double> > (nf, vector<double> (nf,0.));
     inv_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
     sqrt_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
     eig_vec_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
 
-    for (int i = 0; i < problem.nf; ++i) {
+    for (int i = 0; i < problem->nf; ++i) {
         covariance[i][i] = 1.;
         inv_cov[i][i] = 1.;
         sqrt_cov[i][i] = 1.;
         eig_vec_cov[i][i] = 1.;
     }
 }
+
+/* Analyser::Analyser(const Analyser& a) { */
+/*     this->problem = a.problem; */
+/*     this->nf = a.nf; */
+/* } */
 
 // Implementation of a rescaling used to approximate the invariant measure.
 vector<double> Analyser::rescale(vector<double> y) {
@@ -61,7 +66,7 @@ void Analyser::update_stats(vector<double> x) {
         // Normalization constant
         auto lambda = [&] (vector<double> z) -> double {
             vector<double> y = rescale(z);
-            return det_sqrt_cov * problem.zrho(x,y)/gaussian(z);
+            return det_sqrt_cov * problem->zrho(x,y)/gaussian(z);
         };
         normalization = gauss_plus.quadnd(lambda);
 
@@ -124,5 +129,5 @@ void Analyser::update_stats(vector<double> x) {
 }
 
 double Analyser::rho(vector<double> x, vector<double> y) {
-    return problem.zrho(x,y)/normalization;
+    return problem->zrho(x,y)/normalization;
 }
