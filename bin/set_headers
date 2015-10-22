@@ -1,0 +1,10 @@
+#!/bin/bash
+cd $(git rev-parse --show-toplevel)/src
+for f in $(find * -name '*.hpp'); do
+    for g in $(find * -name '*.cpp' -or -name '*.hpp'); do
+        base=$(basename $f)
+        sed -i '/".\+\/$filename"/"$f"' ${g}
+    done
+done
+
+"cpp/header.hpp"
