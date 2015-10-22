@@ -15,8 +15,6 @@ import sympy.printing
 os.system("mkdir -p tmp")
 
 # user input : dimensions
-ns = 2
-nf = 2
 # end
 
 # Coefficient of the BM
@@ -114,7 +112,7 @@ for i in range(nf):
     diff[i] = s
 
 # Output file
-print sys.argv[1]
+print(sys.argv[1])
 output = open(sys.argv[1], 'w')
 
 # Print all the necessary functions
@@ -152,32 +150,55 @@ for i in range(2*nf):
     print_double(diff[j], "diff{}".format(i))
 
 
-def write_mat(fun_base, n=0, m=0):
-    if n == 0:
-        return fun_base
-
-    string = "{"
-    for i in range(n):
-        string += write_mat("{}{}".format(fun_base,  i), m)
-        string += ("}" if i == n-1 else ", ")
-
-    return string
-
-
 def allocate_function_pointer(fun_base, n=0, m=0):
     if(n == 0):
+        # Case of scalar output
         output.write("    {} = {}_n;\n".format(fun_base, fun_base))
 
     elif(n > 0):
-        output.write("    {} = ".format(fun_base, fun_base))
-        output.write(write_mat(fun_base, n, m))
-        output.write(";\n")
+        for i in range(n):
+
+            # Case where output is vector
+            if (m == 0):
+                output.write("    {}[{}] = ".format(fun_base, i))
+                output.write("{}{};\n".format(fun_base,  i))
+
+            # Matrix case
+            elif(m > 0):
+                for j in range(m):
+                    output.write("    {}[{}][{}] = ".format(fun_base, i, j))
+                    output.write("{}{}{};\n".format(fun_base, i, j))
+
+    output.write("\n")
 
 output.write("void Problem::init_functions() {\n\n")
 
 # Declaration of the number of variables
 output.write("    ns = {};\n".format(ns))
 output.write("    nf = {};\n\n".format(nf))
+
+# Declaration of function pointers
+output.write("    dyv = vector<double (*) (vector<double> x,\
+             vector<double> y)> (nf);\n")
+output.write("    h = vector<double (*) (vector<double> x,\
+             vector<double> y)> (nf);\n")
+output.write("    a = vector<double (*) (vector<double> x,\
+             vector<double> y)> (ns);\n")
+output.write("    dxa = vector< vector<double (*) (vector<double> x,\
+             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
+             vector<double> y)> (ns));\n")
+output.write("    dya = vector< vector<double (*) (vector<double> x,\
+             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
+             vector<double> y)> (nf));\n")
+output.write("    phi = vector<double (*) (vector<double> x,\
+             vector<double> y)> (ns);\n")
+output.write("    dxphi = vector< vector<double (*) (vector<double> x,\
+             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
+             vector<double> y)> (ns));\n")
+output.write("    drif = vector<double (*) (vector<double> x,\
+             vector<double> y)> (2*nf);\n")
+output.write("    diff = vector<double (*) (vector<double> x,\
+             vector<double> y)> (2*nf);\n\n")
 
 # Allocation of function pointers
 allocate_function_pointer("stardiv_h")
