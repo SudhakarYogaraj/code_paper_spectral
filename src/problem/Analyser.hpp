@@ -7,7 +7,7 @@
 #include <vector>
 #include <iostream>
 
-#include "Problem.hpp"
+#include "problem/Problem.hpp"
 
 /*! Class to track the properties of the invariant measure of the fast process
  * Provides function that describe the statistics of this measure.

@@ -7,9 +7,9 @@
 #include <vector>
 #include <unordered_map>
 
-#include "Gaussian_integrator.hpp"
-#include "Problem.hpp"
-#include "Analyser.hpp"
+#include "toolbox/Gaussian_integrator.hpp"
+#include "problem/Problem.hpp"
+#include "problem/Analyser.hpp"
 #include "structures.hpp"
 
 class Solver_spectral {

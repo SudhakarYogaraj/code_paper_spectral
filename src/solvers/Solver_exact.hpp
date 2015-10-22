@@ -2,8 +2,8 @@
 #define SOLVER_EXACT_H
 
 #include <vector>
-#include "Problem.hpp"
-#include "Analyser.hpp"
+#include "problem/Problem.hpp"
+#include "problem/Analyser.hpp"
 
 class Solver_exact {
 
