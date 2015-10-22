@@ -10,4 +10,5 @@ using namespace std;
 void Problem::init() {
     this->init_functions();
     this->x0 = vector<double> (ns, 1.2);
+    this->t_end = 1.;
 }
