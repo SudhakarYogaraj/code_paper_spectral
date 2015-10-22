@@ -2,35 +2,29 @@
 .SUFFIXES:
 
 # Declare phone targets (always out of date)
-.PHONY: all clean clean-dep
+.PHONY: all clean clean-dep problem clean-problem
 
 # Compiler and flags
 CXX    = clang++
 CXXFLAGS = -O3 -Ofast -fassociative-math -ffast-math -std=c++11 -Wall
 
-# Directories
-DEP_DIR = dep
-SRC_DIR = src
-OBJ_DIR = obj
-
 # C++ source files and location of .o files
-CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
-DEP_FILES := $(addprefix $(DEP_DIR)/,$(notdir $(CPP_FILES:.cpp=.d)))
-OBJ_FILES := $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cpp=.o)))
+CPP_FILES := $(wildcard src/*.cpp)
+DEP_FILES := $(addprefix dep/,$(notdir $(CPP_FILES:.cpp=.d)))
+OBJ_FILES := $(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 
 # Target executable
-TARGET = ../$(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
+TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
 
 # Program to generate dependencies
-MAKEDEPEND = $(CXX) $(CXXFLAGS) -MM -o $(DEP_DIR)/$*.d $<
+MAKEDEPEND = $(CXX) $(CXXFLAGS) -MM -o dep/$*.d $<
 
 # Ensure that directories exist and build executable
-all :
-	mkdir -p dep obj
-	make target
+all : prebuild $(TARGET)
 
-# Build executable
-target : $(TARGET)
+prebuild :
+	mkdir -p dep obj out
+	cp python/outputs/${ARGS}.cpp src/Problem.cpp
 
 # Rule fo the target executable
 $(TARGET) : $(OBJ_FILES)
@@ -40,15 +34,18 @@ $(TARGET) : $(OBJ_FILES)
 -include $(DEP_FILES)
 
 # Create object files from c++ code, and generate dependencies at the same time
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+obj/%.o: src/%.cpp
 	$(MAKEDEPEND)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-	@sed -i "s#^\([^.]*\.o\)#$(OBJ_DIR)/\1#g" $(DEP_DIR)/$*.d
+	@sed -i "s#^\([^.]*\.o\)#$(OBJ_DIR)/\1#g" dep/$*.d
 
-# Clean the whole project
 clean:
 	rm -f $(TARGET) $(OBJ_FILES) $(DEP_FILES)
 
-# Delete dependencies
-clean-dep:
-	rm -f $(DEP_FILES)
+## Handling of user input ##
+
+problem:
+	make -C python
+
+clean-problem:
+	make clean -C python
