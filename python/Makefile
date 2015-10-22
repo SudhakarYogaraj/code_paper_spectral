@@ -14,11 +14,10 @@ GEN := $(addprefix $(AUX_DIR)/,$(notdir $(IN:.py=.gen)))
 BUILD := $(addprefix $(AUX_DIR)/,$(notdir $(IN)))
 .SECONDARY: $(OUT) $(SUB)
 
-all :
-	mkdir -p $(AUX_DIR) $(OUT_DIR)
-	make -j4 target
+all : prebuild $(OUT)
 
-target : $(OUT)
+prebuild: 
+	mkdir -p $(AUX_DIR) $(OUT_DIR)
 
 $(OUT_DIR)/%.cpp : problem.init $(AUX_DIR)/%.sub
 	cat $^ > $@

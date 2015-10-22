@@ -2,35 +2,50 @@
 .SUFFIXES:
 
 # Declare phone targets (always out of date)
-.PHONY: all cpp problem clean clean-problem clean-cpp
+.PHONY: all clean clean-dep problem clean-problem
 
-# Build the whole project
-all :
-	make -C python
-	cp python/outputs/${ARGS}.cpp cpp/src/Problem.cpp
-	make -C cpp
+# Compiler and flags
+CXX    = clang++
+CXXFLAGS = -O3 -Ofast -fassociative-math -ffast-math -std=c++11 -Wall
 
-# Build only the cpp part
-cpp :
-	make -C cpp
+# C++ source files and location of .o files
+CPP_FILES := $(wildcard src/*.cpp)
+DEP_FILES := $(addprefix dep/,$(notdir $(CPP_FILES:.cpp=.d)))
+OBJ_FILES := $(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 
-# Build problem (generates Problem.cpp)
+# Target executable
+TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
+
+# Program to generate dependencies
+MAKEDEPEND = $(CXX) $(CXXFLAGS) -MM -o dep/$*.d $<
+
+# Ensure that directories exist and build executable
+all : prebuild $(TARGET)
+
+prebuild :
+	mkdir -p dep obj out
+	cp python/outputs/${ARGS}.cpp src/Problem.cpp
+
+# Rule fo the target executable
+$(TARGET) : $(OBJ_FILES)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+# Include dependencies
+-include $(DEP_FILES)
+
+# Create object files from c++ code, and generate dependencies at the same time
+obj/%.o: src/%.cpp
+	$(MAKEDEPEND)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+	@sed -i "s#^\([^.]*\.o\)#$(OBJ_DIR)/\1#g" dep/$*.d
+
+clean:
+	rm -f $(TARGET) $(OBJ_FILES) $(DEP_FILES)
+
+## Handling of user input ##
+
 problem:
 	make -C python
 
-# Clean the whole project
-clean:
-	make clean -C cpp
-	make clean -C python
-
-# Clean cpp files
-clean-cpp:
-	make clean -C cpp
-
-# Delete problem-specific temporary files
 clean-problem:
 	make clean -C python
-
-# Clean all non-git files
-clean-all:
-	git clean -dfx
