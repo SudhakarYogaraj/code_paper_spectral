@@ -208,7 +208,7 @@ void eig_qr(vector< vector<double> > a, vector< vector<double> >& v, vector<doub
     vector< vector<double> > prod = a*u;
     for (int i = 0; i < a.size(); i++) {
         for (int j = 0; j < a.size(); j++) {
-            double err = prod[i][j] - l[i]*u[i][j] ;
+            double err = prod[i][j] - l[j]*u[i][j] ;
             if( fabs (err) > 1e-10) {
                 cout << "Error in eigen-decomposition (" << err << ")." << endl;
                 exit(0);
