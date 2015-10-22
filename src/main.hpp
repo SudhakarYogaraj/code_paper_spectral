@@ -4,7 +4,7 @@
 #include "structures.hpp"
 #include "tictoc.hpp"
 #include "templates.hpp"
-#include "io.hpp"
+#include "io/io.hpp"
 #include "global.hpp"
 #include "combinatorics.hpp"
 

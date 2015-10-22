@@ -4,7 +4,7 @@
 #include "linear_algebra.hpp"
 #include "Solver_spectral.hpp"
 #include "templates.hpp"
-#include "io.hpp"
+#include "io/io.hpp"
 #include "global.hpp"
 #include <iomanip>
 

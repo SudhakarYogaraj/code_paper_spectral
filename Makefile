@@ -6,10 +6,10 @@
 
 # Compiler and flags
 CXX    = clang++
-CXXFLAGS = -I src -O3 -Ofast -fassociative-math -ffast-math -std=c++11 -Wall
+CXXFLAGS = -Isrc -O3 -Ofast -fassociative-math -ffast-math -std=c++11 -Wall
 
 # C++ source files and location of .o files
-CPP_FILES := src/Problem.cpp $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
+CPP_FILES := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp) src/problem/Problem.cpp
 DEP_FILES := $(subst src,dep, $(CPP_FILES:.cpp=.d))
 OBJ_FILES := $(subst src,obj, $(CPP_FILES:.cpp=.o))
 
@@ -26,7 +26,7 @@ all :
 
 prebuild :
 	@mkdir -p out $(dir $(DEP_FILES) $(OBJ_FILES))
-	cp python/outputs/${ARGS}.cpp src/Problem.cpp
+	cp python/outputs/${ARGS}.cpp src/problem/Problem.cpp
 
 target : $(TARGET)
 
