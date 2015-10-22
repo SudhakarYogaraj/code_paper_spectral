@@ -17,7 +17,10 @@ class Analyser {
     public:
 
         // Constructor
-        Analyser(Problem problem);
+        Analyser(Problem *problem);
+
+        // Copy constructor;
+        /* Analyser(const Analyser& a); */
 
         // Value of the slow variable to which the statistics computed correspond.
         std::vector<double> x;
@@ -58,7 +61,7 @@ class Analyser {
     private:
 
         // Problem associated with Analyser
-        Problem problem;
+        Problem *problem;
 
         // Variables derived from Problem, copied for convenience.
         int nf;
