@@ -4,10 +4,12 @@
 #include <random>
 #include <vector>
 
+#include "Problem.hpp"
+
 class Solver_hmm {
     public:
 
-        Solver_hmm(double p, int M);
+        Solver_hmm(Problem *prob, double p, int M);
 
         // Macro and micro time-steps
         double macro_dt;
@@ -25,6 +27,9 @@ class Solver_hmm {
         // Precision parameter of the solver
         double p;
 
-        void estimator(Problem&, std::vector<double> x, std::vector<double>& yInit, SDE_coeffs&, int seed, double t);
+        void estimator(std::vector<double> x, std::vector<double>& yInit, SDE_coeffs&, int seed, double t);
+
+    private:
+        Problem* problem;
 };
 #endif

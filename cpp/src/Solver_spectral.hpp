@@ -8,8 +8,8 @@
 #include <unordered_map>
 
 #include "Gaussian_integrator.hpp"
-#include "Analyser.hpp"
 #include "Problem.hpp"
+#include "Analyser.hpp"
 #include "structures.hpp"
 
 class Solver_spectral {
@@ -19,11 +19,10 @@ class Solver_spectral {
         int degree;
         int nNodes;
 
-        Solver_spectral(int degree, int nNodes, int n_vars);
-        SDE_coeffs estimator(Problem&, Analyser&, std::vector<double> x, double t);
+        Solver_spectral(Problem*, Analyser*, int degree, int nNodes);
+        SDE_coeffs estimator(std::vector<double> x, double t);
 
     private:
-
         struct Hash_multi_index {
 
             // "Hashing" function for multi_indices. Associate a unique integer to
@@ -61,9 +60,9 @@ class Solver_spectral {
         void hermite_coefficients (int degree, std::vector< std::vector<double> >& matrix);
 
         // Update variance and bias of gaussian
-        void update_stats(Problem& problem, Analyser &analyser, std::vector<double> var_scaling);
+        void update_stats(std::vector<double> var_scaling);
 
-        std::vector<double> discretize(Problem &problem, Analyser& analyser, std::vector<double> x, Gaussian_integrator& gauss, double(*f)(std::vector<double>,std::vector<double>));
+        std::vector<double> discretize(std::vector<double> x, Gaussian_integrator& gauss, double(*f)(std::vector<double>,std::vector<double>));
         std::vector<double> project(int nf, int degree, Gaussian_integrator& gauss, std::vector<double> f_discretized, int rescale);
 
         // Statistics associated with the hermite functions
@@ -72,5 +71,8 @@ class Solver_spectral {
         std::vector< std::vector<double> > eig_vec_cov;
         std::vector< std::vector<double> > sqrt_cov;
         double det_cov;
+
+        Problem *problem;
+        Analyser *analyser;
 };
 #endif
