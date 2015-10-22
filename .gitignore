@@ -1,5 +1,4 @@
 ## Addition to the default .gitignore
-python/inputs
 python/outputs
 Problem.cpp
 build_problem.py
