@@ -1,4 +1,4 @@
-#include "combinatorics.hpp"
+#include "toolbox/combinatorics.hpp"
 
 using namespace std;
 

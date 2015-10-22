@@ -1,4 +1,4 @@
-#include "linear_algebra.hpp"
+#include "toolbox/linear_algebra.hpp"
 #include "templates.hpp"
 #include "io/io.hpp"
 

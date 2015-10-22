@@ -1,10 +1,10 @@
 #!/bin/bash
 cd $(git rev-parse --show-toplevel)/src
 for f in $(find * -name '*.hpp'); do
+    keyword=$(echo $(basename $f) | sed 's/[]\/$*.^|[]/\\&/g')
+    replace=$(echo $f | sed -e 's/[\/&]/\\&/g')
     for g in $(find * -name '*.cpp' -or -name '*.hpp'); do
-        base=$(basename $f)
-        sed -i '/".\+\/$filename"/"$f"' ${g}
+        sed -i "s/\"${keyword}\"/\"${replace}\"/g" $g
     done
+    sed -i "s/\"${keyword}\"/\"${replace}\"/g" ../python/problem.init
 done
-
-"cpp/header.hpp"

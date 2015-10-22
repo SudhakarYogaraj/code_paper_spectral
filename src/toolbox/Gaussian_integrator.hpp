@@ -8,7 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include "templates.hpp"
-#include "combinatorics.hpp"
+#include "toolbox/combinatorics.hpp"
 
 class Gaussian_integrator {
 
