@@ -39,13 +39,14 @@ obj/%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 	@sed -i "s#^\([^.]*\.o\)#$(OBJ_DIR)/\1#g" dep/$*.d
 
-clean:
-	rm -f $(TARGET) $(OBJ_FILES) $(DEP_FILES)
-
-## Handling of user input ##
-
 problem:
 	make -C python
 
+clean:
+	rm -f $(TARGET) $(OBJ_FILES) $(DEP_FILES)
+
 clean-problem:
 	make clean -C python
+
+clean-all:
+	git clean -dxf
