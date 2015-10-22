@@ -6,7 +6,7 @@
 
 # Compiler and flags
 CXX    = clang++
-CXXFLAGS = -O3 -Ofast -fassociative-math -ffast-math -std=c++11 -Wall
+CXXFLAGS = -I src -O3 -Ofast -fassociative-math -ffast-math -std=c++11 -Wall
 
 # C++ source files and location of .o files
 CPP_FILES := src/Problem.cpp $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
@@ -25,7 +25,7 @@ all :
 	@make --no-print-directory target
 
 prebuild :
-	mkdir -p dep obj out
+	@mkdir -p out $(dir $(DEP_FILES) $(OBJ_FILES))
 	cp python/outputs/${ARGS}.cpp src/Problem.cpp
 
 target : $(TARGET)
