@@ -4,7 +4,7 @@
 #include <random>
 #include <vector>
 
-#include "Problem.hpp"
+#include "problem/Problem.hpp"
 
 class Solver_hmm {
     public:

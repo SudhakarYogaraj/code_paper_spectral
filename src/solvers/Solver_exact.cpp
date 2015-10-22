@@ -1,6 +1,6 @@
-#include "Solver_exact.hpp"
-#include "Problem.hpp"
-#include "Gaussian_integrator.hpp"
+#include "solvers/Solver_exact.hpp"
+#include "problem/Problem.hpp"
+#include "toolbox/Gaussian_integrator.hpp"
 
 using namespace std;
 

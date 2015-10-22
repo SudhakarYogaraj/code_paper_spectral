@@ -2,20 +2,20 @@
 #define MAIN_H
 
 #include "structures.hpp"
-#include "tictoc.hpp"
+#include "io/tictoc.hpp"
 #include "templates.hpp"
-#include "io.hpp"
+#include "io/io.hpp"
 #include "global.hpp"
-#include "combinatorics.hpp"
+#include "toolbox/combinatorics.hpp"
 
 // Problem and analyser
-#include "Problem.hpp"
-#include "Analyser.hpp"
+#include "problem/Problem.hpp"
+#include "problem/Analyser.hpp"
 
 // Solvers
-#include "Solver_spectral.hpp"
-#include "Solver_hmm.hpp"
-#include "Solver_exact.hpp"
+#include "solvers/Solver_spectral.hpp"
+#include "solvers/Solver_hmm.hpp"
+#include "solvers/Solver_exact.hpp"
 
 #include <iostream>
 #include <iomanip>

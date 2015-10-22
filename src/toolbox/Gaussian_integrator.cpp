@@ -1,4 +1,4 @@
-#include "Gaussian_integrator.hpp"
+#include "toolbox/Gaussian_integrator.hpp"
 #include "templates.hpp"
 
 using namespace std;

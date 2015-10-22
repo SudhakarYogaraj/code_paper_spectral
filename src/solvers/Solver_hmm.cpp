@@ -1,8 +1,8 @@
 #include "structures.hpp"
-#include "linear_algebra.hpp"
+#include "toolbox/linear_algebra.hpp"
 #include "templates.hpp"
-#include "Problem.hpp"
-#include "Solver_hmm.hpp"
+#include "problem/Problem.hpp"
+#include "solvers/Solver_hmm.hpp"
 
 using namespace std;
 
