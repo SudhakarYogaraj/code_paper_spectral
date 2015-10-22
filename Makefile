@@ -9,9 +9,9 @@ CXX    = clang++
 CXXFLAGS = -O3 -Ofast -fassociative-math -ffast-math -std=c++11 -Wall
 
 # C++ source files and location of .o files
-CPP_FILES := src/Problem.cpp $(wildcard src/*.cpp)
-DEP_FILES := $(addprefix dep/,$(notdir $(CPP_FILES:.cpp=.d)))
-OBJ_FILES := $(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
+CPP_FILES := src/Problem.cpp $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
+DEP_FILES := $(subst src,dep, $(CPP_FILES:.cpp=.d))
+OBJ_FILES := $(subst src,obj, $(CPP_FILES:.cpp=.o))
 
 # Target executable
 TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
