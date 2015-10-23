@@ -15,6 +15,9 @@ SDE_coeffs Solver_spectral::estimator(vector<double> x, double t) {
     // Vectors to store the coefficients of the sde
     SDE_coeffs sde_coeffs;
 
+    // Update statistics
+    analyser->update_stats(x);
+
     // Integrator
     Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
 
