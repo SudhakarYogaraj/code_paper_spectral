@@ -32,6 +32,9 @@ namespace tests {
         for (int i = 0; i < degrees.size(); ++i)
             degrees[i] = i + degree_min;
 
+        // Update of the statistics of the invariant measure
+        analyser->update_stats(x);
+
         // Computation of the exact solution
         Solver_exact solver_exact(problem, analyser);
         vector<double> exact_drift = solver_exact.soldrif(x);
@@ -49,17 +52,12 @@ namespace tests {
             // Create new solvers
             Solver_spectral solver_spectral(problem, analyser, degrees[i], ni);
 
-            // Update of the statistics of the invariant measure
-            analyser->update_stats(x);
-
             // Measure time of execution
             tic(); SDE_coeffs c = solver_spectral.estimator(x, 0.); estimator_time[i] = toc();
 
             // Error
             vector<double> Ddrif = (c.drif - exact_drift);
             vector< vector<double> > Ddiff = (c.diff - exact_diff);
-            cout << "fabs(Ddrif)" << fabs(Ddrif) << endl;
-            cout << "fabs(Ddiff)" << fabs(Ddiff) << endl;
             estimator_error[i] = fabs(Ddrif)/fabs(exact_drift) + fabs(Ddiff)/fabs(exact_diff);
 
             // Write to file
