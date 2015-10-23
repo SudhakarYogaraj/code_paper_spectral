@@ -1,4 +1,5 @@
 #include "solvers/Solver_exact.hpp"
+#include "structures.hpp"
 #include "problem/Problem.hpp"
 #include "toolbox/Gaussian_integrator.hpp"
 
@@ -7,6 +8,14 @@ using namespace std;
 Solver_exact::Solver_exact(Problem* p, Analyser* a) {
     problem = p;
     analyser = a;
+}
+
+SDE_coeffs Solver_exact::estimator(vector<double> x) {
+    analyser->update_stats(x);
+    SDE_coeffs sde_coeffs;
+    sde_coeffs.drif = soldrif(x);
+    sde_coeffs.diff = soldiff(x);
+    return sde_coeffs;
 }
 
 vector<double> Solver_exact::soldrif(vector<double> x) {
