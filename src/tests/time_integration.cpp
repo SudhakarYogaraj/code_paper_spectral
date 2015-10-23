@@ -20,7 +20,7 @@ using namespace std;
 
 namespace tests {
 
-    void integrate(Problem *problem, Solver_exact *se, Solver_spectral *ss, Solver_hmm *sh) {
+    void integrate(Problem *problem, Solver *se, Solver_spectral *ss, Solver_hmm *sh) {
 
         // Precision of the cout command
         cout.precision(6);
@@ -71,13 +71,10 @@ namespace tests {
             struct SDE_coeffs c_spectral;
             struct SDE_coeffs c_hmm;
 
-            // Random seed for the hmm method
-            int seed = (int) abs(1000*distribution(generator));
-
             // Solution of the problem using the HMM method
             c_exact = se->estimator(x_exact[i], t[i]);
             c_spectral = ss->estimator(x_spectral[i], t[i]);
-            c_hmm = sh->estimator(x_hmm[i], seed, t[i]);
+            c_hmm = sh->estimator(x_hmm[i], t[i]);
 
             // Initial value for new time step
             x_exact[i+1] = x_exact[i];
