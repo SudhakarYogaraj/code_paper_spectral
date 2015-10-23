@@ -34,6 +34,9 @@ namespace tests {
         for (int i = 0; i < p_values.size(); ++i)
             p_values[i] = p_min + i;
 
+        // Update of the statistics of the invariant measure
+        analyser->update_stats(x);
+
         // Computation of the exact solution
         Solver_exact solver_exact(problem, analyser);
         vector<double> exact_drift = solver_exact.soldrif(x);
@@ -43,8 +46,8 @@ namespace tests {
         vector<double> estimator_error(p_values.size());
 
         // Files to write to
-        ofstream out_time("out/spectral_time");
-        ofstream out_errs("out/spectral_error");
+        ofstream out_time("out/hmm_time");
+        ofstream out_errs("out/hmm_error");
 
         for (unsigned int i = 0; i < p_values.size(); ++i) {
 
