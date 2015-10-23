@@ -20,6 +20,7 @@
 // Tests
 #include "tests/error_spectral.hpp"
 #include "tests/error_hmm.hpp"
+#include "tests/time_integration.hpp"
 
 #include <iostream>
 #include <iomanip>
