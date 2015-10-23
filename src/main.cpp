@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
             // Erorr
             vector<double> Ddrif = (ci.drif - solver_exact.soldrif(problem.x0));
             vector< vector<double> > Ddiff = (ci.diff - solver_exact.soldiff(problem.x0));
-            estimator_error[i] = fabs(Ddrif);// + fabs(Ddiff);
+            estimator_error[i] = fabs(Ddrif)/fabs(solver_exact.soldrif(problem.x0)) + fabs(Ddiff)/fabs(solver_exact.soldiff(problem.x0));
 
             // Summary of iteration
             cout << "    Iteration " << i << ". Time: " << estimator_time[i] << ". Error: " << estimator_error[i] << endl;

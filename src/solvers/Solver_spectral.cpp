@@ -24,7 +24,7 @@ SDE_coeffs Solver_spectral::estimator(vector<double> x, double t) {
     int nb = bin(degree + nf, nf);
 
     // User defined rescaling of the eigenvalues
-    vector<double> var_scaling = {0.5, 0.4};
+    vector<double> var_scaling(nf, 0.5);
 
     // Update statistics of Gaussian
     this->update_stats(var_scaling);
@@ -434,6 +434,12 @@ Solver_spectral::Solver_spectral(Problem *p, Analyser *a, int degree, int nNodes
     this->hermiteCoeffs_1d = mat1d;
     this->hermiteCoeffs_nd = matnd;
 }
+
+/* void discrete solution { */
+/* } */
+
+/* void discrete_grid(vector< vector<double> > x) { */
+/* } */
 
 /*! Function to compute hermite coefficients
  *
