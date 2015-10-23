@@ -11,8 +11,11 @@ CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
 # Problem file
 PRB = src/problem/problem_${ARG}.cpp
 
-# C++ source files and location of .o files
-CPP_FILES := $(filter-out src/problem/problem_%.cpp, $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)) $(PRB)
+# All sources, corresponding to different problems
+ALL_SOURCES := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
+
+# For the particular problem
+CPP_FILES := $(filter-out src/problem/problem_%.cpp, $(ALL_SOURCES)) $(PRB)
 DEP_FILES := $(subst src,dep, $(CPP_FILES:.cpp=.d))
 OBJ_FILES := $(subst src,obj, $(CPP_FILES:.cpp=.o))
 
