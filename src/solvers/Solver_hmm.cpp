@@ -44,7 +44,7 @@ Solver_hmm::Solver_hmm(Problem *prob, double p, int M) {
     this->M = M;
 }
 
-SDE_coeffs Solver_hmm::estimator(vector<double> xt, int seed, double t) {
+SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
 
     // Vectors to store the coefficients of the sde
     SDE_coeffs sde_coeffs;
@@ -57,7 +57,9 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, int seed, double t) {
     sde_coeffs.diff = vector< vector<double> >(problem->ns, vector<double>(problem->ns, 0.));
 
     default_random_engine generator;
+    generator.seed(time(NULL));
     normal_distribution<double> distribution(0.0,1.0);
+    int seed = (int) abs(1000*distribution(generator));
     generator.seed(seed);
 
     // Construction of the array that will contain the solution for the

@@ -22,10 +22,6 @@ namespace tests {
 
     void error_hmm(vector<double> x, Problem *problem, Analyser *analyser) {
 
-        // Random numbers generator
-        default_random_engine generator; generator.seed(time(NULL));
-        normal_distribution<double> distribution(0.0,1.0);
-
         // Minimal and maximal values of the precision parameter
         int p_min = 3;
         int p_max = 6;
@@ -54,11 +50,8 @@ namespace tests {
             // Create new solvers
             Solver_hmm solver_hmm(problem, p_values[i], 1);
 
-            // Random seed for estimator
-            int seed = (int) abs(1000*distribution(generator));
-
             // Measure time of execution
-            tic(); SDE_coeffs c = solver_hmm.estimator(x, seed, 0.); estimator_time[i] = toc();
+            tic(); SDE_coeffs c = solver_hmm.estimator(x, 0.); estimator_time[i] = toc();
 
             // Error
             vector<double> Ddrif = (c.drif - exact_drift);

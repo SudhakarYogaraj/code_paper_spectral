@@ -20,7 +20,7 @@ using namespace std;
 
 namespace tests {
 
-    void integrate(Problem *problem, Solver_exact *se, Solver_spectral *ss, Solver_hmm *sh) {
+    void integrate(Problem *problem, Solver *solver, int seed, string s) {
 
         // Precision of the cout command
         cout.precision(6);
@@ -37,7 +37,7 @@ namespace tests {
         }
 
         // Random numbers generator
-        default_random_engine generator; generator.seed(time(NULL));
+        default_random_engine generator; generator.seed(seed);
         normal_distribution<double> distribution(0.0,1.0);
 
         // Vector of random variables used to simulate the brownian
@@ -50,66 +50,32 @@ namespace tests {
         }
 
         // Approximate and exact solutions
-        vector< vector<double> > x_exact(sizet,vector<double>(problem->ns,0.));
-        vector< vector<double> > x_spectral(sizet,vector<double>(problem->ns,0.));
-        vector< vector<double> > x_hmm(sizet,vector<double>(problem->ns,0.));
+        vector< vector<double> > x(sizet,vector<double>(problem->ns,0.));
 
         // Initial condition
-        x_exact[0] = problem->x0;
-        x_spectral[0] = problem->x0;
-        x_hmm[0] = problem->x0;
+        x[0] = problem->x0;
 
         // Streams
-        ofstream out_time("out/time_integration/time");
-        ofstream out_exact("out/time_integration/exact");
-        ofstream out_spectral("out/time_integration/spectral");
-        ofstream out_hmm("out/time_integration/hmm");
+        ofstream out_time("out/time_integration/time_" + s);
+        ofstream out_sol("out/time_integration/sol_" + s);
 
         for (unsigned int i = 0; i < sizet - 1; i++) {
 
-            struct SDE_coeffs c_exact;
-            struct SDE_coeffs c_spectral;
-            struct SDE_coeffs c_hmm;
-
-            // Random seed for the hmm method
-            int seed = (int) abs(1000*distribution(generator));
-
-            // Solution of the problem using the HMM method
-            c_exact = se->estimator(x_exact[i], t[i]);
-            c_spectral = ss->estimator(x_spectral[i], t[i]);
-            c_hmm = sh->estimator(x_hmm[i], seed, t[i]);
-
-            // Initial value for new time step
-            x_exact[i+1] = x_exact[i];
-            x_hmm[i+1] = x_hmm[i];
-            x_spectral[i+1] = x_spectral[i];
+            struct SDE_coeffs c = solver->estimator(x[i], t[i]);
+            x[i+1] = x[i];
 
             for (int i1 = 0; i1 < problem->ns; i1++) {
                 for (int i2 = 0; i2 < problem->ns; i2++) {
-                    x_exact[i+1][i1] += c_exact.diff[i1][i2]*sqrt(Dt)*dWs[i][i2];
-                    x_spectral[i+1][i1] += c_spectral.diff[i1][i2]*sqrt(Dt)*dWs[i][i2];
-                    x_hmm[i+1][i1] += c_hmm.diff[i1][i2]*sqrt(Dt)*dWs[i][i2];
+                    x[i+1][i1] += c.diff[i1][i2]*sqrt(Dt)*dWs[i][i2];
                 }
-                x_exact[i+1][i1] += Dt*c_exact.drif[i1];
-                x_spectral[i+1][i1] += Dt*c_spectral.drif[i1];
-                x_hmm[i+1][i1] += Dt*c_hmm.drif[i1];
+                x[i+1][i1] += Dt*c.drif[i1];
             }
 
             out_time << t[i] << endl;
             for (int j = 0; j < problem->ns; ++j) {
-                out_exact << x_exact[i][j];
-                out_spectral << x_spectral[i][j];
-                out_hmm << x_hmm[i][j];
-                if (j != problem->ns -1) {
-                    out_exact << " ";
-                    out_spectral << " ";
-                    out_hmm << " ";
-                }
-                else {
-                    out_exact << endl;
-                    out_spectral << endl;
-                    out_hmm << endl;
-                }
+                out_sol << x[i][j];
+                if (j != problem->ns -1) out_sol << " ";
+                else out_sol << endl;
             }
         }
     }
