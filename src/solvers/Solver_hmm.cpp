@@ -44,14 +44,17 @@ Solver_hmm::Solver_hmm(Problem *prob, double p, int M) {
     this->M = M;
 }
 
-void Solver_hmm::estimator(vector<double> xt, \
-               vector<double>& yInit, \
-               SDE_coeffs& data, \
-               int seed, \
-               double t) {
+SDE_coeffs Solver_hmm::estimator(vector<double> xt, int seed, double t) {
 
-    data.drif = vector<double>(problem->ns, 0.);
-    data.diff = vector< vector<double> >(problem->ns, vector<double>(problem->ns, 0.));
+    // Vectors to store the coefficients of the sde
+    SDE_coeffs sde_coeffs;
+
+    // Initial value for the fast process at each macro time-step
+    vector<double> yInit(2*problem->nf, 0.);
+
+    // Initialization of the coefficients of the SDE
+    sde_coeffs.drif = vector<double>(problem->ns, 0.);
+    sde_coeffs.diff = vector< vector<double> >(problem->ns, vector<double>(problem->ns, 0.));
 
     default_random_engine generator;
     normal_distribution<double> distribution(0.0,1.0);
@@ -168,15 +171,18 @@ void Solver_hmm::estimator(vector<double> xt, \
         // Incremental mean over the samples
         for (int i1 = 0; i1 < problem->ns; i1++) {
             for (int i2 = 0; i2 < problem->ns; i2++) {
-                data.diff[i1][i2] = (data.diff[i1][i2]*m + him[i1][i2])/(m+1);
+                sde_coeffs.diff[i1][i2] = (sde_coeffs.diff[i1][i2]*m + him[i1][i2])/(m+1);
             }
-            data.drif[i1] = (data.drif[i1]*m + fim[i1])/(m+1);
+            sde_coeffs.drif[i1] = (sde_coeffs.drif[i1]*m + fim[i1])/(m+1);
         }
     }
 
     // Approximate diffusion coefficient
-    data.diff = cholesky(symmetric(data.diff));
+    sde_coeffs.diff = cholesky(symmetric(sde_coeffs.diff));
 
     // Initial condition for next iteration and storage of y
     yInit = yAux[yAux.size()-1];
+
+    // return coefficients of the SDE
+    return sde_coeffs;
 }

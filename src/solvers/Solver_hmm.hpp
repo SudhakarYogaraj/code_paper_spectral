@@ -27,7 +27,7 @@ class Solver_hmm {
         // Precision parameter of the solver
         double p;
 
-        void estimator(std::vector<double> x, std::vector<double>& yInit, SDE_coeffs&, int seed, double t);
+        SDE_coeffs estimator(std::vector<double> x, int seed, double t);
 
     private:
         Problem* problem;
