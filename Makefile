@@ -31,6 +31,7 @@ all : prebuild $(TARGET)
 prebuild :
 	@rm -f $(TARGET)
 	@mkdir -p out $(dir $(DEP_FILES) $(OBJ_FILES))
+	@mkdir -p $(addprefix out/,$(notdir $(basename $(wildcard src/tests/*.cpp))))
 
 # Rule fo the target executable
 $(TARGET) : $(OBJ_FILES)
