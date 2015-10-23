@@ -7,7 +7,7 @@
 #include "problem/Problem.hpp"
 #include "solvers/Solver.hpp"
 
-class Solver_hmm : Solver {
+class Solver_hmm : public Solver {
     public:
 
         Solver_hmm(Problem *prob, double p, int M);
