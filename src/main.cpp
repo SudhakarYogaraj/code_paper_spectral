@@ -1,22 +1,17 @@
 #include "main.hpp"
 
-/* TODO: Pass to general LU solver (urbain, Sat 23 May 2015 20:12:16 BST) */
-/* TODO: Test gradient structures in several dimensions (urbain, Thu 21 May 2015 12:12:14 BST) */
-/* TODO: automatic problem generation for hmm (urbain, Thu 21 May 2015 18:23:04 BST) */
-
 using namespace std;
 
 int main(int argc, char* argv[]) {
-
-    /* Gaussian_integrator::test_integrator(); */
-    /* exit(0); */
-
-    int output1 = 1;
 
     // Initialization of the problem and helper analyser
     Problem problem;
     problem.init();
     Analyser analyser(&problem);
+
+    // Test of the solvers
+    tests::error_spectral(problem.x0, &problem, &analyser);
+    tests::error_hmm(problem.x0, &problem, &analyser);
 
     // Values of the precision parameter
     vector<double> p_values = {6.};
@@ -55,47 +50,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // OUTPUT 1: GRAPH TIME - PRECISION FOR SPECTRAL METHOD
 
-    if (output1) {
-
-        vector<int> estimator_degrees = {2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
-        vector<double> estimator_time(estimator_degrees.size());
-        vector<double> estimator_error(estimator_degrees.size());
-
-        ofstream out_time("out/spectral_time");
-        ofstream out_errs("out/spectral_error");
-
-        cout << "* Generating output for graph precision-time (spectral)" << endl;
-        for (unsigned int i = 0; i < estimator_degrees.size(); ++i) {
-
-            // Create new solver
-            Solver_spectral solver_spectral = Solver_spectral(&problem, &analyser, estimator_degrees[i], 100);
-            Solver_exact solver_exact(&problem, &analyser);
-
-            // Update of the statistics of the invariant measure
-            analyser.update_stats(problem.x0);
-
-            // Measure time of execution
-            tic(); SDE_coeffs ci = solver_spectral.estimator(problem.x0, 0.);
-            estimator_time[i] = toc();
-
-            // Erorr
-            vector<double> Ddrif = (ci.drif - solver_exact.soldrif(problem.x0));
-            vector< vector<double> > Ddiff = (ci.diff - solver_exact.soldiff(problem.x0));
-            estimator_error[i] = fabs(Ddrif)/fabs(solver_exact.soldrif(problem.x0)) + fabs(Ddiff)/fabs(solver_exact.soldiff(problem.x0));
-
-            // Summary of iteration
-            cout << "    Iteration " << i << ". Time: " << estimator_time[i] << ". Error: " << estimator_error[i] << endl;
-
-            // Write to file
-            out_time << estimator_time[i] << endl;
-            out_errs << estimator_error[i] << endl;
-        }
-
-        writeToFile("spectral_time", estimator_time);
-        writeToFile("spectral_error", estimator_error);
-    }
 
     for (unsigned int j = 0; j < p_values.size(); ++j) {
 
@@ -132,7 +87,7 @@ int main(int argc, char* argv[]) {
             analyser.update_stats(x_exact[i]);
 
             // Solution of the problem using the HMM method
-            solver_hmm.estimator(xt_hmm[i], yInit, c_hmm, seed, t[i]);
+            c_hmm = solver_hmm.estimator(xt_hmm[i], seed, t[i]);
             c_spectral = solver_spectral.estimator(xt_spectral[i], t[i]);
 
             // Exact drift and diffusion coefficients
