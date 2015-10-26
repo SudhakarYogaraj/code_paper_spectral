@@ -15,6 +15,8 @@ import sympy.printing
 os.system("mkdir -p tmp")
 
 # user input : dimensions
+ns = 2
+nf = 2
 # end
 
 # Coefficient of the BM
@@ -47,6 +49,8 @@ drif = [0.] * (2*nf)
 diff = [0.] * (2*nf)
 
 # user input : solution
+g[0] = sympy.cos(x[0] + y[0] + y[1])
+g[1] = sympy.sin(x[1]) * sympy.sin(y[0] + y[1])
 # end
 
 for i in range(ns):
@@ -54,6 +58,8 @@ for i in range(ns):
         gx[i][j] = sympy.diff(g[i], x[j])
 
 # user input : second order drift
+h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.cos(y[1])
+h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1])
 # end
 
 stardivh = 0
@@ -62,6 +68,7 @@ for i in range(nf):
 stardivh = sympy.simplify(stardivh)
 
 # user input : potential
+v = ((y[1] + y[0]) ** 4/4 - (y[1] + y[0]) ** 2 / 2) + (y[1] - y[0]) ** 4
 # end
 
 for i in range(nf):
@@ -115,6 +122,7 @@ for i in range(nf):
 print(sys.argv[1])
 output = open(sys.argv[1], 'w')
 
+
 # Print all the necessary functions
 def print_double(symbol, fun_name):
 
@@ -150,55 +158,31 @@ for i in range(2*nf):
     print_double(diff[j], "diff{}".format(i))
 
 
+def print_matrix(fun_base, n=0, m=0):
+    if (n == 0):
+        s = fun_base
+    else:
+        s = "{"
+        for i in range(n):
+            s += print_matrix(fun_base + "{}".format(i), m, 0)
+            s += ", " if i != n - 1 else "}"
+    return s
+
+
 def allocate_function_pointer(fun_base, n=0, m=0):
     if(n == 0):
         # Case of scalar output
         output.write("    {} = {}_n;\n".format(fun_base, fun_base))
 
     elif(n > 0):
-        for i in range(n):
-
-            # Case where output is vector
-            if (m == 0):
-                output.write("    {}[{}] = ".format(fun_base, i))
-                output.write("{}{};\n".format(fun_base,  i))
-
-            # Matrix case
-            elif(m > 0):
-                for j in range(m):
-                    output.write("    {}[{}][{}] = ".format(fun_base, i, j))
-                    output.write("{}{}{};\n".format(fun_base, i, j))
-
-    output.write("\n")
+        s = print_matrix(fun_base, n, m)
+        output.write("    {} = {};\n".format(fun_base, s))
 
 output.write("void Problem::init_functions() {\n\n")
 
 # Declaration of the number of variables
 output.write("    ns = {};\n".format(ns))
 output.write("    nf = {};\n\n".format(nf))
-
-# Declaration of function pointers
-output.write("    dyv = vector<double (*) (vector<double> x,\
-             vector<double> y)> (nf);\n")
-output.write("    h = vector<double (*) (vector<double> x,\
-             vector<double> y)> (nf);\n")
-output.write("    a = vector<double (*) (vector<double> x,\
-             vector<double> y)> (ns);\n")
-output.write("    dxa = vector< vector<double (*) (vector<double> x,\
-             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
-             vector<double> y)> (ns));\n")
-output.write("    dya = vector< vector<double (*) (vector<double> x,\
-             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
-             vector<double> y)> (nf));\n")
-output.write("    phi = vector<double (*) (vector<double> x,\
-             vector<double> y)> (ns);\n")
-output.write("    dxphi = vector< vector<double (*) (vector<double> x,\
-             vector<double> y)> >(ns, vector<double (*) (vector<double> x,\
-             vector<double> y)> (ns));\n")
-output.write("    drif = vector<double (*) (vector<double> x,\
-             vector<double> y)> (2*nf);\n")
-output.write("    diff = vector<double (*) (vector<double> x,\
-             vector<double> y)> (2*nf);\n\n")
 
 # Allocation of function pointers
 allocate_function_pointer("stardiv_h")
