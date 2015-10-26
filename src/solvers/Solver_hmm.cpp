@@ -25,12 +25,12 @@ Solver_hmm::Solver_hmm(Problem *prob, double p, int M) {
     // this->micro_dt = 0.05*pow(2.,-this->p/this->l);
 
     // If Burgers
-    this->micro_dt = 0.1*pow(2.,-this->p/this->l);
+    this->micro_dt = pow(2.,-this->p/this->l);
 
     // Number of micro time-steps taken into account
     // in the average to obtain the coefficients of the
     // effective equation at each macro time-step.
-    this->n = (int) 100*pow(2,this->p*(2+1./this->l));
+    this->n = (int) 10*pow(2,this->p*(2+1./this->l));
 
     // Number of micro time-steps that are not taken
     // into account in the averages
