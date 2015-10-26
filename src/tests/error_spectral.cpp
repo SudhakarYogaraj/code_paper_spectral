@@ -44,8 +44,9 @@ namespace tests {
         vector<double> estimator_error(degrees.size());
 
         // Files to write to
-        ofstream out_time("out/spectral_time");
-        ofstream out_errs("out/spectral_error");
+        ofstream out_degree("out/error_spectral/degree");
+        ofstream out_time("out/error_spectral/time");
+        ofstream out_errs("out/error_spectral/error");
 
         for (unsigned int i = 0; i < degrees.size(); ++i) {
 
@@ -61,6 +62,7 @@ namespace tests {
             estimator_error[i] = fabs(Ddrif)/fabs(exact_drift) + fabs(Ddiff)/fabs(exact_diff);
 
             // Write to file
+            out_degree << degrees[i] << endl;
             out_time << estimator_time[i] << endl;
             out_errs << estimator_error[i] << endl;
 
