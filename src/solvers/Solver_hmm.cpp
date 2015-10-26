@@ -25,12 +25,12 @@ Solver_hmm::Solver_hmm(Problem *prob, double p, int M) {
     // this->micro_dt = 0.05*pow(2.,-this->p/this->l);
 
     // If Burgers
-    this->micro_dt = pow(2.,-this->p/this->l);
+    this->micro_dt = 0.1*pow(2.,-this->p/this->l);
 
     // Number of micro time-steps taken into account
     // in the average to obtain the coefficients of the
     // effective equation at each macro time-step.
-    this->n = (int) 10*pow(2,this->p*(2+1./this->l));
+    this->n = (int) 100*pow(2,this->p*(2+1./this->l));
 
     // Number of micro time-steps that are not taken
     // into account in the averages
@@ -57,8 +57,7 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
     sde_coeffs.diff = vector< vector<double> >(problem->ns, vector<double>(problem->ns, 0.));
 
     default_random_engine generator;
-    /* generator.seed(time(NULL)); */
-    generator.seed(0);
+    generator.seed(time(NULL));
     normal_distribution<double> distribution(0.0,1.0);
     int seed = (int) abs(1000*distribution(generator));
     generator.seed(seed);
@@ -134,10 +133,8 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
             for (int k = 0; k < problem->ns; ++k) {
                 for (int l = 0; l < problem->nf; ++l) {
                     dya_j[k][l] = problem->dya[k][l](xt, yAux[j]);
-                    cout << dya_j[k][l] << endl;
                 }
             }
-            exit(0);
 
             // first term
             for (int i1 = 0; i1 < problem->ns; i1++) {
