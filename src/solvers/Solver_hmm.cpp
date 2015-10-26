@@ -57,7 +57,8 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
     sde_coeffs.diff = vector< vector<double> >(problem->ns, vector<double>(problem->ns, 0.));
 
     default_random_engine generator;
-    generator.seed(time(NULL));
+    /* generator.seed(time(NULL)); */
+    generator.seed(0);
     normal_distribution<double> distribution(0.0,1.0);
     int seed = (int) abs(1000*distribution(generator));
     generator.seed(seed);
@@ -133,8 +134,10 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
             for (int k = 0; k < problem->ns; ++k) {
                 for (int l = 0; l < problem->nf; ++l) {
                     dya_j[k][l] = problem->dya[k][l](xt, yAux[j]);
+                    cout << dya_j[k][l] << endl;
                 }
             }
+            exit(0);
 
             // first term
             for (int i1 = 0; i1 < problem->ns; i1++) {

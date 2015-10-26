@@ -17,8 +17,8 @@ int main(int argc, char* argv[]) {
 
     // Test of the solvers
     /* tests::error_spectral(problem.x0, &problem, &analyser); */
-    /* tests::error_hmm(problem.x0, &problem, &analyser); */
-    tests::integrate(&problem, &solver_exact, 0, "exact");
-    tests::integrate(&problem, &solver_spectral, 0, "spectral");
-    tests::integrate(&problem, &solver_hmm, 0, "hmm");
+    tests::error_hmm(problem.x0, &problem, &analyser);
+    /* tests::integrate(&problem, &solver_exact, 0, "exact"); */
+    /* tests::integrate(&problem, &solver_spectral, 0, "spectral"); */
+    /* tests::integrate(&problem, &solver_hmm, 0, "hmm"); */
 }
