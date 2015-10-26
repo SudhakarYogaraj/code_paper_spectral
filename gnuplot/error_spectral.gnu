@@ -11,19 +11,33 @@ set term pdf
 # Style for lines and points
 set style line 1 lt 1 lw 1.5 pt 13 ps 1.5 pi 1
 
-# Output file
-set output out."time_integration.pdf"
+unset key
+
+
+## Degree - error
+set output out."degree_error.pdf"
 
 # Logarithmic scale for y
 set logscale y
+set logscale x
 
-# unset key
 set xlabel "Degree of approximation"
 set title "Relative error for the homogenized coefficients"
 
 # Data from file
-data_exact = "<paste ".input."time_exact ".input."sol_exact"
-data_spectral = "<paste ".input."time_spectral ".input."sol_spectral"
-data_hmm = "<paste ".input."time_hmm ".input."sol_hmm"
+data = "<paste ".input."degree ".input."error"
 
-plot data_exact with lines, data_spectral with lines, data_hmm with lines
+plot data with points
+
+
+## Time - error
+set output out."time_error.pdf"
+
+# unset key
+set xlabel "Time of computations"
+set title "Relative error for the homogenized coefficients"
+
+# Data from file
+data = "<paste ".input."time ".input."error"
+
+plot data with points
