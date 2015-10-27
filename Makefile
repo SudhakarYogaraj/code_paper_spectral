@@ -9,10 +9,13 @@ CXX = clang++
 CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
 
 # Problem file
-PRB = src/problem/Problem.cpp
+PRB = src/problem/problem_${ARG}.cpp
 
-# C++ source files and location of .o files
-CPP_FILES := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp) $(PRB)
+# All sources, corresponding to different problems
+ALL_SOURCES := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
+
+# For the particular problem
+CPP_FILES := $(filter-out src/problem/problem_%.cpp, $(ALL_SOURCES)) $(PRB)
 DEP_FILES := $(subst src,dep, $(CPP_FILES:.cpp=.d))
 OBJ_FILES := $(subst src,obj, $(CPP_FILES:.cpp=.o))
 
@@ -23,15 +26,12 @@ TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
 MAKEDEPEND = $(CXX) $(CXXFLAGS) -MM -o dep/$*.d $<
 
 # Ensure that directories exist and build executable
-all :
-	@make --no-print-directory prebuild
-	@make --no-print-directory target
+all : prebuild $(TARGET)
 
 prebuild :
+	@rm -f $(TARGET)
 	@mkdir -p out $(dir $(DEP_FILES) $(OBJ_FILES))
-	cp python/outputs/${ARGS}.cpp $(PRB)
-
-target : $(TARGET)
+	@mkdir -p $(addprefix out/,$(notdir $(basename $(wildcard src/tests/*.cpp))))
 
 # Rule fo the target executable
 $(TARGET) : $(OBJ_FILES)
@@ -50,7 +50,7 @@ problem:
 	make -C python
 
 clean:
-	rm -f $(TARGET) $(OBJ_FILES) $(DEP_FILES) $(PRB)
+	rm -rf $(TARGET) obj dep
 
 clean-problem:
 	make clean -C python

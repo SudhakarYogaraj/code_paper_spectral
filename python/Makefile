@@ -3,12 +3,12 @@
 
 # Directories
 IN_DIR = inputs
-OUT_DIR = outputs
+OUT_DIR = ../src/problem
 AUX_DIR = tmp
 
 # Files
 IN := $(wildcard $(IN_DIR)/*.py)
-OUT := $(addprefix $(OUT_DIR)/,$(notdir $(IN:.py=.cpp)))
+OUT := $(addprefix $(OUT_DIR)/problem_,$(notdir $(IN:.py=.cpp)))
 SUB := $(addprefix $(AUX_DIR)/,$(notdir $(IN:.py=.sub)))
 GEN := $(addprefix $(AUX_DIR)/,$(notdir $(IN:.py=.gen)))
 BUILD := $(addprefix $(AUX_DIR)/,$(notdir $(IN)))
@@ -16,10 +16,10 @@ BUILD := $(addprefix $(AUX_DIR)/,$(notdir $(IN)))
 
 all : prebuild $(OUT)
 
-prebuild: 
+prebuild:
 	mkdir -p $(AUX_DIR) $(OUT_DIR)
 
-$(OUT_DIR)/%.cpp : problem.init $(AUX_DIR)/%.sub
+$(OUT_DIR)/problem_%.cpp : problem.init $(AUX_DIR)/%.sub
 	cat $^ > $@
 
 $(AUX_DIR)/%.sub : $(AUX_DIR)/%.gen

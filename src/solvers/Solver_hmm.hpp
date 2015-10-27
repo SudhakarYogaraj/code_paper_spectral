@@ -5,8 +5,9 @@
 #include <vector>
 
 #include "problem/Problem.hpp"
+#include "solvers/Solver.hpp"
 
-class Solver_hmm {
+class Solver_hmm : public Solver {
     public:
 
         Solver_hmm(Problem *prob, double p, int M);
@@ -27,7 +28,7 @@ class Solver_hmm {
         // Precision parameter of the solver
         double p;
 
-        void estimator(std::vector<double> x, std::vector<double>& yInit, SDE_coeffs&, int seed, double t);
+        SDE_coeffs estimator(std::vector<double> x, double t);
 
     private:
         Problem* problem;
