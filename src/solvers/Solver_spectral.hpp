@@ -7,12 +7,13 @@
 #include <vector>
 #include <unordered_map>
 
+#include "solvers/Solver.hpp"
 #include "toolbox/Gaussian_integrator.hpp"
 #include "problem/Problem.hpp"
 #include "problem/Analyser.hpp"
 #include "structures.hpp"
 
-class Solver_spectral {
+class Solver_spectral : public Solver {
     public:
 
         int n_mcmc;
