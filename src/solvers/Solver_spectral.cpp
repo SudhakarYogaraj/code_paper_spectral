@@ -19,15 +19,15 @@ SDE_coeffs Solver_spectral::estimator(vector<double> x, double t) {
     analyser->update_stats(x);
 
     // Integrator
-    Gaussian_integrator gauss = Gaussian_integrator(nNodes,nf);
+    Gaussian_integrator gauss = Gaussian_integrator(conf->n_nodes,nf);
 
     // Parameters of the problem
     int nf = problem->nf;
     int ns = problem->ns;
-    int nb = bin(degree + nf, nf);
+    int nb = bin(conf->degree + nf, nf);
 
     // User defined rescaling of the eigenvalues
-    vector<double> var_scaling(nf, 0.5);
+    vector<double> var_scaling = conf->scaling;
 
     // Update statistics of Gaussian
     this->update_stats(var_scaling);
@@ -62,15 +62,15 @@ SDE_coeffs Solver_spectral::estimator(vector<double> x, double t) {
 
         // Projection of da/dx
         for (int j = 0; j < ns; j++) {
-            coefficients_dx[i][j] = project(nf, degree, gauss, dax_discretized[i][j], 1);
+            coefficients_dx[i][j] = project(nf, conf->degree, gauss, dax_discretized[i][j], 1);
         }
 
         // Projection of a
-        coefficients[i] = project(nf, degree, gauss, a_discretized[i], 1);
+        coefficients[i] = project(nf, conf->degree, gauss, a_discretized[i], 1);
     }
 
     // Projection of h
-    coefficients_h = project(nf, degree, gauss, h_discretized, 1);
+    coefficients_h = project(nf, conf->degree, gauss, h_discretized, 1);
 
     // Mapping to Hermite basis
     for (int i = 0; i < ns; ++i) {
@@ -104,7 +104,7 @@ SDE_coeffs Solver_spectral::estimator(vector<double> x, double t) {
     }
 
     // Projection against monomials
-    vector<double> tmp_vec = project(nf, 2*degree, gauss, diff_discretized, 0);
+    vector<double> tmp_vec = project(nf, 2*conf->degree, gauss, diff_discretized, 0);
 
     // Generating Galerkin matrix based on these
     vector< vector<double> > prod_mat(nb, vector<double>(nb, 0.));
@@ -386,7 +386,9 @@ vector<double> Solver_spectral::project(int nf, int degree, Gaussian_integrator&
  * - The number of nodes to use in the Gauss-Hermite quadrature,
  * - The number of variables in the fast processes.
  */
-Solver_spectral::Solver_spectral(Problem *p, Analyser *a, int degree, int nNodes) {
+Solver_spectral::Solver_spectral(Problem *p, Analyser *a, config_spectral* config) {
+
+    conf = config;
 
     problem = p;
     analyser = a;
@@ -395,21 +397,21 @@ Solver_spectral::Solver_spectral(Problem *p, Analyser *a, int degree, int nNodes
     this->nf = problem->nf;
 
     // Initialize multi-indices
-    ind2mult = lower_multi_indices(nf, 2*degree);
+    ind2mult = lower_multi_indices(nf, 2*conf->degree);
     for (unsigned int i = 0; i < ind2mult.size(); ++i) {
         mult2ind.emplace(ind2mult[i], i);
     }
 
     // Dimension of the approximation space
-    int nb = bin(degree + problem->nf, problem->nf);
+    int nb = bin(conf->degree + problem->nf, problem->nf);
 
     // Matrices that will contain the coefficients of the 1- and multi- dimensional
     // Hermite polynomials
-    vector< vector<double> > mat1d (degree + 1, vector<double>(degree + 1,0.));
+    vector< vector<double> > mat1d (conf->degree + 1, vector<double>(conf->degree + 1,0.));
     vector< vector<double> > matnd(nb, vector<double>(nb,0.));
 
     // Fill the matrix for the unidimensional coefficients.
-    hermite_coefficients(degree, mat1d);
+    hermite_coefficients(conf->degree, mat1d);
 
     // Calculate the multi-dimensional coefficients by tensor products.
     for (int i = 0; i < nb; ++i) {
@@ -432,8 +434,6 @@ Solver_spectral::Solver_spectral(Problem *p, Analyser *a, int degree, int nNodes
     }
 
     // Initialize variables of the solver
-    this->degree = degree;
-    this->nNodes = nNodes;
     this->hermiteCoeffs_1d = mat1d;
     this->hermiteCoeffs_nd = matnd;
 }
