@@ -13,17 +13,22 @@
 #include "problem/Analyser.hpp"
 #include "structures.hpp"
 
+struct config_spectral {
+    int n_nodes;
+    int degree;
+    std::vector<double> scaling;
+};
+
 class Solver_spectral : public Solver {
     public:
 
-        int n_mcmc;
-        int degree;
-        int nNodes;
-
-        Solver_spectral(Problem*, Analyser*, int degree, int nNodes);
+        Solver_spectral(Problem*, Analyser*, config_spectral*);
         SDE_coeffs estimator(std::vector<double> x, double t);
 
     private:
+
+        config_spectral* conf;
+
         struct Hash_multi_index {
 
             // "Hashing" function for multi_indices. Associate a unique integer to

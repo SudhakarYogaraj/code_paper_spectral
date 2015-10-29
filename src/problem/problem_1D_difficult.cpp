@@ -92,42 +92,17 @@ void Problem::init_functions() {
     ns = 1;
     nf = 1;
 
-    dyv = vector<double (*) (vector<double> x,             vector<double> y)> (nf);
-    h = vector<double (*) (vector<double> x,             vector<double> y)> (nf);
-    a = vector<double (*) (vector<double> x,             vector<double> y)> (ns);
-    dxa = vector< vector<double (*) (vector<double> x,             vector<double> y)> >(ns, vector<double (*) (vector<double> x,             vector<double> y)> (ns));
-    dya = vector< vector<double (*) (vector<double> x,             vector<double> y)> >(ns, vector<double (*) (vector<double> x,             vector<double> y)> (nf));
-    phi = vector<double (*) (vector<double> x,             vector<double> y)> (ns);
-    dxphi = vector< vector<double (*) (vector<double> x,             vector<double> y)> >(ns, vector<double (*) (vector<double> x,             vector<double> y)> (ns));
-    drif = vector<double (*) (vector<double> x,             vector<double> y)> (2*nf);
-    diff = vector<double (*) (vector<double> x,             vector<double> y)> (2*nf);
-
     stardiv_h = stardiv_h_n;
-
     zrho = zrho_n;
-
     linearTerm = linearTerm_n;
-
     potential = potential_n;
-
-    dyv[0] = dyv0;
-
-    h[0] = h0;
-
-    a[0] = a0;
-
-    dxa[0][0] = dxa00;
-
-    dya[0][0] = dya00;
-
-    phi[0] = phi0;
-
-    dxphi[0][0] = dxphi00;
-
-    drif[0] = drif0;
-    drif[1] = drif1;
-
-    diff[0] = diff0;
-    diff[1] = diff1;
-
+    dyv = {dyv0};
+    h = {h0};
+    a = {a0};
+    dxa = {{dxa00}};
+    dya = {{dya00}};
+    phi = {phi0};
+    dxphi = {{dxphi00}};
+    drif = {drif0, drif1};
+    diff = {diff0, diff1};
 }

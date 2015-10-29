@@ -4,10 +4,6 @@
 // Structures
 #include "structures.hpp"
 
-// Problem and analyser
-#include "problem/Problem.hpp"
-#include "problem/Analyser.hpp"
-
 // Solvers
 #include "solvers/Solver_spectral.hpp"
 #include "solvers/Solver_exact.hpp"
@@ -50,8 +46,15 @@ namespace tests {
 
         for (unsigned int i = 0; i < degrees.size(); ++i) {
 
+            // Configuration for the spectral solver
+            config_spectral conf_spectral; {
+                conf_spectral.n_nodes = ni;
+                conf_spectral.degree = degrees[i];
+                conf_spectral.scaling = vector<double> (problem->nf, 0.5);
+            }
+
             // Create new solvers
-            Solver_spectral solver_spectral(problem, analyser, degrees[i], ni);
+            Solver_spectral solver_spectral(problem, analyser, &conf_spectral);
 
             // Measure time of execution
             tic(); SDE_coeffs c = solver_spectral.estimator(x, 0.); estimator_time[i] = toc();
@@ -69,6 +72,5 @@ namespace tests {
             // Summary of iteration
             cout << "> Degree" << degrees[i] << ". Time: " << estimator_time[i] << ". Error: " << estimator_error[i] << endl;
         }
-
     }
 }
