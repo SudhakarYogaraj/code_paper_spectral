@@ -6,42 +6,10 @@
 
 using namespace std;
 
-Solver_hmm::Solver_hmm(Problem *prob, double p, int M) {
+Solver_hmm::Solver_hmm(Problem *prob, config_hmm *config) {
 
+    conf = config;
     problem = prob;
-
-    // Precision parameter
-    this->p = p;
-
-    // Order of the micro solver
-    this->l = 1;
-
-    // Macro time-step
-    this->macro_dt = .01;
-
-    // Micro time-step
-
-    // If KS
-    // this->micro_dt = 0.05*pow(2.,-this->p/this->l);
-
-    // If Burgers
-    this->micro_dt = pow(2.,-this->p/this->l);
-
-    // Number of micro time-steps taken into account
-    // in the average to obtain the coefficients of the
-    // effective equation at each macro time-step.
-    this->n = (int) 10*pow(2,this->p*(2+1./this->l));
-
-    // Number of micro time-steps that are not taken
-    // into account in the averages
-    this->nt = 16;
-
-    // Number of micre time-steps used for the discretization
-    // of the integrals in time.
-    this->np = (int) pow(2.,this->p/this->l)*this->p;
-
-    // Number of replicas of the fast process
-    this->M = M;
 }
 
 SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
@@ -64,11 +32,11 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
 
     // Construction of the array that will contain the solution for the
     // fast process at each macro time-step.
-    vector< vector<double> > yAux(this->nt + this->n + this->np, \
+    vector< vector<double> > yAux(conf->nt + conf->n + conf->np, \
             vector<double>(2*problem->nf,0.));
 
     // Loop for ensemble average
-    for (int m = 0; m < this->M; m++) {
+    for (int m = 0; m < conf->M; m++) {
 
         // Initialization of the fast variables
         yAux[0] = yInit;
@@ -86,23 +54,23 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
 
             for (int k = 0; k < 2*problem->nf; k++)
             {
-                yAux[j+1][k] = yAux[j][k] + drift[k]*this->micro_dt +
-                    diffu[k]*sqrt(this->micro_dt)*distribution(generator);
+                yAux[j+1][k] = yAux[j][k] + drift[k]*conf->micro_dt +
+                    diffu[k]*sqrt(conf->micro_dt)*distribution(generator);
             }
         }
 
         // Construction of auxiliary vector for efficiency.
 
         // sumsAux1 =approx= dax
-        vector< vector< vector<double> > > sumsAux1(this->nt + this->n, \
+        vector< vector< vector<double> > > sumsAux1(conf->nt + conf->n, \
                 vector< vector<double> >(problem->ns,vector<double>(problem->ns,0.)));
 
         // sumsAux2 =approx= a
-        vector< vector<double> > sumsAux2(this->nt + this->n, \
+        vector< vector<double> > sumsAux2(conf->nt + conf->n, \
                 vector<double>(problem->ns, 0.));
 
         // First component of each vector
-        for (int index = 0; index <= this->np; index++) {
+        for (int index = 0; index <= conf->np; index++) {
             for (int k = 0; k < problem->ns; ++k) {
                 sumsAux2[0][k] = sumsAux2[0][k] + problem->a[k](xt, yAux[index]);
                 for (int l = 0; l < problem->ns; ++l) {
@@ -112,11 +80,11 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
         }
 
         // Recursion to obtain the other components
-        for (int index = 1; index < this->nt + this->n; index++) {
+        for (int index = 1; index < conf->nt + conf->n; index++) {
             for (int k = 0; k < problem->ns; ++k) {
-                sumsAux2[index][k] = sumsAux2[index-1][k] + problem->a[k](xt, yAux[index + this->np]) - problem->a[k](xt, yAux[index-1]);
+                sumsAux2[index][k] = sumsAux2[index-1][k] + problem->a[k](xt, yAux[index + conf->np]) - problem->a[k](xt, yAux[index-1]);
                 for (int l = 0; l < problem->ns; ++l) {
-                    sumsAux1[index][k][l] = sumsAux1[index-1][k][l] + problem->dxa[k][l](xt, yAux[index + this->np]) - problem->dxa[k][l](xt, yAux[index-1]);
+                    sumsAux1[index][k][l] = sumsAux1[index-1][k][l] + problem->dxa[k][l](xt, yAux[index + conf->np]) - problem->dxa[k][l](xt, yAux[index-1]);
                 }
             }
         }
@@ -126,7 +94,7 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
         vector<double> fim1(problem->ns, 0.);
         vector<double> fim2(problem->ns, 0.);
 
-        for (int j = this->nt; j < this->nt + this->n; j++) {
+        for (int j = conf->nt; j < conf->nt + conf->n; j++) {
 
             // evaluation of data
             vector< vector<double> > dya_j(problem->ns, vector<double> (problem->nf));
@@ -145,15 +113,15 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
             // second term: improved
             for (int i1 = 0; i1 < problem->ns; i1++) {
                 for (int i2 = 0; i2 < problem->ns; i2++) {
-                    fim2[i1] += this->micro_dt*problem->a[i2](xt, \
+                    fim2[i1] += conf->micro_dt*problem->a[i2](xt, \
                             yAux[j])*sumsAux1[j][i1][i2];
                 }
             }
         }
 
         for (int i1 = 0; i1 < problem->ns; i1++) {
-            fim1[i1] = fim1[i1]/this->n;
-            fim2[i1] = fim2[i1]/this->n;
+            fim1[i1] = fim1[i1]/conf->n;
+            fim2[i1] = fim2[i1]/conf->n;
             fim[i1] = fim1[i1] + fim2[i1];
         }
 
@@ -162,11 +130,11 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
 
         for (int i1 = 0; i1 < problem->ns; i1++) {
             for (int i2 = 0; i2 < problem->ns; i2++) {
-                for (int j = this->nt; j < this->nt + this->n; j++) {
-                    him[i1][i2] += this->micro_dt*problem->a[i1](xt, \
+                for (int j = conf->nt; j < conf->nt + conf->n; j++) {
+                    him[i1][i2] += conf->micro_dt*problem->a[i1](xt, \
                             yAux[j])*sumsAux2[j][i2];
                 }
-                him[i1][i2] = 2*him[i1][i2]/this->n;
+                him[i1][i2] = 2*him[i1][i2]/conf->n;
             }
         }
 
@@ -187,4 +155,37 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
 
     // return coefficients of the SDE
     return sde_coeffs;
+}
+
+config_hmm Solver_hmm::sensible_conf(int p, int M) {
+
+    config_hmm conf;
+
+    // Precision parameter
+    conf.p = p;
+
+    // Number of replicas of the fast process
+    conf.M = M;
+
+    // Order of micro-solver (has to be 1)
+    conf.l = 1;
+
+    // Micro time step
+    conf.micro_dt = pow(2.,-conf.p/conf.l);
+    // conf.micro_dt = 0.05*pow(2.,-conf.p/conf.l); // KS
+
+    // Number of micro time-steps taken into account
+    // in the average to obtain the coefficients of the
+    // effective equation at each macro time-step.
+    conf.n = (int) 10*pow(2,conf.p*(2+1./conf.l));
+
+    // Number of micro time-steps that are not taken
+    // into account in the averages
+    conf.nt = 16;
+
+    // Number of micre time-steps used for the discretization
+    // of the integrals in time.
+    conf.np = (int) pow(2.,conf.p/conf.l)*conf.p;
+
+    return conf;
 }
