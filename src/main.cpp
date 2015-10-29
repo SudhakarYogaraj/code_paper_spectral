@@ -12,9 +12,16 @@ int main(int argc, char* argv[]) {
     // Configuration for the HMM solver
     config_hmm conf_hmm = Solver_hmm::sensible_conf(4,1);
 
+    // Configuration for the spectral solver
+    config_spectral conf_spectral; {
+        conf_spectral.n_nodes = 100;
+        conf_spectral.degree = 15;
+        conf_spectral.scaling = vector<double> (problem.nf, 0.5);
+    }
+
     // Initialization of the default solvers
     Solver_exact solver_exact(&problem, &analyser);
-    Solver_spectral solver_spectral = Solver_spectral(&problem, &analyser, 15, 100);
+    Solver_spectral solver_spectral = Solver_spectral(&problem, &analyser, &conf_spectral);
     Solver_hmm solver_hmm = Solver_hmm(&problem, &conf_hmm);
 
     // Test of the solvers
