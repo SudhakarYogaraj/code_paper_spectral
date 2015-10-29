@@ -177,59 +177,17 @@ void Problem::init_functions() {
     ns = 2;
     nf = 2;
 
-    dyv = vector<double (*) (vector<double> x,             vector<double> y)> (nf);
-    h = vector<double (*) (vector<double> x,             vector<double> y)> (nf);
-    a = vector<double (*) (vector<double> x,             vector<double> y)> (ns);
-    dxa = vector< vector<double (*) (vector<double> x,             vector<double> y)> >(ns, vector<double (*) (vector<double> x,             vector<double> y)> (ns));
-    dya = vector< vector<double (*) (vector<double> x,             vector<double> y)> >(ns, vector<double (*) (vector<double> x,             vector<double> y)> (nf));
-    phi = vector<double (*) (vector<double> x,             vector<double> y)> (ns);
-    dxphi = vector< vector<double (*) (vector<double> x,             vector<double> y)> >(ns, vector<double (*) (vector<double> x,             vector<double> y)> (ns));
-    drif = vector<double (*) (vector<double> x,             vector<double> y)> (2*nf);
-    diff = vector<double (*) (vector<double> x,             vector<double> y)> (2*nf);
-
     stardiv_h = stardiv_h_n;
-
     zrho = zrho_n;
-
     linearTerm = linearTerm_n;
-
     potential = potential_n;
-
-    dyv[0] = dyv0;
-    dyv[1] = dyv1;
-
-    h[0] = h0;
-    h[1] = h1;
-
-    a[0] = a0;
-    a[1] = a1;
-
-    dxa[0][0] = dxa00;
-    dxa[0][1] = dxa01;
-    dxa[1][0] = dxa10;
-    dxa[1][1] = dxa11;
-
-    dya[0][0] = dya00;
-    dya[0][1] = dya01;
-    dya[1][0] = dya10;
-    dya[1][1] = dya11;
-
-    phi[0] = phi0;
-    phi[1] = phi1;
-
-    dxphi[0][0] = dxphi00;
-    dxphi[0][1] = dxphi01;
-    dxphi[1][0] = dxphi10;
-    dxphi[1][1] = dxphi11;
-
-    drif[0] = drif0;
-    drif[1] = drif1;
-    drif[2] = drif2;
-    drif[3] = drif3;
-
-    diff[0] = diff0;
-    diff[1] = diff1;
-    diff[2] = diff2;
-    diff[3] = diff3;
-
+    dyv = {dyv0, dyv1};
+    h = {h0, h1};
+    a = {a0, a1};
+    dxa = {{dxa00, dxa01}, {dxa10, dxa11}};
+    dya = {{dya00, dya01}, {dya10, dya11}};
+    phi = {phi0, phi1};
+    dxphi = {{dxphi00, dxphi01}, {dxphi10, dxphi11}};
+    drif = {drif0, drif1, drif2, drif3};
+    diff = {diff0, diff1, diff2, diff3};
 }

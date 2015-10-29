@@ -4,10 +4,6 @@
 // Structures
 #include "structures.hpp"
 
-// Problem and analyser
-#include "problem/Problem.hpp"
-#include "problem/Analyser.hpp"
-
 // Solvers
 #include "solvers/Solver_spectral.hpp"
 #include "solvers/Solver_exact.hpp"
@@ -69,6 +65,5 @@ namespace tests {
             // Summary of iteration
             cout << "> Degree" << degrees[i] << ". Time: " << estimator_time[i] << ". Error: " << estimator_error[i] << endl;
         }
-
     }
 }

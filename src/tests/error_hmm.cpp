@@ -48,7 +48,8 @@ namespace tests {
         for (unsigned int i = 0; i < p_values.size(); ++i) {
 
             // Create new solvers
-            Solver_hmm solver_hmm(problem, p_values[i], 1);
+            config_hmm config = Solver_hmm::sensible_conf(p_values[i], 1);
+            Solver_hmm solver_hmm(problem, &config);
 
             // Measure time of execution
             tic(); SDE_coeffs c = solver_hmm.estimator(x, 0.); estimator_time[i] = toc();

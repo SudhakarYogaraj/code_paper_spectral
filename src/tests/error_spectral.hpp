@@ -6,6 +6,9 @@
 #include <vector>
 #include <fstream>
 
+#include "problem/Problem.hpp"
+#include "problem/Analyser.hpp"
+
 namespace tests {
     void error_spectral(std::vector<double> x, Problem*, Analyser*);
 }
