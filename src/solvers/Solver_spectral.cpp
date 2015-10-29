@@ -438,12 +438,6 @@ Solver_spectral::Solver_spectral(Problem *p, Analyser *a, int degree, int nNodes
     this->hermiteCoeffs_nd = matnd;
 }
 
-/* void discrete solution { */
-/* } */
-
-/* void discrete_grid(vector< vector<double> > x) { */
-/* } */
-
 /*! Function to compute hermite coefficients
  *
  * This fills the matrix passed in argument with the hermite coefficients of
