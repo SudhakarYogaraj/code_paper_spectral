@@ -7,6 +7,7 @@
 # Compiler and flags
 CXX = clang++
 CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
+LIBS = -larmadillo
 
 # Problem file
 PRB = src/problem/problem_${ARG}.cpp
@@ -35,7 +36,7 @@ prebuild :
 
 # Rule fo the target executable
 $(TARGET) : $(OBJ_FILES)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(LIBS) $(CXXFLAGS) $^ -o $@
 
 # Include dependencies
 -include $(DEP_FILES)
