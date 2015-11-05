@@ -7,6 +7,8 @@
 #include <vector>
 #include <iostream>
 
+typedef std::vector<double> std_vec;
+
 class Problem {
     public:
 
@@ -20,7 +22,7 @@ class Problem {
         int ns;
 
         // Initial condition for the slow process
-        std::vector<double> x0;
+        std_vec x0;
 
         // FOR HMM
         // Drift and diffusion terms of the fast system, in its transformed
@@ -32,18 +34,19 @@ class Problem {
         void init();
         void init_functions();
 
-        double (*potential) (std::vector<double> x, std::vector<double> y);
-        double (*linearTerm) (std::vector<double> x, std::vector<double> y);
-        double (*zrho) (std::vector<double> x, std::vector<double> y);
-        double (*stardiv_h) (std::vector<double> x, std::vector<double> y);
-        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> dyv;
-        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> h;
-        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> a;
-        std::vector< std::vector<double (*) (std::vector<double> x, std::vector<double> y)> > dxa;
-        std::vector< std::vector<double (*) (std::vector<double> x, std::vector<double> y)> > dya;
-        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> phi;
-        std::vector< std::vector<double (*) (std::vector<double> x, std::vector<double> y)> > dxphi;
-        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> drif;
-        std::vector<double (*) (std::vector<double> x, std::vector<double> y)> diff;
+
+        double (*potential) (std_vec x, std_vec y);
+        double (*linearTerm) (std_vec x, std_vec y);
+        double (*zrho) (std_vec x, std_vec y);
+        double (*stardiv_h) (std_vec x, std_vec y);
+        std::vector<double (*) (std_vec x, std_vec y)> dyv;
+        std::vector<double (*) (std_vec x, std_vec y)> h;
+        std::vector<double (*) (std_vec x, std_vec y)> a;
+        std::vector< std::vector<double (*) (std_vec x, std_vec y)> > dxa;
+        std::vector< std::vector<double (*) (std_vec x, std_vec y)> > dya;
+        std::vector<double (*) (std_vec x, std_vec y)> phi;
+        std::vector< std::vector<double (*) (std_vec x, std_vec y)> > dxphi;
+        std::vector<double (*) (std_vec x, std_vec y)> drif;
+        std::vector<double (*) (std_vec x, std_vec y)> diff;
 };
 #endif
