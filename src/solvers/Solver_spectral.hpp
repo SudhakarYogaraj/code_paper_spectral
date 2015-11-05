@@ -6,6 +6,7 @@
 #include <functional>
 #include <vector>
 #include <unordered_map>
+#include <armadillo>
 
 #include "solvers/Solver.hpp"
 #include "toolbox/Gaussian_integrator.hpp"

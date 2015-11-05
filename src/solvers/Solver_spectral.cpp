@@ -9,6 +9,7 @@
 #include <iomanip>
 
 using namespace std;
+using namespace arma;
 
 SDE_coeffs Solver_spectral::estimator(vector<double> x, double t) {
 
@@ -149,9 +150,9 @@ SDE_coeffs Solver_spectral::estimator(vector<double> x, double t) {
 
     if(VERBOSE) cout << "* Solving linear system." << endl;
     for (int i = 0; i < ns; ++i) {
-        solution[i] = solve(mat, coefficients[i]);
+        solution[i] = solve(to_arma(mat), to_arma_vec(coefficients[i]));
         for (int j = 0; j < ns; ++j) {
-            solution_dx[i][j] = solve(mat, coefficients_dx[i][j]);
+            solution_dx[i][j] = solve(to_arma(mat), to_arma_vec(coefficients_dx[i][j]));
         }
     }
     if(VERBOSE) cout << "done!" << endl;
