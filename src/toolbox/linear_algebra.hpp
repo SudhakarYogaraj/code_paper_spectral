@@ -13,16 +13,18 @@ std::vector< std::vector<double> > symmetric(std::vector< std::vector<double> > 
 
 // Cholesky decomposition of a matrix.
 std::vector< std::vector<double> > cholesky(std::vector< std::vector<double> > A);
-void lu(std::vector< std::vector<double> > a, std::vector< std::vector<double> >& l, std::vector< std::vector<double> >& u);
 std::vector< std::vector<double> > transpose(std::vector< std::vector<double> > A);
 
 // Solution of linear system for SPD matrices.
-std::vector<double> solve(std::vector< std::vector<double> > A, std::vector<double> b);
+std::vector<double> solve(arma::mat, arma::vec);
 
 // Integer power.
 double ipow(double x, int e);
 
 arma::mat to_arma(const std::vector< std::vector<double> > &A);
 std::vector< std::vector<double> > to_std(const arma::mat &A);
+
+arma::vec to_arma_vec(const std::vector<double> &v);
+std::vector<double>  to_std_vec(const arma::vec &v);
 
 #endif
