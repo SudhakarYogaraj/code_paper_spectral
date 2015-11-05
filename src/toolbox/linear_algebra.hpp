@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <armadillo>
 
 // Symmetric part of a matrix.
 std::vector< std::vector<double> > symmetric(std::vector< std::vector<double> > A);
@@ -22,7 +23,6 @@ std::vector<double> solve(std::vector< std::vector<double> > A, std::vector<doub
 double ipow(double x, int e);
 
 // Eigenvalue decomposition
-void qr(std::vector< std::vector<double> > a, std::vector< std::vector<double> >& q, std::vector< std::vector<double> >& r);
 void eig_qr(std::vector< std::vector<double> > a, std::vector< std::vector<double> >& v, std::vector<double>& l);
 
 #endif
