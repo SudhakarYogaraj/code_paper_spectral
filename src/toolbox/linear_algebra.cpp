@@ -42,7 +42,6 @@ vector< vector<double> > cholesky(vector< vector<double> > A) {
                     cout << "Warning: matrix is not positive definite: (" << A[i][i] - sum << ")." << endl;
                     if (A[i][i] - sum < -1e-12) {
                         cout << A[0][0] << endl;
-                        exit(0);
                         cout << "Error occured during Cholesky factorization of line " << i << "." << endl;
                         /* exit(0); */
                     }
@@ -211,9 +210,8 @@ void eig_qr(vector< vector<double> > a, vector< vector<double> >& v, vector<doub
     for (int i = 0; i < a.size(); i++) {
         for (int j = 0; j < a.size(); j++) {
             double err = prod[i][j] - l[j]*u[i][j] ;
-            if( fabs (err) > 1e-10) {
+            if( fabs (err) > 1e-8) {
                 cout << "Error in eigen-decomposition (" << err << ")." << endl;
-                exit(0);
             }
         }
     }
