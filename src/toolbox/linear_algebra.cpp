@@ -13,18 +13,8 @@ double ipow(double x, int e) {
     return x*aux*aux;
 }
 
-// Symmetric part of a matrix
 vector< vector<double> > symmetric(vector< vector<double> > A) {
-    int n = A.size();
-    vector< vector <double> > result(n,vector<double>(n,0.));
-
-    for (int i = 0.; i < n; i++) {
-        for (int j = 0; j <= i; j++) {
-            result[i][j] = 0.5*(A[i][j] + A[j][i]);
-            result[j][i] = result[i][j];
-        }
-    }
-    return result;
+    return to_std(0.5 * to_arma(A).t() + 0.5 * to_arma(A));
 }
 
 mat to_arma(const vector< vector<double> > &A) {
@@ -43,38 +33,23 @@ vector< vector<double> > to_std(const mat &A) {
     return B;
 }
 
-// Cholesky factorization of a matrix
-vector< vector<double> > cholesky(vector< vector<double> > matrix) {
-    mat A = to_arma(matrix);
-    mat result = chol(A);
-    return to_std(result);
+arma::vec to_arma_vec(const std::vector<double> &v) {
+    return arma::conv_to< vec >::from(v);
 }
 
-vector< vector<double> > transpose(vector< vector<double> > A)
-{
-    int n = A.size();
-    vector< vector <double> > T(n,vector<double>(n,0.));
-
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            T[i][j] = A[j][i];
-        }
-    }
-    return T;
+std::vector<double> to_std_vec(const arma::vec &v) {
+    typedef std::vector<double> std_vec;
+    return arma::conv_to< std_vec >::from(v);
 }
 
-vector<double> solve(vector< vector<double> > A, vector<double> b) {
-    mat matrix = to_arma(A);
-    vec vector = conv_to< vec >::from(b);
-    vec solution = arma::solve(matrix, vector);
-    typedef std::vector<double> stdvec;
-    return arma::conv_to< stdvec >::from(solution);
+vector< vector<double> > cholesky(vector< vector<double> > A) {
+    return to_std(chol(to_arma(A)));
 }
 
-void eig_qr(vector< vector<double> > a, vector< vector<double> >& v, vector<double>& l) {
-    vec eigval;
-    mat eigvec;
-    eig_sym(eigval, eigvec, to_arma(a));
-    l = conv_to< vector<double> >::from(eigval);
-    v = to_std(eigvec);
+vector< vector<double> > transpose(vector< vector<double> > A) {
+    return to_std(to_arma(A).t());
+}
+
+vector<double> solve(mat A, vec b) {
+    return to_std_vec(arma::solve(A, b));
 }

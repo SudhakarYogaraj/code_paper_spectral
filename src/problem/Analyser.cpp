@@ -8,6 +8,7 @@
 #include "global.hpp"
 
 using namespace std;
+using namespace arma;
 
 // Consntructor of the analyser. The only parameter is the problem that
 // the analyser will follow.
@@ -92,7 +93,12 @@ void Analyser::update_stats(vector<double> x) {
         }
 
         // Eigenvalue decomposition
-        eig_qr(covariance, eig_vec_cov, eig_val_cov);
+        vec eigval;
+        mat eigvec;
+        eig_sym(eigval, eigvec, to_arma(covariance));
+        typedef vector<double> std_vec;
+        eig_val_cov = conv_to< std_vec >::from(eigval);
+        eig_vec_cov = to_std(eigvec);
 
         sqrt_cov = eig_vec_cov;
         for (int i = 0; i < nf; i++) {
@@ -108,7 +114,12 @@ void Analyser::update_stats(vector<double> x) {
         // Inverse of covariance matrix
         for (int i = 0; i < nf; ++i) {
             vector<double> rhs_tmp(nf, 0.); rhs_tmp[i] = 1.;
-            inv_cov[i] = solve(covariance, rhs_tmp);
+            // Solution
+            mat matrix = to_arma(covariance);
+            vec vector = conv_to< vec >::from(rhs_tmp);
+            vec solution = arma::solve(matrix, vector);
+            typedef std::vector<double> stdvec;
+            inv_cov[i] = arma::conv_to< stdvec >::from(solution);
         }
         inv_cov = transpose(inv_cov);
     }
