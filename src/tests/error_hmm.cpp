@@ -2,9 +2,6 @@
 #include "io/tictoc.hpp"
 #include "templates.hpp"
 
-// Structures
-#include "structures.hpp"
-
 // Problem and analyser
 #include "problem/Problem.hpp"
 #include "problem/Analyser.hpp"

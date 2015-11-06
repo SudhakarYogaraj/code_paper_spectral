@@ -1,9 +1,6 @@
 // Time tracking
 #include "io/tictoc.hpp"
 
-// Structures
-#include "structures.hpp"
-
 // Solvers
 #include "solvers/Solver_spectral.hpp"
 #include "solvers/Solver_exact.hpp"

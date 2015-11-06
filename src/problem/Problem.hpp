@@ -7,7 +7,7 @@
 #include <vector>
 #include <iostream>
 
-typedef std::vector<double> std_vec;
+#include "global.hpp"
 
 class Problem {
     public:
@@ -22,7 +22,7 @@ class Problem {
         int ns;
 
         // Initial condition for the slow process
-        std_vec x0;
+        std::vec x0;
 
         // FOR HMM
         // Drift and diffusion terms of the fast system, in its transformed
@@ -35,18 +35,18 @@ class Problem {
         void init_functions();
 
 
-        double (*potential) (std_vec x, std_vec y);
-        double (*linearTerm) (std_vec x, std_vec y);
-        double (*zrho) (std_vec x, std_vec y);
-        double (*stardiv_h) (std_vec x, std_vec y);
-        std::vector<double (*) (std_vec x, std_vec y)> dyv;
-        std::vector<double (*) (std_vec x, std_vec y)> h;
-        std::vector<double (*) (std_vec x, std_vec y)> a;
-        std::vector< std::vector<double (*) (std_vec x, std_vec y)> > dxa;
-        std::vector< std::vector<double (*) (std_vec x, std_vec y)> > dya;
-        std::vector<double (*) (std_vec x, std_vec y)> phi;
-        std::vector< std::vector<double (*) (std_vec x, std_vec y)> > dxphi;
-        std::vector<double (*) (std_vec x, std_vec y)> drif;
-        std::vector<double (*) (std_vec x, std_vec y)> diff;
+        double (*potential) (std::vec x, std::vec y);
+        double (*linearTerm) (std::vec x, std::vec y);
+        double (*zrho) (std::vec x, std::vec y);
+        double (*stardiv_h) (std::vec x, std::vec y);
+        std::vector<double (*) (std::vec x, std::vec y)> dyv;
+        std::vector<double (*) (std::vec x, std::vec y)> h;
+        std::vector<double (*) (std::vec x, std::vec y)> a;
+        std::vector< std::vector<double (*) (std::vec x, std::vec y)> > dxa;
+        std::vector< std::vector<double (*) (std::vec x, std::vec y)> > dya;
+        std::vector<double (*) (std::vec x, std::vec y)> phi;
+        std::vector< std::vector<double (*) (std::vec x, std::vec y)> > dxphi;
+        std::vector<double (*) (std::vec x, std::vec y)> drif;
+        std::vector<double (*) (std::vec x, std::vec y)> diff;
 };
 #endif

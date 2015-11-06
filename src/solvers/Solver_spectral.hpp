@@ -8,11 +8,12 @@
 #include <unordered_map>
 #include <armadillo>
 
+#include "global.hpp"
 #include "solvers/Solver.hpp"
 #include "toolbox/Gaussian_integrator.hpp"
 #include "problem/Problem.hpp"
 #include "problem/Analyser.hpp"
-#include "structures.hpp"
+#include "global.hpp"
 
 struct config_spectral {
     int n_nodes;
