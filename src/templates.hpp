@@ -1,7 +1,10 @@
 #ifndef TEMPLATES_H
 #define TEMPLATES_H
+
 #include <vector>
 #include <cmath>
+
+#include "global.hpp"
 
 template<class type> std::vector<type> operator-(const std::vector<type>& v1, const std::vector<type>& v2) {
     std::vector<type> result(v1.size());
@@ -36,8 +39,8 @@ template<class type> std::vector<type> operator*(const std::vector<type>& vec, c
     return result;
 }
 
-std::vector< std::vector<double> > operator*(const std::vector< std::vector<double> >& mat1, const std::vector< std::vector<double> >& mat2);
-std::vector<double> operator*(const std::vector< std::vector<double> >& mat, const std::vector<double>& vec);
-double operator*(const std::vector<double>& vec1, const std::vector<double>& vec2);
+std::mat operator*(const std::mat& mat1, const std::mat& mat2);
+std::vec operator*(const std::mat& mat, const std::vec& vec);
+double operator*(const std::vec& vec1, const std::vec& vec2);
 
 #endif

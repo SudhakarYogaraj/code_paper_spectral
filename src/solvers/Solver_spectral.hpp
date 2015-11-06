@@ -13,19 +13,18 @@
 #include "toolbox/Gaussian_integrator.hpp"
 #include "problem/Problem.hpp"
 #include "problem/Analyser.hpp"
-#include "global.hpp"
 
 struct config_spectral {
     int n_nodes;
     int degree;
-    std::vector<double> scaling;
+    std::vec scaling;
 };
 
 class Solver_spectral : public Solver {
     public:
 
         Solver_spectral(Problem*, Analyser*, config_spectral*);
-        SDE_coeffs estimator(std::vector<double> x, double t);
+        SDE_coeffs estimator(std::vec x, double t);
 
     private:
 
@@ -58,26 +57,26 @@ class Solver_spectral : public Solver {
 
         // Matrix containing the coefficients of uni- and multi-
         // dimensional Hermite polynomials in terms of monomials.
-        std::vector< std::vector<double> > hermiteCoeffs_1d;
-        std::vector< std::vector<double> > hermiteCoeffs_nd;
+        std::mat hermiteCoeffs_1d;
+        std::mat hermiteCoeffs_nd;
 
-        double gaussian_linear_term(std::vector<double> z);
-        std::vector<double> map_to_real(std::vector<double> z);
+        double gaussian_linear_term(std::vec z);
+        std::vec map_to_real(std::vec z);
 
         // Calculate coefficients of Hermite polynomials.
-        void hermite_coefficients (int degree, std::vector< std::vector<double> >& matrix);
+        void hermite_coefficients (int degree, std::mat& matrix);
 
         // Update variance and bias of gaussian
-        void update_stats(std::vector<double> var_scaling);
+        void update_stats(std::vec var_scaling);
 
-        std::vector<double> discretize(std::vector<double> x, Gaussian_integrator& gauss, double(*f)(std::vector<double>,std::vector<double>));
-        std::vector<double> project(int nf, int degree, Gaussian_integrator& gauss, std::vector<double> f_discretized, int rescale);
+        std::vec discretize(std::vec x, Gaussian_integrator& gauss, double(*f)(std::vec,std::vec));
+        std::vec project(int nf, int degree, Gaussian_integrator& gauss, std::vec f_discretized, int rescale);
 
         // Statistics associated with the hermite functions
-        std::vector<double> bias;
-        std::vector<double> eig_val_cov;
-        std::vector< std::vector<double> > eig_vec_cov;
-        std::vector< std::vector<double> > sqrt_cov;
+        std::vec bias;
+        std::vec eig_val_cov;
+        std::mat eig_vec_cov;
+        std::mat sqrt_cov;
         double det_cov;
 
         Problem *problem;
