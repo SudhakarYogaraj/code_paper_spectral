@@ -8,7 +8,6 @@
 #include "global.hpp"
 
 using namespace std;
-using namespace arma;
 
 // Consntructor of the analyser. The only parameter is the problem that
 // the analyser will follow.
