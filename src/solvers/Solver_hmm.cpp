@@ -1,4 +1,4 @@
-#include "structures.hpp"
+#include "global.hpp"
 #include "toolbox/linear_algebra.hpp"
 #include "templates.hpp"
 #include "problem/Problem.hpp"
@@ -12,17 +12,17 @@ Solver_hmm::Solver_hmm(Problem *prob, config_hmm *config) {
     problem = prob;
 }
 
-SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
+SDE_coeffs Solver_hmm::estimator(vec xt, double t) {
 
     // Vectors to store the coefficients of the sde
     SDE_coeffs sde_coeffs;
 
     // Initial value for the fast process at each macro time-step
-    vector<double> yInit(2*problem->nf, 0.);
+    vec yInit(2*problem->nf, 0.);
 
     // Initialization of the coefficients of the SDE
-    sde_coeffs.drif = vector<double>(problem->ns, 0.);
-    sde_coeffs.diff = vector< vector<double> >(problem->ns, vector<double>(problem->ns, 0.));
+    sde_coeffs.drif = vec(problem->ns, 0.);
+    sde_coeffs.diff = mat(problem->ns, vec(problem->ns, 0.));
 
     default_random_engine generator;
     generator.seed(time(NULL));
@@ -32,8 +32,7 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
 
     // Construction of the array that will contain the solution for the
     // fast process at each macro time-step.
-    vector< vector<double> > yAux(conf->nt + conf->n + conf->np, \
-            vector<double>(2*problem->nf,0.));
+    mat yAux(conf->nt + conf->n + conf->np, vec(2*problem->nf,0.));
 
     // Loop for ensemble average
     for (int m = 0; m < conf->M; m++) {
@@ -41,8 +40,8 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
         // Initialization of the fast variables
         yAux[0] = yInit;
 
-        vector<double> drift(2*problem->nf);
-        vector<double> diffu(2*problem->nf);
+        vec drift(2*problem->nf);
+        vec diffu(2*problem->nf);
 
         // Euler-Maruyama method for the fast processes:
         for (unsigned int j = 0; j < yAux.size() - 1; j++) {
@@ -62,12 +61,10 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
         // Construction of auxiliary vector for efficiency.
 
         // sumsAux1 =approx= dax
-        vector< vector< vector<double> > > sumsAux1(conf->nt + conf->n, \
-                vector< vector<double> >(problem->ns,vector<double>(problem->ns,0.)));
+        vector< mat > sumsAux1(conf->nt + conf->n, mat(problem->ns,vec(problem->ns,0.)));
 
         // sumsAux2 =approx= a
-        vector< vector<double> > sumsAux2(conf->nt + conf->n, \
-                vector<double>(problem->ns, 0.));
+        mat sumsAux2(conf->nt + conf->n, vec(problem->ns, 0.));
 
         // First component of each vector
         for (int index = 0; index <= conf->np; index++) {
@@ -90,14 +87,14 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
         }
 
         // Drift term by the HMM
-        vector<double> fim(problem->ns, 0.);
-        vector<double> fim1(problem->ns, 0.);
-        vector<double> fim2(problem->ns, 0.);
+        vec fim(problem->ns, 0.);
+        vec fim1(problem->ns, 0.);
+        vec fim2(problem->ns, 0.);
 
         for (int j = conf->nt; j < conf->nt + conf->n; j++) {
 
             // evaluation of data
-            vector< vector<double> > dya_j(problem->ns, vector<double> (problem->nf));
+            mat dya_j(problem->ns, vec (problem->nf));
             for (int k = 0; k < problem->ns; ++k) {
                 for (int l = 0; l < problem->nf; ++l) {
                     dya_j[k][l] = problem->dya[k][l](xt, yAux[j]);
@@ -126,7 +123,7 @@ SDE_coeffs Solver_hmm::estimator(vector<double> xt, double t) {
         }
 
         // Diffusion term by the HMM
-        vector< vector<double> > him(problem->ns, vector<double>(problem->ns,0.));
+        mat him(problem->ns, vec(problem->ns,0.));
 
         for (int i1 = 0; i1 < problem->ns; i1++) {
             for (int i2 = 0; i2 < problem->ns; i2++) {

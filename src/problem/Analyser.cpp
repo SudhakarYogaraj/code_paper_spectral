@@ -21,13 +21,13 @@ Analyser::Analyser(Problem *p) {
     normalization = 1.;
     det_sqrt_cov = 1.;
 
-    bias = vector<double>(problem->nf, 0.);
-    eig_val_cov = vector<double>(problem->nf, 1.);
+    bias = std::vec(problem->nf, 0.);
+    eig_val_cov = std::vec(problem->nf, 1.);
 
-    covariance = vector< vector<double> > (nf, vector<double> (nf,0.));
-    inv_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
-    sqrt_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
-    eig_vec_cov = vector< vector<double> > (nf, vector<double> (nf,0.));
+    covariance = std::mat(nf, std::vec (nf,0.));
+    inv_cov = std::mat(nf, std::vec (nf,0.));
+    sqrt_cov = std::mat(nf, std::vec (nf,0.));
+    eig_vec_cov = std::mat(nf, std::vec (nf,0.));
 
     for (int i = 0; i < problem->nf; ++i) {
         covariance[i][i] = 1.;
@@ -43,8 +43,8 @@ Analyser::Analyser(Problem *p) {
 /* } */
 
 // Implementation of a rescaling used to approximate the invariant measure.
-vector<double> Analyser::rescale(vector<double> y) {
-    vector<double> result(y.size(), 0.);
+std::vec Analyser::rescale(std::vec y) {
+    std::vec result(y.size(), 0.);
     for (int i = 0; i < y.size(); ++i) {
         for (int j = 0; j < y.size(); ++j) {
             result[i] += sqrt_cov[i][j] * y[j];
@@ -55,7 +55,7 @@ vector<double> Analyser::rescale(vector<double> y) {
 
 // Update statistics of the invariant measure at x.
 // The outer loop serves to obtain a more accurate result.
-void Analyser::update_stats(vector<double> x) {
+void Analyser::update_stats(std::vec x) {
 
     Gaussian_integrator gauss_plus = Gaussian_integrator(100, nf);
     Gaussian_integrator gauss = Gaussian_integrator(30, nf);
@@ -64,17 +64,17 @@ void Analyser::update_stats(vector<double> x) {
     for (int n = 0; n < n_iterations; ++n) {
 
         // Normalization constant
-        auto lambda = [&] (vector<double> z) -> double {
-            vector<double> y = rescale(z);
+        auto lambda = [&] (std::vec z) -> double {
+            std::vec y = rescale(z);
             return det_sqrt_cov * problem->zrho(x,y)/gaussian(z);
         };
         normalization = gauss_plus.quadnd(lambda);
 
         // Calculation of the bias of 'rho'
-        bias = vector<double> (nf, 0.);
+        bias = std::vec (nf, 0.);
         for (i = 0; i < nf; ++i) {
-            auto lambda = [&] (vector<double> z) -> double {
-                vector<double> y = rescale(z);
+            auto lambda = [&] (std::vec z) -> double {
+                std::vec y = rescale(z);
                 return det_sqrt_cov * y[i] * (rho(x,y)/gaussian(z));
             };
             bias[i] = gauss.quadnd(lambda);
@@ -83,8 +83,8 @@ void Analyser::update_stats(vector<double> x) {
         // Calculation of the covariance matrix
         for (i = 0; i < nf; ++i) {
             for (int j = 0; j < nf; ++j) {
-                auto lambda = [&] (vector<double> z) -> double {
-                    vector<double> y = rescale(z);
+                auto lambda = [&] (std::vec z) -> double {
+                    std::vec y = rescale(z);
                     return det_sqrt_cov * (y[i] - bias[i]) * (y[j] - bias[j]) * (rho(x,y)/gaussian(z));
                 };
                 covariance[i][j] = gauss.quadnd(lambda);
@@ -92,7 +92,11 @@ void Analyser::update_stats(vector<double> x) {
         }
 
         // Eigenvalue decomposition
-        eig_qr(covariance, eig_vec_cov, eig_val_cov);
+        arma::vec eigval;
+        arma::mat eigvec;
+        eig_sym(eigval, eigvec, to_arma(covariance));
+        eig_val_cov = to_std_vec(eigval);
+        eig_vec_cov = to_std(eigvec);
 
         sqrt_cov = eig_vec_cov;
         for (int i = 0; i < nf; i++) {
@@ -106,11 +110,7 @@ void Analyser::update_stats(vector<double> x) {
             det_sqrt_cov *= sqrt(eig_val_cov[i]);
 
         // Inverse of covariance matrix
-        for (int i = 0; i < nf; ++i) {
-            vector<double> rhs_tmp(nf, 0.); rhs_tmp[i] = 1.;
-            inv_cov[i] = solve(covariance, rhs_tmp);
-        }
-        inv_cov = transpose(inv_cov);
+        inv_cov = to_std(to_arma(covariance).i());
     }
 
     if(DEBUG) {
@@ -128,6 +128,6 @@ void Analyser::update_stats(vector<double> x) {
     }
 }
 
-double Analyser::rho(vector<double> x, vector<double> y) {
+double Analyser::rho(std::vec x, std::vec y) {
     return problem->zrho(x,y)/normalization;
 }

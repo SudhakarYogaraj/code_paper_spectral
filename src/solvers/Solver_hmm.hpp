@@ -8,6 +8,7 @@
 #include "solvers/Solver.hpp"
 
 struct config_hmm {
+
     // Macro and micro time-steps
     double macro_dt;
     double micro_dt;

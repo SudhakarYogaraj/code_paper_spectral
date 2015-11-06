@@ -1,11 +1,10 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "structures.hpp"
+#include "global.hpp"
 #include "io/tictoc.hpp"
 #include "templates.hpp"
 #include "io/io.hpp"
-#include "global.hpp"
 #include "toolbox/combinatorics.hpp"
 
 // Problem and analyser
