@@ -1,4 +1,3 @@
-#include "structures.hpp"
 #include "problem/Problem.hpp"
 #include "toolbox/Gaussian_integrator.hpp"
 #include "solvers/Solver_exact.hpp"

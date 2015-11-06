@@ -5,24 +5,27 @@
 
 #include <iostream>
 #include <cmath>
-#include <vector>
+#include <armadillo>
+
+#include "global.hpp"
 
 // Symmetric part of a matrix.
-std::vector< std::vector<double> > symmetric(std::vector< std::vector<double> > A);
+std::mat symmetric(std::mat A);
 
 // Cholesky decomposition of a matrix.
-std::vector< std::vector<double> > cholesky(std::vector< std::vector<double> > A);
-void lu(std::vector< std::vector<double> > a, std::vector< std::vector<double> >& l, std::vector< std::vector<double> >& u);
-std::vector< std::vector<double> > transpose(std::vector< std::vector<double> > A);
+std::mat cholesky(std::mat A);
+std::mat transpose(std::mat A);
 
 // Solution of linear system for SPD matrices.
-std::vector<double> solve(std::vector< std::vector<double> > A, std::vector<double> b);
+std::vector<double> solve(std::mat, std::vec);
 
 // Integer power.
 double ipow(double x, int e);
 
-// Eigenvalue decomposition
-void qr(std::vector< std::vector<double> > a, std::vector< std::vector<double> >& q, std::vector< std::vector<double> >& r);
-void eig_qr(std::vector< std::vector<double> > a, std::vector< std::vector<double> >& v, std::vector<double>& l);
+arma::mat to_arma(const std::mat &A);
+std::mat to_std(const arma::mat &A);
+
+arma::vec to_arma_vec(const std::vec &v);
+std::vec to_std_vec(const arma::vec &v);
 
 #endif
