@@ -6,7 +6,6 @@
 #include <math.h>
 #include <vector>
 #include <iostream>
-#include <armadillo>
 
 #include "problem/Problem.hpp"
 

@@ -6,7 +6,6 @@
 #define DEBUG 0
 
 #include<vector>
-#include<armadillo>
 
 // Definition of types
 namespace std {
