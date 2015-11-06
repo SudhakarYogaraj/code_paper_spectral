@@ -3,8 +3,9 @@
 
 #include <iostream>
 #include <iomanip>
-#include <vector>
 #include <fstream>
+
+#include "global.hpp"
 
 namespace tests {
     void error_hmm(std::vector<double> x, Problem*, Analyser*);

@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 
+#include "global.hpp"
 #include "problem/Problem.hpp"
 #include "problem/Analyser.hpp"
 
