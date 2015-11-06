@@ -1,6 +1,3 @@
-# Paper on the solution of multiscale SDEs/SPDEs
-This repository contains the codes of the 
+This repository contains the code used for the numerical experiments presented in our [paper](https://github.com/uvaes/paper).
 
-# Structure of the repository
-
-## Work in progress
+Our implementation uses the C++ linear algebra library [Armadillo](http://arma.sourceforge.net/), which is packaged for most of the popular linux distributions.
