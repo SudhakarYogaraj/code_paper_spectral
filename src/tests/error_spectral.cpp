@@ -19,7 +19,7 @@ namespace tests {
         int degree_max = 30;
 
         // Number of integration points
-        int ni = 100;
+        int ni = 16;
 
         vector<int> degrees(degree_max - degree_min + 1);
         for (int i = 0; i < degrees.size(); ++i)
