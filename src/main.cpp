@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
     // Configuration for the spectral solver
     config_spectral conf_spectral; {
-        conf_spectral.n_nodes = 100;
+        conf_spectral.n_nodes = 0;
         conf_spectral.degree = 15;
         conf_spectral.scaling = vector<double> (problem.nf, 0.5);
     }
