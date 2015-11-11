@@ -19,8 +19,11 @@ ns = 2
 nf = 2
 # end
 
-# Coefficient of the BM
+# user input : diffusion
 s = sympy.sqrt(2)
+# end
+
+# Coefficient appearing in generator
 S = s * s
 
 # Creation of symbolic Variables
