@@ -67,7 +67,7 @@ class Solver_spectral : public Solver {
         void hermite_coefficients (int degree, std::mat& matrix);
 
         // Update variance and bias of gaussian
-        void update_stats(std::vec var_scaling);
+        void update_stats();
 
         std::vec discretize(std::vec x, Gaussian_integrator& gauss, double(*f)(std::vec,std::vec));
         std::vec project(int nf, int degree, Gaussian_integrator& gauss, std::vec f_discretized, int rescale);
