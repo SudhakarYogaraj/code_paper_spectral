@@ -1,6 +1,6 @@
 ## Addition to the default .gitignore
+problem_*.cpp
 python/outputs
-Problem.cpp
 build_problem.py
 *.exec
 dep
