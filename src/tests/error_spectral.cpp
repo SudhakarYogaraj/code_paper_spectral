@@ -18,9 +18,6 @@ namespace tests {
         int degree_min = 2;
         int degree_max = 30;
 
-        // Number of integration points
-        int ni = 16;
-
         vector<int> degrees(degree_max - degree_min + 1);
         for (int i = 0; i < degrees.size(); ++i)
             degrees[i] = i + degree_min;
@@ -45,7 +42,7 @@ namespace tests {
 
             // Configuration for the spectral solver
             config_spectral conf_spectral; {
-                conf_spectral.n_nodes = ni;
+                conf_spectral.n_nodes = 100;
                 conf_spectral.degree = degrees[i];
                 conf_spectral.scaling = vector<double> (problem->nf, 0.5);
             }

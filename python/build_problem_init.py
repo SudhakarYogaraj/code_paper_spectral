@@ -19,8 +19,11 @@ ns = 2
 nf = 2
 # end
 
-# Coefficient of the BM
+# user input : diffusion
 s = sympy.sqrt(2)
+# end
+
+# Coefficient appearing in generator
 S = s * s
 
 # Creation of symbolic Variables
@@ -110,10 +113,10 @@ y = [sympy.Symbol('y%d' % i) for i in range(2*nf)]
 
 # Construction of the drift
 for i in range(nf):
-    drif[i] = -vy[i]
+    drif[i] = -S*vy[i]
     drif[nf+i] = h[i]
     for j in range(nf):
-        drif[nf+i] -= vyy[i][j] * y[j+nf]
+        drif[nf+i] -= S*vyy[i][j] * y[j+nf]
 
 for i in range(nf):
     diff[i] = s
@@ -182,7 +185,8 @@ output.write("void Problem::init_functions() {\n\n")
 
 # Declaration of the number of variables
 output.write("    ns = {};\n".format(ns))
-output.write("    nf = {};\n\n".format(nf))
+output.write("    nf = {};\n".format(nf))
+output.write("    s = {};\n\n".format(s))
 
 # Allocation of function pointers
 allocate_function_pointer("stardiv_h")
