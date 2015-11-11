@@ -24,11 +24,8 @@ SDE_coeffs Solver_spectral::estimator(vec x, double t) {
     int ns = problem->ns;
     int nb = bin(conf->degree + nf, nf);
 
-    // User defined rescaling of the eigenvalues
-    vec var_scaling = conf->scaling;
-
     // Update statistics of Gaussian
-    this->update_stats(var_scaling);
+    this->update_stats();
 
     // Discretization of the functions of the problem
     vec h_discretized;
@@ -129,11 +126,9 @@ SDE_coeffs Solver_spectral::estimator(vec x, double t) {
     for (int i = 0; i < nb; ++i) {
         if(VERBOSE) progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(2*nb+1)) ));
         vector<int> m1 = ind2mult[i];
-        /* FIXME: sigmas? (urbain, Thu 28 May 2015 18:15:19 BST) */
-        /* FIXME: Normalization (urbain, Thu 28 May 2015 20:55:46 BST) */
 
         for (int j = 0; j < nf; ++j) {
-            matrix[i][i] += m1[j]/this->eig_val_cov[j];
+            matrix[i][i] += m1[j] / this->eig_val_cov[j] * (problem->s * problem->s) / 2;
         }
         for (int j = 0; j <= i; ++j) {
             for (int k = 0; k < nb; ++k) {
@@ -201,7 +196,7 @@ double Solver_spectral::gaussian_linear_term(vec z) {
     double grad2 = 0.;
 
     // Square of the coefficient of the noise.
-    double S = 2.;
+    double S = problem->s*problem->s;
 
     // Computation of the term
     for (int k = 0; k < this->nf; ++k) {
@@ -243,7 +238,10 @@ vec Solver_spectral::map_to_real(vec z) {
  * functions are calculated. In simple words, the Hermite functions are
  * concentrated where the density of the Gaussian is non-zero.
  */
-void Solver_spectral::update_stats(vec var_scaling) {
+void Solver_spectral::update_stats() {
+
+    // Scaling for covariant matrix
+    vec var_scaling = conf->scaling;
 
     // Update of bias and covariance
     this->bias = analyser->bias;

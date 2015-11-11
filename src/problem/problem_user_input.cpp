@@ -12,6 +12,7 @@ void Problem::init() {
     this->x0 = vector<double> (ns, 1.2);
     this->t_end = 1.;
 }
+
 double stardiv_h_n(vector<double> x, vector<double> y){
     double result = ((-y[0] - y[1] - 4*pow(y[0] - y[1], 3) + pow(y[0] + y[1], 3))*cos(y[0] + y[1]) + (-y[0] - y[1] + 4*pow(y[0] - y[1], 3) + pow(y[0] + y[1], 3))*cos(y[0])*cos(y[1]) + sin(y[0])*cos(y[1]) + sin(y[0] + y[1]))*cos(x[0]);
     return result; 
@@ -176,6 +177,7 @@ void Problem::init_functions() {
 
     ns = 2;
     nf = 2;
+    s = sqrt(2);
 
     stardiv_h = stardiv_h_n;
     zrho = zrho_n;

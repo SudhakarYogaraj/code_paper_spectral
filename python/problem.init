@@ -12,3 +12,4 @@ void Problem::init() {
     this->x0 = vector<double> (ns, 1.2);
     this->t_end = 1.;
 }
+
