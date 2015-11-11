@@ -12,85 +12,87 @@ void Problem::init() {
     this->x0 = vector<double> (ns, 1.2);
     this->t_end = 1.;
 }
+
 double stardiv_h_n(vector<double> x, vector<double> y){
     double result = (1.0*y[0]*(pow(y[0], 2) - 1)*cos(0.5*y[0]) + 0.5*sin(0.5*y[0]))*cos(x[0]);
-    return result;
+    return result; 
 }
 
 double potential_n(vector<double> x, vector<double> y){
     double result = 0.25*pow(y[0], 4) - 0.5*pow(y[0], 2);
-    return result;
+    return result; 
 }
 
 double linearTerm_n(vector<double> x, vector<double> y){
     double result = -0.25*pow(y[0], 2)*pow(pow(y[0], 2) - 1, 2) + 1.5*pow(y[0], 2) - 0.5;
-    return result;
+    return result; 
 }
 
 double zrho_n(vector<double> x, vector<double> y){
     double result = exp(-0.25*pow(y[0], 4) + 0.5*pow(y[0], 2));
-    return result;
+    return result; 
 }
 
 double phi0(vector<double> x, vector<double> y){
     double result = x[0]*cos(0.5*y[0]) + sin((1.0L/2.0L)*x[0]*y[0]);
-    return result;
+    return result; 
 }
 
 double a0(vector<double> x, vector<double> y){
     double result = x[0]*(0.25*x[0]*sin((1.0L/2.0L)*x[0]*y[0]) - 0.5*pow(y[0], 3)*sin(0.5*y[0]) + 0.5*pow(y[0], 3)*cos((1.0L/2.0L)*x[0]*y[0]) + 0.5*y[0]*sin(0.5*y[0]) - 0.5*y[0]*cos((1.0L/2.0L)*x[0]*y[0]) + 0.25*cos(0.5*y[0]));
-    return result;
+    return result; 
 }
 
 double dxphi00(vector<double> x, vector<double> y){
     double result = (1.0L/2.0L)*y[0]*cos((1.0L/2.0L)*x[0]*y[0]) + cos(0.5*y[0]);
-    return result;
+    return result; 
 }
 
 double dxa00(vector<double> x, vector<double> y){
     double result = x[0]*(0.125*x[0]*y[0]*cos((1.0L/2.0L)*x[0]*y[0]) - 0.25*pow(y[0], 4)*sin((1.0L/2.0L)*x[0]*y[0]) + 0.25*pow(y[0], 2)*sin((1.0L/2.0L)*x[0]*y[0]) + 0.25*sin((1.0L/2.0L)*x[0]*y[0])) + 0.25*x[0]*sin((1.0L/2.0L)*x[0]*y[0]) - 0.5*pow(y[0], 3)*sin(0.5*y[0]) + 0.5*pow(y[0], 3)*cos((1.0L/2.0L)*x[0]*y[0]) + 0.5*y[0]*sin(0.5*y[0]) - 0.5*y[0]*cos((1.0L/2.0L)*x[0]*y[0]) + 0.25*cos(0.5*y[0]);
-    return result;
+    return result; 
 }
 
 double dya00(vector<double> x, vector<double> y){
     double result = x[0]*(0.125*pow(x[0], 2)*cos((1.0L/2.0L)*x[0]*y[0]) - 0.25*x[0]*pow(y[0], 3)*sin((1.0L/2.0L)*x[0]*y[0]) + 0.25*x[0]*y[0]*sin((1.0L/2.0L)*x[0]*y[0]) - 0.25*pow(y[0], 3)*cos(0.5*y[0]) - 1.5*pow(y[0], 2)*sin(0.5*y[0]) + 1.5*pow(y[0], 2)*cos((1.0L/2.0L)*x[0]*y[0]) + 0.25*y[0]*cos(0.5*y[0]) + 0.375*sin(0.5*y[0]) - 0.5*cos((1.0L/2.0L)*x[0]*y[0]));
-    return result;
+    return result; 
 }
 
 double dyv0(vector<double> x, vector<double> y){
     double result = 1.0*pow(y[0], 3) - 1.0*y[0];
-    return result;
+    return result; 
 }
 
 double h0(vector<double> x, vector<double> y){
     double result = cos(x[0])*cos(0.5*y[0]);
-    return result;
+    return result; 
 }
 
 double drif0(vector<double> x, vector<double> y){
     double result = -1.0*pow(y[0], 3) + 1.0*y[0];
-    return result;
+    return result; 
 }
 
 double diff0(vector<double> x, vector<double> y){
     double result = sqrt(2);
-    return result;
+    return result; 
 }
 
 double drif1(vector<double> x, vector<double> y){
     double result = -y[1]*(3.0*pow(y[0], 2) - 1.0) + cos(x[0])*cos(0.5*y[0]);
-    return result;
+    return result; 
 }
 
 double diff1(vector<double> x, vector<double> y){
     double result = sqrt(2);
-    return result;
+    return result; 
 }
 
 void Problem::init_functions() {
 
     ns = 1;
     nf = 1;
+    s = sqrt(2);
 
     stardiv_h = stardiv_h_n;
     zrho = zrho_n;
