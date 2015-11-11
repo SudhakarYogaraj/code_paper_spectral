@@ -113,10 +113,10 @@ y = [sympy.Symbol('y%d' % i) for i in range(2*nf)]
 
 # Construction of the drift
 for i in range(nf):
-    drif[i] = -vy[i]
+    drif[i] = -S*vy[i]
     drif[nf+i] = h[i]
     for j in range(nf):
-        drif[nf+i] -= vyy[i][j] * y[j+nf]
+        drif[nf+i] -= S*vyy[i][j] * y[j+nf]
 
 for i in range(nf):
     diff[i] = s
