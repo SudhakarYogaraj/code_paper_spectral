@@ -21,7 +21,7 @@ nf = 2
 # end
 
 # user input : diffusion
-s = sympy.sqrt(2)
+s = sympy.Symbol('4')
 # end
 
 # user input : solution
