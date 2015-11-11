@@ -185,7 +185,8 @@ output.write("void Problem::init_functions() {\n\n")
 
 # Declaration of the number of variables
 output.write("    ns = {};\n".format(ns))
-output.write("    nf = {};\n\n".format(nf))
+output.write("    nf = {};\n".format(nf))
+output.write("    s = {};\n\n".format(s))
 
 # Allocation of function pointers
 allocate_function_pointer("stardiv_h")

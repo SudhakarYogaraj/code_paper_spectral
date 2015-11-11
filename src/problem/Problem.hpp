@@ -21,6 +21,9 @@ class Problem {
         // Number of slow processes
         int ns;
 
+        // Diffusion coefficient
+        double s;
+
         // Initial condition for the slow process
         std::vec x0;
 
