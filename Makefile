@@ -45,7 +45,7 @@ $(TARGET) : $(OBJ_FILES)
 obj/%.o : src/%.cpp
 	$(MAKEDEPEND)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-	@sed -i "s#^\([^.]*\.o\)#$(OBJ_DIR)/\1#g" dep/$*.d
+	@sed -i "s#^\([^.]*\.o\)#obj/$*.o#g" dep/$*.d
 
 problem:
 	make -C python
