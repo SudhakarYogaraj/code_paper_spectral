@@ -15,7 +15,7 @@ namespace tests {
     void error_spectral(vector<double> x, Problem *problem, Analyser *analyser) {
 
         // Maximal degree of Hermite polynomials
-        int degree_min = 2;
+        int degree_min = 5;
         int degree_max = 30;
 
         vector<int> degrees(degree_max - degree_min + 1);
@@ -27,8 +27,9 @@ namespace tests {
 
         // Computation of the exact solution
         Solver_exact solver_exact(problem, analyser);
-        vector<double> exact_drift = solver_exact.soldrif(x);
-        vector< vector<double> > exact_diff = solver_exact.soldiff(x);
+        SDE_coeffs c_exact = solver_exact.estimator(x, 0.);
+        vector<double> exact_drift = c_exact.drif;
+        vector< vector<double> > exact_diff = c_exact.diff;
 
         vector<double> estimator_time(degrees.size());
         vector<double> estimator_error(degrees.size());

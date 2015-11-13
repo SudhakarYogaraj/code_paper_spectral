@@ -32,8 +32,9 @@ namespace tests {
 
         // Computation of the exact solution
         Solver_exact solver_exact(problem, analyser);
-        vector<double> exact_drift = solver_exact.soldrif(x);
-        vector< vector<double> > exact_diff = solver_exact.soldiff(x);
+        SDE_coeffs c_exact = solver_exact.estimator(x, 0.);
+        vector<double> exact_drift = c_exact.drif;
+        vector< vector<double> > exact_diff = c_exact.diff;
 
         vector<double> estimator_time(p_values.size());
         vector<double> estimator_error(p_values.size());
