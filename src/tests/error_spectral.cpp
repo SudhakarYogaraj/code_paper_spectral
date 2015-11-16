@@ -39,6 +39,32 @@ namespace tests {
         ofstream out_time("out/error_spectral/time");
         ofstream out_errs("out/error_spectral/error");
 
+        // Configuration for the spectral solver
+        config_spectral conf_spectral; {
+            conf_spectral.n_nodes = 100;
+            conf_spectral.degree = degrees[degrees.size()-1];
+            conf_spectral.scaling = vector<double> (problem->nf, 0.5);
+        }
+
+        // Create new solver
+        Solver_spectral solver_spectral(problem, analyser, &conf_spectral);
+
+        // Find full solution
+        tic(); vector<SDE_coeffs> full_c = solver_spectral.full_estimator(x, 0.,degrees);
+
+        for (unsigned int i = 0; i < degrees.size(); ++i) {
+
+            // Error
+            vector<double> Ddrif = (full_c[i].drif - exact_drift);
+            vector< vector<double> > Ddiff = (full_c[i].diff - exact_diff);
+            estimator_error[i] = fabs(Ddrif)/fabs(exact_drift) + fabs(Ddiff)/fabs(exact_diff);
+
+            // Summary of iteration
+            cout << "> Degree" << degrees[i] << ". Error: " << estimator_error[i] << endl;
+        }
+
+        cout << "Time for full solution: " << toc() << endl << endl;
+
         for (unsigned int i = 0; i < degrees.size(); ++i) {
 
             // Configuration for the spectral solver
@@ -67,5 +93,9 @@ namespace tests {
             // Summary of iteration
             cout << "> Degree" << degrees[i] << ". Time: " << estimator_time[i] << ". Error: " << estimator_error[i] << endl;
         }
+
+        /* Do you notice a difference between the two solutions?
+         * This is because the analyser updates the statistics each time.
+         */
     }
 }

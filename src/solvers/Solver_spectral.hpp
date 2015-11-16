@@ -25,6 +25,7 @@ class Solver_spectral : public Solver {
 
         Solver_spectral(Problem*, Analyser*, config_spectral*);
         SDE_coeffs estimator(std::vec x, double t);
+        std::vector<SDE_coeffs> full_estimator(std::vec x, double t, std::vector<int> degrees);
 
     private:
 
@@ -54,9 +55,9 @@ class Solver_spectral : public Solver {
 
         // Number of dimension to solve on
         int nf;
+        int ns;
 
-        // Matrix containing the coefficients of uni- and multi-
-        // dimensional Hermite polynomials in terms of monomials.
+        // Matrix containing the coefficients of uni- and multi- dimensional Hermite polynomials in terms of monomials.
         std::mat hermiteCoeffs_1d;
         std::mat hermiteCoeffs_nd;
 
@@ -69,8 +70,18 @@ class Solver_spectral : public Solver {
         // Update variance and bias of gaussian
         void update_stats();
 
-        std::vec discretize(std::vec x, Gaussian_integrator& gauss, double(*f)(std::vec,std::vec));
-        std::vec project(int nf, int degree, Gaussian_integrator& gauss, std::vec f_discretized, int rescale);
+        // Compute matrix of the linear system
+        std::mat compute_matrix(std::vec x);
+
+        // Compute effective coefficients from expansions in Hermite functions
+        SDE_coeffs compute_averages(const std::mat& functions, const std::mat& solutions);
+
+        // Discretize function on grid
+        std::vec discretize(std::vec x, double(*f)(std::vec,std::vec));
+
+        // Project discretized functions on monomials and hermite polynomials
+        std::vec project_mon(int nf, int degree, std::vec f_discretized, int rescale);
+        std::vec project_herm(int nf, int degree, std::vec f_discretized, int rescale);
 
         // Statistics associated with the hermite functions
         std::vec bias;
@@ -79,6 +90,8 @@ class Solver_spectral : public Solver {
         std::mat sqrt_cov;
         double det_cov;
 
+        // Integrator
+        Gaussian_integrator *gauss;
         Problem *problem;
         Analyser *analyser;
 };
