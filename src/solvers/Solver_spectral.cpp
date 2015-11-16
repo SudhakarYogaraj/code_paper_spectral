@@ -148,10 +148,24 @@ SDE_coeffs Solver_spectral::estimator(vec x, double t) {
     }
     if(VERBOSE) cout << "done!" << endl;
 
-    // Calculation of the coefficients of the simplified equation
+    return compute_averages(solution, solution_dx, coefficients, coefficients_h);
+}
+
+SDE_coeffs Solver_spectral::compute_averages(const mat &sol, const cube &sol_dx, const mat &coeffs, const vec coeffs_h) {
+
+    int nf = problem->nf;
+    int ns = problem->ns;
+    int nb = bin(conf->degree + nf, nf);
+
+    // Vectors to store the coefficients of the sde
+    SDE_coeffs sde_coeffs;
+
+    // Drift coefficient
     vec F1(ns, 0.);
     vec F2(ns, 0.);
-    vector< vector <double> > A0(ns, vec(ns,0.));
+
+    // Diffusion coefficient
+    mat A0(ns, vec(ns,0.));
 
     // Calculation of the coefficients of the effective equation
     for (int i = 0; i < nb; ++i) {
@@ -159,18 +173,18 @@ SDE_coeffs Solver_spectral::estimator(vec x, double t) {
         // First part of the drift coefficient
         for (int j = 0; j < ns; ++j) {
             for (int k = 0; k < ns; ++k)
-                F1[j] += solution_dx[j][k][i]*coefficients[k][i];
+                F1[j] += sol_dx[j][k][i]*coeffs[k][i];
         }
 
         // Second part of the drift coefficient
         for (int j = 0; j < ns; ++j) {
-            F2[j] += solution[j][i]*coefficients_h[i];
+            F2[j] += sol[j][i]*coeffs_h[i];
         }
 
         // Diffusion coefficient
         for (int j = 0; j < ns; ++j) {
             for (int k = 0; k < ns; ++k) {
-                A0[j][k] += 2*solution[j][i]*coefficients[k][i];
+                A0[j][k] += 2*sol[j][i]*coeffs[k][i];
             }
         }
     }
