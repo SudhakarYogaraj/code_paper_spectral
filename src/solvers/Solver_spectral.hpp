@@ -69,6 +69,9 @@ class Solver_spectral : public Solver {
         // Update variance and bias of gaussian
         void update_stats();
 
+        // Compute effective coefficients from expansions in Hermite functions
+        SDE_coeffs compute_averages(const std::mat &sol, const std::cube &sol_dx, const std::mat &coeffs, const std::vec coeffs_h);
+
         std::vec discretize(std::vec x, Gaussian_integrator& gauss, double(*f)(std::vec,std::vec));
         std::vec project(int nf, int degree, Gaussian_integrator& gauss, std::vec f_discretized, int rescale);
 
