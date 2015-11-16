@@ -67,70 +67,16 @@ SDE_coeffs Solver_spectral::estimator(vec x, double t) {
     // Projection of h
     coefficients_h = project_herm(nf, conf->degree, gauss, h_discretized, 1);
 
+    // Matrix of the linear system
+    mat matrix = compute_matrix(x, gauss);
+
     // Solution of the Poisson equation
     mat solution(ns, vec(nb,0.));
     cube solution_dx(ns, mat(ns, vec(nb, 0.)));
 
 
-    // Discretized difference of linear terms
-    mat quad_points = gauss.nodes;
-    vec  quad_weights = gauss.weights;
-    int ni = gauss.weights.size();
-
-    vec diff_discretized(ni, 1.);
-
-    for (int j = 0; j < ni; ++j) {
-
-        vec z = quad_points[j];
-        vec y = map_to_real(z);
-
-        diff_discretized[j] = gaussian_linear_term(z) - problem->linearTerm(x,y);
-        diff_discretized[j] *= quad_weights[j];
-    }
-
-    // Projection against monomials
-    vec tmp_vec = project_mon(nf, 2*conf->degree, gauss, diff_discretized, 0);
-
-    // Generating Galerkin matrix based on these
-    mat prod_mat(nb, vec(nb, 0.));
-
-    for (int i = 0; i < nb; ++i) {
-        vector<int> m1 = ind2mult[i];
-        for (int j = 0; j < nb; ++j) {
-            vector<int> m2 = ind2mult[j];
-            int index = mult2ind[m1 + m2];
-            prod_mat[i][j] = tmp_vec[index];
-        }
-    }
-
-    if(VERBOSE) cout << "* Creating the matrix of the linear system." << endl << endl;
-    mat tmp_mat(nb, vec(nb, 0.));
-    mat matrix(nb, vec(nb, 0.));
-    for (int i = 0; i < nb; ++i) {
-        if(VERBOSE) progress_bar(( (double) (i*nb) )/( (double) (nb*(2*nb + 1)) ));
-        for (int j = 0; j < nb; ++j) {
-            for (int k = 0; k < nb; ++k) {
-                tmp_mat[i][j] += hermiteCoeffs_nd[j][k]*prod_mat[i][k];
-            }
-        }
-    }
-    for (int i = 0; i < nb; ++i) {
-        if(VERBOSE) progress_bar(( (double) (nb*nb + i*(i+1)) )/( (double) (nb*(2*nb+1)) ));
-        vector<int> m1 = ind2mult[i];
-
-        for (int j = 0; j < nf; ++j) {
-            matrix[i][i] += m1[j] / this->eig_val_cov[j] * (problem->s * problem->s) / 2;
-        }
-        for (int j = 0; j <= i; ++j) {
-            for (int k = 0; k < nb; ++k) {
-                matrix[i][j] += hermiteCoeffs_nd[i][k]*tmp_mat[k][j];
-            }
-            matrix[j][i] = matrix[i][j];
-        }
-    }
-    if(VERBOSE) end_progress_bar();
-
     if(VERBOSE) cout << "* Solving linear system." << endl;
+    // Solution of the linear system
     for (int i = 0; i < ns; ++i) {
         solution[i] = solve(matrix, coefficients[i]);
         for (int j = 0; j < ns; ++j) {
