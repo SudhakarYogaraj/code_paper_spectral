@@ -55,8 +55,7 @@ class Solver_spectral : public Solver {
         // Number of dimension to solve on
         int nf;
 
-        // Matrix containing the coefficients of uni- and multi-
-        // dimensional Hermite polynomials in terms of monomials.
+        // Matrix containing the coefficients of uni- and multi- dimensional Hermite polynomials in terms of monomials.
         std::mat hermiteCoeffs_1d;
         std::mat hermiteCoeffs_nd;
 
@@ -69,11 +68,16 @@ class Solver_spectral : public Solver {
         // Update variance and bias of gaussian
         void update_stats();
 
-        // Compute effective coefficients from expansions in Hermite functions
+        // Compute matrix of the linear system
         std::mat compute_matrix(std::vec x, const Gaussian_integrator &gauss);
-        SDE_coeffs compute_averages(const std::mat &sol, const std::cube &sol_dx, const std::mat &coeffs, const std::vec &coeffs_h);
 
+        // Compute effective coefficients from expansions in Hermite functions
+        SDE_coeffs compute_averages(const std::mat& functions, const std::mat& solutions);
+
+        // Discretize function on grid
         std::vec discretize(std::vec x, Gaussian_integrator& gauss, double(*f)(std::vec,std::vec));
+
+        // Project discretized functions on monomials and hermite polynomials
         std::vec project_mon(int nf, int degree, const Gaussian_integrator& gauss, std::vec f_discretized, int rescale);
         std::vec project_herm(int nf, int degree, const Gaussian_integrator& gauss, std::vec f_discretized, int rescale);
 
