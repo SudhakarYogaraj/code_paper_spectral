@@ -9,9 +9,18 @@
 using namespace std;
 
 SDE_coeffs Solver_spectral::estimator(vec x, double t) {
+    vector<SDE_coeffs> full_result =  full_estimator(x,t,0);
+    return full_result[full_result.size() - 1];
+}
+
+vector<SDE_coeffs> Solver_spectral::full_estimator(vec x, double t, int full) {
 
     // Update statistics
     analyser->update_stats(x);
+
+    // Parameters of the problem
+    int nf = problem->nf;
+    int ns = problem->ns;
 
     // Update statistics of Gaussian
     this->update_stats();
@@ -36,7 +45,7 @@ SDE_coeffs Solver_spectral::estimator(vec x, double t) {
     // Discretization of functions in hermite components
     mat functions_discretized_herm(n_functions);
     for (int i = 0; i < n_functions; ++i)
-        functions_discretized_herm[i] = project_herm(problem->nf, conf->degree, functions_discretized_space[i], 1);
+        functions_discretized_herm[i] = project_herm(nf, conf->degree, functions_discretized_space[i], 1);
 
     // Matrix of the linear system
     mat matrix = compute_matrix(x);
@@ -46,87 +55,30 @@ SDE_coeffs Solver_spectral::estimator(vec x, double t) {
     for (int i = 0; i < ns + ns*ns; ++i)
         solutions_discretized_herm[i] = solve(matrix, functions_discretized_herm[i]);
 
-    // Compute averages
-    return compute_averages(functions_discretized_herm, solutions_discretized_herm);
+    // Full solution of all the subsystems
+    vector<SDE_coeffs> result(conf->degree + 1);
+
+    for (int i = 0; i < conf->degree + 1; ++i) {
+
+        // Dimension of the space of polynomials of degree lower or equal to i.
+        int n = bin(i + nf, nf);
+
+        // Solutions obtained by using polynomials of degree up to i.
+        mat sub_solutions(n_functions);
+        mat sub_functions(n_functions);
+
+        // Corresponding submatrix
+        arma::mat sub_matrix = to_arma(matrix).submat(0,0, n-1,n-1);
+
+        for (int j = 0; j < n_functions; ++j) {
+            sub_functions[j] = to_std_vec(to_arma_vec(functions_discretized_herm[j]).subvec(0,n-1));
+            sub_solutions[j] = to_std_vec(arma::solve(sub_matrix, to_arma_vec(sub_functions[j])));
+        }
+
+        result[i] = compute_averages(sub_functions, sub_solutions);
+    }
+    return result;
 }
-
-/* vector<SDE_coeffs> all_estimator(vec x, double t) { */
-
-/*     // Update statistics */
-/*     analyser->update_stats(x); */
-
-/*     // Parameters of the problem */
-/*     int nf = problem->nf; */
-/*     int ns = problem->ns; */
-
-/*     // Update statistics of Gaussian */
-/*     this->update_stats(); */
-
-/*     // Vector of functions to discretize */
-/*     int n_functions = ns + ns*ns + 1; */
-/*     vector<double (*) (vec, vec)> functions(n_functions); */
-/*     for (int i = 0; i < ns; i++) */
-/*         functions[i] = problem->a[i]; */
-/*     for (int i = 0; i < ns; i++) { */
-/*         for (int j = 0; j < ns; j++) { */
-/*             functions[ns + i*ns + j] = problem->dxa[i][j]; */
-/*         } */
-/*     } */
-/*     functions[ns + ns*ns] = problem->stardiv_h; */
-
-/*     // Discretization of functions in space */
-/*     mat functions_discretized_space(n_functions); */
-/*     for (int i = 0; i < n_functions; ++i) */
-/*         functions_discretized_space[i] = discretize(x, functions[i]); */
-
-/*     // Discretization of functions in hermite components */
-/*     mat functions_discretized_herm(n_functions); */
-/*     for (int i = 0; i < n_functions; ++i) */
-/*         functions_discretized_herm[i] = project_herm(nf, conf->degree, functions_discretized_space[i], 1); */
-
-/*     // Matrix of the linear system */
-/*     mat matrix = compute_matrix(x); */
-
-/*     // Solution of the Poisson equation */
-/*     mat solutions_discretized_herm(ns + ns*ns); */
-/*     for (int i = 0; i < ns + ns*ns; ++i) */
-/*         solutions_discretized_herm[i] = solve(matrix, functions_discretized_herm[i]); */
-
-/*     // Compute averages */
-/*     return compute_averages(functions_discretized_herm, solutions_discretized_herm); */
-
-/*     /1* // Full solution of all the subsystems *1/ */
-/*     /1* for (int i = 0; i < conf->degree; ++i) { *1/ */
-
-/*     /1*     // Dimension of the space of polynomials of degree lower or equal to i. *1/ */
-/*     /1*     int n = bin(i + nf, nf); *1/ */
-
-/*     /1*     // Solution of the Poisson equation *1/ */
-/*     /1*     mat sub_solution(ns, vec(n,0.)); *1/ */
-/*     /1*     cube sub_solution_dx(ns, mat(ns, vec(n, 0.))); *1/ */
-
-/*     /1*     // Corresponding submatrix *1/ */
-/*     /1*     arma::mat sub_matrix = to_arma(matrix).submat(0,0, n-1,n-1); *1/ */
-
-/*     /1*     for (int j = 0; j < ns; ++j) { *1/ */
-
-/*     /1*         // Subvector of length n *1/ */
-/*     /1*         arma::vec sub_coeffs = to_arma_vec(coefficients[j]).subvec(0,n-1); *1/ */
-
-/*     /1*         // Solution of linear system *1/ */
-/*     /1*         sub_solution[j] = to_std_vec(arma::solve(sub_matrix, sub_coeffs)); *1/ */
-
-/*     /1*         for (int k = 0; k < ns; ++k) { *1/ */
-
-/*     /1*             // Subvector of length n *1/ */
-/*     /1*             arma::vec sub_coeffs_dx = to_arma_vec(coefficients_dx[j][k]).subvec(0,n-1); *1/ */
-
-/*     /1*             // Solution of the linear system *1/ */
-/*     /1*             sub_solution_dx[j][k] = to_std_vec(arma::solve(sub_matrix, sub_coeffs_dx)); *1/ */
-/*     /1*         } *1/ */
-/*     /1*     } *1/ */
-/*     /1* } *1/ */
-/* } */
 
 mat Solver_spectral::compute_matrix(vec x) {
 
@@ -199,9 +151,7 @@ mat Solver_spectral::compute_matrix(vec x) {
  */
 SDE_coeffs Solver_spectral::compute_averages(const mat& functions, const mat& solutions) {
 
-    int nf = problem->nf;
     int ns = problem->ns;
-    int nb = bin(conf->degree + nf, nf);
 
     mat coeffs(ns);
     mat sol(ns);
@@ -218,9 +168,6 @@ SDE_coeffs Solver_spectral::compute_averages(const mat& functions, const mat& so
     }
     vec coeffs_h = functions[ns + ns*ns];
 
-    // Vectors to store the coefficients of the sde
-    SDE_coeffs sde_coeffs;
-
     // Drift coefficient
     vec F1(ns, 0.);
     vec F2(ns, 0.);
@@ -229,7 +176,7 @@ SDE_coeffs Solver_spectral::compute_averages(const mat& functions, const mat& so
     mat A0(ns, vec(ns,0.));
 
     // Calculation of the coefficients of the effective equation
-    for (int i = 0; i < nb; ++i) {
+    for (int i = 0; i < solutions[0].size(); ++i) {
 
         // First part of the drift coefficient
         for (int j = 0; j < ns; ++j) {
@@ -250,6 +197,16 @@ SDE_coeffs Solver_spectral::compute_averages(const mat& functions, const mat& so
         }
     }
 
+    arma::vec eigval; arma::mat eigvec;
+    eig_sym(eigval, eigvec, to_arma(symmetric(A0)));
+    vec eigen_values = to_std_vec(eigval);
+
+    if (arma::min(eigval) < -1E-14) {
+        cout << "Warning: Matrix not positive definite" << endl;
+        A0 = mat(ns, vec(ns, 0.));
+    }
+
+    SDE_coeffs sde_coeffs;
     sde_coeffs.diff =  cholesky(symmetric(A0));
     sde_coeffs.drif = F1 + F2;
 
