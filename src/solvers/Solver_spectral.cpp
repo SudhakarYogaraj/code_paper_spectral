@@ -10,9 +10,6 @@ using namespace std;
 
 SDE_coeffs Solver_spectral::estimator(vec x, double t) {
 
-    // Vectors to store the coefficients of the sde
-    SDE_coeffs sde_coeffs;
-
     // Update statistics
     analyser->update_stats(x);
 
@@ -22,101 +19,74 @@ SDE_coeffs Solver_spectral::estimator(vec x, double t) {
     // Parameters of the problem
     int nf = problem->nf;
     int ns = problem->ns;
-    int nb = bin(conf->degree + nf, nf);
 
     // Update statistics of Gaussian
     this->update_stats();
 
-    // Discretization of the functions of the problem
-    vec h_discretized;
-    mat a_discretized(ns);
-    cube dax_discretized(ns, mat(ns));
-
-    // Computation of the discretized functions
+    // Vector of functions to discretize
+    int n_functions = ns + ns*ns + 1;
+    vector<double (*) (vec, vec)> functions(n_functions);
+    for (int i = 0; i < ns; i++)
+        functions[i] = problem->a[i];
     for (int i = 0; i < ns; i++) {
-
-        // Discretization of dx/da
         for (int j = 0; j < ns; j++) {
-            dax_discretized[i][j] = discretize(x, gauss, problem->dxa[i][j]);
+            functions[ns + i*ns + j] = problem->dxa[i][j];
         }
-
-        // Discretization of the function a
-        a_discretized[i] = discretize(x, gauss, problem->a[i]);
     }
+    functions[ns + ns*ns] = problem->stardiv_h;
 
-    // Discretization of h
-    h_discretized = discretize(x, gauss, problem->stardiv_h);
+    // Discretization of functions in space
+    mat functions_discretized_space(n_functions);
+    for (int i = 0; i < n_functions; ++i)
+        functions_discretized_space[i] = discretize(x, gauss, functions[i]);
 
-    // Coefficients of the projection of the functions
-    vec coefficients_h;
-    mat coefficients(ns);
-    cube coefficients_dx(ns, mat(ns));
-
-    // Expansion of right-hand side of the Poisson equation
-    for (int i = 0; i < ns; ++i) {
-
-        // Projection of da/dx
-        for (int j = 0; j < ns; j++) {
-            coefficients_dx[i][j] = project_herm(nf, conf->degree, gauss, dax_discretized[i][j], 1);
-        }
-
-        // Projection of a
-        coefficients[i] = project_herm(nf, conf->degree, gauss, a_discretized[i], 1);
-    }
-
-    // Projection of h
-    coefficients_h = project_herm(nf, conf->degree, gauss, h_discretized, 1);
+    // Discretization of functions in hermite components
+    mat functions_discretized_herm(n_functions);
+    for (int i = 0; i < n_functions; ++i)
+        functions_discretized_herm[i] = project_herm(nf, conf->degree, gauss, functions_discretized_space[i], 1);
 
     // Matrix of the linear system
     mat matrix = compute_matrix(x, gauss);
 
     // Solution of the Poisson equation
-    mat solution(ns, vec(nb,0.));
-    cube solution_dx(ns, mat(ns, vec(nb, 0.)));
+    mat solutions_discretized_herm(ns + ns*ns);
+    for (int i = 0; i < ns + ns*ns; ++i)
+        solutions_discretized_herm[i] = solve(matrix, functions_discretized_herm[i]);
 
+    // Compute averages
+    return compute_averages(functions_discretized_herm, solutions_discretized_herm);
 
+    /* // Full solution of all the subsystems */
+    /* for (int i = 0; i < conf->degree; ++i) { */
 
-    // Full solution of all the subsystems
-    for (int i = 0; i < conf->degree; ++i) {
+    /*     // Dimension of the space of polynomials of degree lower or equal to i. */
+    /*     int n = bin(i + nf, nf); */
 
-        // Dimension of the space of polynomials of degree lower or equal to i.
-        int n = bin(i + nf, nf);
+    /*     // Solution of the Poisson equation */
+    /*     mat sub_solution(ns, vec(n,0.)); */
+    /*     cube sub_solution_dx(ns, mat(ns, vec(n, 0.))); */
 
-        // Solution of the Poisson equation
-        mat sub_solution(ns, vec(n,0.));
-        cube sub_solution_dx(ns, mat(ns, vec(n, 0.)));
+    /*     // Corresponding submatrix */
+    /*     arma::mat sub_matrix = to_arma(matrix).submat(0,0, n-1,n-1); */
 
-        // Corresponding submatrix
-        arma::mat sub_matrix = to_arma(matrix).submat(0,0, n-1,n-1);
+    /*     for (int j = 0; j < ns; ++j) { */
 
-        for (int j = 0; j < ns; ++j) {
+    /*         // Subvector of length n */
+    /*         arma::vec sub_coeffs = to_arma_vec(coefficients[j]).subvec(0,n-1); */
 
-            // Subvector of length n
-            arma::vec sub_coeffs = to_arma_vec(coefficients[j]).subvec(0,n-1);
+    /*         // Solution of linear system */
+    /*         sub_solution[j] = to_std_vec(arma::solve(sub_matrix, sub_coeffs)); */
 
-            // Solution of linear system
-            sub_solution[j] = to_std_vec(arma::solve(sub_matrix, sub_coeffs));
+    /*         for (int k = 0; k < ns; ++k) { */
 
-            for (int k = 0; k < ns; ++k) {
+    /*             // Subvector of length n */
+    /*             arma::vec sub_coeffs_dx = to_arma_vec(coefficients_dx[j][k]).subvec(0,n-1); */
 
-                // Subvector of length n
-                arma::vec sub_coeffs_dx = to_arma_vec(coefficients_dx[j][k]).subvec(0,n-1);
-
-                // Solution of the linear system
-                sub_solution_dx[j][k] = to_std_vec(arma::solve(sub_matrix, sub_coeffs_dx));
-            }
-        }
-    }
-
-    // Solution of the linear system
-    for (int i = 0; i < ns; ++i) {
-        solution[i] = solve(matrix, coefficients[i]);
-        for (int j = 0; j < ns; ++j) {
-            solution_dx[i][j] = solve(matrix, coefficients_dx[i][j]);
-        }
-    }
-
-    return compute_averages(solution, solution_dx, coefficients, coefficients_h);
+    /*             // Solution of the linear system */
+    /*             sub_solution_dx[j][k] = to_std_vec(arma::solve(sub_matrix, sub_coeffs_dx)); */
+    /*         } */
+    /*     } */
+    /* } */
 }
 
 mat Solver_spectral::compute_matrix(vec x, const Gaussian_integrator &gauss) {
@@ -165,6 +135,7 @@ mat Solver_spectral::compute_matrix(vec x, const Gaussian_integrator &gauss) {
             }
         }
     }
+
     for (int i = 0; i < nb; ++i) {
         vector<int> m1 = ind2mult[i];
 
@@ -187,11 +158,26 @@ mat Solver_spectral::compute_matrix(vec x, const Gaussian_integrator &gauss) {
  * This function calculates the homogenized coefficients from the solution of
  * the cell problem, and the discretization of the coefficients in hermite functions.
  */
-SDE_coeffs Solver_spectral::compute_averages(const mat &sol, const cube &sol_dx, const mat &coeffs, const vec &coeffs_h) {
+SDE_coeffs Solver_spectral::compute_averages(const mat& functions, const mat& solutions) {
 
     int nf = problem->nf;
     int ns = problem->ns;
     int nb = bin(conf->degree + nf, nf);
+
+    mat coeffs(ns);
+    mat sol(ns);
+    cube coeffs_dx(ns, mat(ns));
+    cube sol_dx(ns, mat(ns));
+
+    for (int i = 0; i < ns; ++i) {
+        coeffs[i] = functions[i];
+        sol[i] = solutions[i];
+        for (int j = 0; j < ns; j++) {
+            coeffs_dx[i][j] = functions[ns + i*ns + j];
+            sol_dx[i][j] = solutions[ns + i*ns +j];
+        }
+    }
+    vec coeffs_h = functions[ns + ns*ns];
 
     // Vectors to store the coefficients of the sde
     SDE_coeffs sde_coeffs;
@@ -237,50 +223,50 @@ SDE_coeffs Solver_spectral::compute_averages(const mat &sol, const cube &sol_dx,
  *
  * TODO: add description (urbain, Thu 25 Jun 2015 01:27:09 CEST)
  */
-double Solver_spectral::gaussian_linear_term(vec z) {
+    double Solver_spectral::gaussian_linear_term(vec z) {
 
-    // Laplacian term.
-    double laplacian = 0.;
+        // Laplacian term.
+        double laplacian = 0.;
 
-    // Square of the gradient.
-    double grad2 = 0.;
+        // Square of the gradient.
+        double grad2 = 0.;
 
-    // Square of the coefficient of the noise.
-    double S = problem->s*problem->s;
+        // Square of the coefficient of the noise.
+        double S = problem->s*problem->s;
 
-    // Computation of the term
-    for (int k = 0; k < this->nf; ++k) {
-        laplacian += 1/this->eig_val_cov[k];
-        grad2 += z[k]*z[k] /this->eig_val_cov[k];
+        // Computation of the term
+        for (int k = 0; k < this->nf; ++k) {
+            laplacian += 1/this->eig_val_cov[k];
+            grad2 += z[k]*z[k] /this->eig_val_cov[k];
+        }
+
+        // Standard formula for the potential
+        return (0.25 * S * laplacian - 0.125 * S * grad2);
     }
-
-    // Standard formula for the potential
-    return (0.25 * S * laplacian - 0.125 * S * grad2);
-}
 
 /*! Change of variable y = Cz + m
  *
  * This function implements the change of variables y = Cz + m.. If z is
  * distributed as G(0,I), y will be distributed as G(CC^T,m).
  */
-vec Solver_spectral::map_to_real(vec z) {
+    vec Solver_spectral::map_to_real(vec z) {
 
-    // Initialization
-    vec result(z.size(), 0.);
+        // Initialization
+        vec result(z.size(), 0.);
 
-    for (int i = 0; i < z.size(); ++i) {
+        for (int i = 0; i < z.size(); ++i) {
 
-        // Left-multiply z by covariance matrix
-        for (int j = 0; j < z.size(); ++j) {
-            result[i] += this->sqrt_cov[i][j] * z[j];
+            // Left-multiply z by covariance matrix
+            for (int j = 0; j < z.size(); ++j) {
+                result[i] += this->sqrt_cov[i][j] * z[j];
+            }
+
+            // Add bias
+            result[i] += this->bias[i];
         }
 
-        // Add bias
-        result[i] += this->bias[i];
+        return result;
     }
-
-    return result;
-}
 
 /*! Update the statistics of the Gaussian related to Hermite functions
  *
