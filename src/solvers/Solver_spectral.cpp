@@ -9,11 +9,12 @@
 using namespace std;
 
 SDE_coeffs Solver_spectral::estimator(vec x, double t) {
-    vector<SDE_coeffs> full_result =  full_estimator(x,t,0);
-    return full_result[full_result.size() - 1];
+    vector<int> degrees(1, conf->degree);
+    vector<SDE_coeffs> full_result =  full_estimator(x,t,degrees);
+    return full_result[0];
 }
 
-vector<SDE_coeffs> Solver_spectral::full_estimator(vec x, double t, int full) {
+vector<SDE_coeffs> Solver_spectral::full_estimator(vec x, double t, vector<int> degrees) {
 
     // Update statistics
     analyser->update_stats(x);
@@ -51,17 +52,14 @@ vector<SDE_coeffs> Solver_spectral::full_estimator(vec x, double t, int full) {
     mat matrix = compute_matrix(x);
 
     // Solution of the Poisson equation
-    mat solutions_discretized_herm(ns + ns*ns);
-    for (int i = 0; i < ns + ns*ns; ++i)
-        solutions_discretized_herm[i] = solve(matrix, functions_discretized_herm[i]);
+    vector<SDE_coeffs> result(degrees.size());
 
-    // Full solution of all the subsystems
-    vector<SDE_coeffs> result(conf->degree + 1);
+    for (int i = 0; i < degrees.size(); ++i) {
 
-    for (int i = 0; i < conf->degree + 1; ++i) {
+        int d = degrees[i];
 
         // Dimension of the space of polynomials of degree lower or equal to i.
-        int n = bin(i + nf, nf);
+        int n = bin(d + nf, nf);
 
         // Solutions obtained by using polynomials of degree up to i.
         mat sub_solutions(n_functions);

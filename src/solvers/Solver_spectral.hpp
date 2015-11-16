@@ -25,7 +25,7 @@ class Solver_spectral : public Solver {
 
         Solver_spectral(Problem*, Analyser*, config_spectral*);
         SDE_coeffs estimator(std::vec x, double t);
-        std::vector<SDE_coeffs> full_estimator(std::vec x, double t, int full);
+        std::vector<SDE_coeffs> full_estimator(std::vec x, double t, std::vector<int> degrees);
 
     private:
 
