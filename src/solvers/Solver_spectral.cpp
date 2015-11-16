@@ -57,24 +57,15 @@ SDE_coeffs Solver_spectral::estimator(vec x, double t) {
 
         // Projection of da/dx
         for (int j = 0; j < ns; j++) {
-            coefficients_dx[i][j] = project(nf, conf->degree, gauss, dax_discretized[i][j], 1);
+            coefficients_dx[i][j] = project_herm(nf, conf->degree, gauss, dax_discretized[i][j], 1);
         }
 
         // Projection of a
-        coefficients[i] = project(nf, conf->degree, gauss, a_discretized[i], 1);
+        coefficients[i] = project_herm(nf, conf->degree, gauss, a_discretized[i], 1);
     }
 
     // Projection of h
-    coefficients_h = project(nf, conf->degree, gauss, h_discretized, 1);
-
-    // Mapping to Hermite basis
-    for (int i = 0; i < ns; ++i) {
-        for (int j = 0; j < ns; ++j) {
-            coefficients_dx[i][j] = hermiteCoeffs_nd * coefficients_dx[i][j];
-        }
-        coefficients[i] = hermiteCoeffs_nd * coefficients[i];
-    }
-    coefficients_h = hermiteCoeffs_nd * coefficients_h;
+    coefficients_h = project_herm(nf, conf->degree, gauss, h_discretized, 1);
 
     // Solution of the Poisson equation
     mat solution(ns, vec(nb,0.));
@@ -98,7 +89,7 @@ SDE_coeffs Solver_spectral::estimator(vec x, double t) {
     }
 
     // Projection against monomials
-    vec tmp_vec = project(nf, 2*conf->degree, gauss, diff_discretized, 0);
+    vec tmp_vec = project_mon(nf, 2*conf->degree, gauss, diff_discretized, 0);
 
     // Generating Galerkin matrix based on these
     mat prod_mat(nb, vec(nb, 0.));
@@ -386,6 +377,10 @@ vec Solver_spectral::project(int nf, int degree, Gaussian_integrator& gauss, vec
     }
 
     return coefficients;
+}
+
+vec Solver_spectral::project_herm(int nf, int degree, Gaussian_integrator& gauss, vec f_discretized, int rescale) {
+    return hermiteCoeffs_nd * project_mon(nf, degree, gauss, f_discretized, rescale);
 }
 
 /*! Constructor of the spectral solver
