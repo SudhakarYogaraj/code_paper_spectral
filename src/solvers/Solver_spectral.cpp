@@ -187,7 +187,7 @@ mat Solver_spectral::compute_matrix(vec x, const Gaussian_integrator &gauss) {
  * This function calculates the homogenized coefficients from the solution of
  * the cell problem, and the discretization of the coefficients in hermite functions.
  */
-SDE_coeffs Solver_spectral::compute_averages(const mat &sol, const cube &sol_dx, const mat &coeffs, const vec coeffs_h) {
+SDE_coeffs Solver_spectral::compute_averages(const mat &sol, const cube &sol_dx, const mat &coeffs, const vec &coeffs_h) {
 
     int nf = problem->nf;
     int ns = problem->ns;

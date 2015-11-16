@@ -71,7 +71,7 @@ class Solver_spectral : public Solver {
 
         // Compute effective coefficients from expansions in Hermite functions
         std::mat compute_matrix(std::vec x, const Gaussian_integrator &gauss);
-        SDE_coeffs compute_averages(const std::mat &sol, const std::cube &sol_dx, const std::mat &coeffs, const std::vec coeffs_h);
+        SDE_coeffs compute_averages(const std::mat &sol, const std::cube &sol_dx, const std::mat &coeffs, const std::vec &coeffs_h);
 
         std::vec discretize(std::vec x, Gaussian_integrator& gauss, double(*f)(std::vec,std::vec));
         std::vec project_mon(int nf, int degree, const Gaussian_integrator& gauss, std::vec f_discretized, int rescale);
