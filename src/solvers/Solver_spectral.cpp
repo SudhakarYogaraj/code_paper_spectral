@@ -8,6 +8,10 @@
 
 using namespace std;
 
+/* template<typename Input> vec test_discretize(func, mat nodes) { */
+/*     mat result = */
+/* } */
+
 SDE_coeffs Solver_spectral::estimator(vec x, double t) {
     vector<int> degrees(1, conf->degree);
     vector<SDE_coeffs> full_result =  full_estimator(x,t,degrees);
@@ -80,6 +84,8 @@ vector<SDE_coeffs> Solver_spectral::full_estimator(vec x, double t, vector<int> 
 
 mat Solver_spectral::compute_matrix(vec x) {
 
+    if(VERBOSE) cout << "Start matrix computation" << endl;
+
     // Parameters of the problem
     int nf = problem->nf;
     int nb = bin(conf->degree + nf, nf);
@@ -103,6 +109,8 @@ mat Solver_spectral::compute_matrix(vec x) {
     // Projection against monomials
     vec tmp_vec = project_mon(nf, 2*conf->degree, diff_discretized, 0);
 
+    if(VERBOSE) cout << "Generating galerkin matrix for monomials" << endl;
+
     // Generating Galerkin matrix based on these
     mat prod_mat(nb, vec(nb, 0.));
 
@@ -115,17 +123,27 @@ mat Solver_spectral::compute_matrix(vec x) {
         }
     }
 
+    if(VERBOSE) cout << "Calculating mat - mat probuct" << endl;
+
     mat tmp_mat(nb, vec(nb, 0.));
     mat matrix(nb, vec(nb, 0.));
-    for (int i = 0; i < nb; ++i) {
-        for (int j = 0; j < nb; ++j) {
-            for (int k = 0; k < nb; ++k) {
-                tmp_mat[i][j] += hermiteCoeffs_nd[j][k]*prod_mat[i][k];
-            }
-        }
-    }
+
+    tmp_mat = to_std(to_arma(prod_mat) * to_arma(hermiteCoeffs_nd).t());
+    /* for (int i = 0; i < nb; ++i) { */
+    /*     if(VERBOSE && i%100 == 0) cout << i << "/" << nb << endl; */
+    /*     for (int j = 0; j < nb; ++j) { */
+    /*         for (int k = 0; k < nb; ++k) { */
+    /*             tmp_mat[i][j] += hermiteCoeffs_nd[j][k]*prod_mat[i][k]; */
+    /*         } */
+    /*     } */
+    /* } */
+
+    if(VERBOSE) cout << "Final part of matrix computation" << endl;
+    /* matrix = to_std(to_arma(hermiteCoeffs_nd) * to_arma(tmp_mat)); */
+    if(VERBOSE) cout << "Done final part" << endl;
 
     for (int i = 0; i < nb; ++i) {
+        if(VERBOSE && i%100 == 0) cout << i << "/" << nb << endl;
         vector<int> m1 = ind2mult[i];
 
         for (int j = 0; j < nf; ++j) {
@@ -138,7 +156,6 @@ mat Solver_spectral::compute_matrix(vec x) {
             matrix[j][i] = matrix[i][j];
         }
     }
-
     return matrix;
 }
 
@@ -148,6 +165,8 @@ mat Solver_spectral::compute_matrix(vec x) {
  * the cell problem, and the discretization of the coefficients in hermite functions.
  */
 SDE_coeffs Solver_spectral::compute_averages(const mat& functions, const mat& solutions) {
+
+    if(VERBOSE) cout << "Computing averages" << endl;
 
     int ns = problem->ns;
 
@@ -243,24 +262,24 @@ double Solver_spectral::gaussian_linear_term(vec z) {
  * This function implements the change of variables y = Cz + m.. If z is
  * distributed as G(0,I), y will be distributed as G(CC^T,m).
  */
-    vec Solver_spectral::map_to_real(vec z) {
+vec Solver_spectral::map_to_real(vec z) {
 
-        // Initialization
-        vec result(z.size(), 0.);
+    // Initialization
+    vec result(z.size(), 0.);
 
-        for (int i = 0; i < z.size(); ++i) {
+    for (int i = 0; i < z.size(); ++i) {
 
-            // Left-multiply z by covariance matrix
-            for (int j = 0; j < z.size(); ++j) {
-                result[i] += this->sqrt_cov[i][j] * z[j];
-            }
-
-            // Add bias
-            result[i] += this->bias[i];
+        // Left-multiply z by covariance matrix
+        for (int j = 0; j < z.size(); ++j) {
+            result[i] += this->sqrt_cov[i][j] * z[j];
         }
 
-        return result;
+        // Add bias
+        result[i] += this->bias[i];
     }
+
+    return result;
+}
 
 /*! Update the statistics of the Gaussian related to Hermite functions
  *
@@ -334,6 +353,8 @@ vec Solver_spectral::discretize(vec x, double(*f)(vec, vec )) {
 }
 
 vec Solver_spectral::project_mon(int nf, int degree, vec f_discretized, int rescale) {
+
+    if (VERBOSE) cout << "Starting projection" << endl;
 
     // Number of polynomials
     int nb = bin(degree + nf, nf);

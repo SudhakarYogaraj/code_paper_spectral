@@ -6,7 +6,7 @@
 
 # Compiler and flags
 CXX = clang++
-CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
+CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++14 -Wall
 LIBS = -larmadillo
 
 # Problem file

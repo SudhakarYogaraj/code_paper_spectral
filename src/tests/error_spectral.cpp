@@ -16,7 +16,7 @@ namespace tests {
 
         // Maximal degree of Hermite polynomials
         int degree_min = 5;
-        int degree_max = 30;
+        int degree_max = 25;
 
         vector<int> degrees(degree_max - degree_min + 1);
         for (int i = 0; i < degrees.size(); ++i)
@@ -41,7 +41,7 @@ namespace tests {
 
         // Configuration for the spectral solver
         config_spectral conf_spectral; {
-            conf_spectral.n_nodes = 100;
+            conf_spectral.n_nodes = 32;
             conf_spectral.degree = degrees[degrees.size()-1];
             conf_spectral.scaling = vector<double> (problem->nf, 0.5);
         }
