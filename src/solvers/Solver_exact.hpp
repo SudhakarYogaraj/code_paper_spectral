@@ -2,8 +2,8 @@
 #define SOLVER_EXACT_H
 
 #include "global/global.hpp"
-#include "problem/Problem.hpp"
-#include "problem/Analyser.hpp"
+#include "problems/Problem.hpp"
+#include "problems/Analyser.hpp"
 #include "solvers/Solver.hpp"
 
 class Solver_exact : public Solver {

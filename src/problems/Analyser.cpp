@@ -1,5 +1,5 @@
-#include "problem/Analyser.hpp"
-#include "problem/Problem.hpp"
+#include "problems/Analyser.hpp"
+#include "problems/Problem.hpp"
 
 #include "global/templates.hpp"
 #include "toolbox/Gaussian_integrator.hpp"

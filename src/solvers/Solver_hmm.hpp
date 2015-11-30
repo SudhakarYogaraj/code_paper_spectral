@@ -4,7 +4,7 @@
 #include <random>
 #include <vector>
 
-#include "problem/Problem.hpp"
+#include "problems/Problem.hpp"
 #include "solvers/Solver.hpp"
 
 struct config_hmm {

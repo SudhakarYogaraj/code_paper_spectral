@@ -3,8 +3,8 @@
 #include "global/templates.hpp"
 
 // Problem and analyser
-#include "problem/Problem.hpp"
-#include "problem/Analyser.hpp"
+#include "problems/Problem.hpp"
+#include "problems/Analyser.hpp"
 
 // Solvers
 #include "solvers/Solver_hmm.hpp"
