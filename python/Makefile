@@ -3,7 +3,7 @@
 
 # Directories
 IN_DIR = inputs
-OUT_DIR = ../src/problem
+OUT_DIR = ../src/problems
 AUX_DIR = tmp
 
 # Files
