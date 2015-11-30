@@ -4,7 +4,7 @@
 #include <vector>
 #include <cmath>
 
-#include "global.hpp"
+#include "global/global.hpp"
 
 template<class type> std::vector<type> operator-(const std::vector<type>& v1, const std::vector<type>& v2) {
     std::vector<type> result(v1.size());

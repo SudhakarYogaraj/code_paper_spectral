@@ -7,7 +7,7 @@
 #include <cmath>
 #include <armadillo>
 
-#include "global.hpp"
+#include "global/global.hpp"
 
 // Symmetric part of a matrix.
 std::mat symmetric(std::mat A);

@@ -15,6 +15,9 @@ PRB = src/problem/problem_${ARG}.cpp
 # All sources, corresponding to different problems
 ALL_SOURCES := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
 
+ALL_DIRS := $(wildcard src/*)
+LIB_DIRS := $(filter-out src/tests src/problems, $(ALL_DIRS))
+
 # For the particular problem
 CPP_FILES := $(filter-out src/problem/problem_%.cpp, $(ALL_SOURCES)) $(PRB)
 DEP_FILES := $(subst src,dep, $(CPP_FILES:.cpp=.d))
@@ -32,6 +35,7 @@ TARGET_TESTS := $(addprefix tests/, $(foreach p, $(PROBLEMS), $(addprefix $(p)/,
 
 # Ensure that directories exist and build executable
 all : prebuild $(TARGET)
+	echo $(LIB_DIRS);
 	echo $(TARGET_TESTS);
 
 # ---- CREATE MISSING DIRECTORIES ----
@@ -55,11 +59,16 @@ obj/%.o : src/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 	@sed -i "s#^\([^.]*\.o\)#obj/$*.o#g" dep/$*.d
 
-# ---- ?
+# ---- CREATE MAIN EXECTUABLE ----
 
 # Rule fo the target executable
 $(TARGET) : $(OBJ_FILES)
 	$(CXX) $(LIBS) $(CXXFLAGS) $^ -o $@
+
+# ---- CREATE TEST EXECUTABLES ----
+tests/% : $(OBJ_FILES)
+
+
 
 # ---- CREATE PROBLEM FILES ----
 

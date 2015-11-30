@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <armadillo>
 
-#include "global.hpp"
+#include "global/global.hpp"
 #include "solvers/Solver.hpp"
 #include "toolbox/Gaussian_integrator.hpp"
 #include "problem/Problem.hpp"

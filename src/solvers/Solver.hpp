@@ -1,7 +1,7 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
-#include "global.hpp"
+#include "global/global.hpp"
 
 class Solver {
     public:

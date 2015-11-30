@@ -1,7 +1,7 @@
 #ifndef SOLVER_EXACT_H
 #define SOLVER_EXACT_H
 
-#include "global.hpp"
+#include "global/global.hpp"
 #include "problem/Problem.hpp"
 #include "problem/Analyser.hpp"
 #include "solvers/Solver.hpp"

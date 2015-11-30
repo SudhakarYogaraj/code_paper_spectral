@@ -6,7 +6,7 @@
 #include <vector>
 #include <fstream>
 
-#include "global.hpp"
+#include "global/global.hpp"
 
 namespace tests {
     void integrate(Problem*, Solver*, int seed, std::string s);

@@ -1,9 +1,9 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "global.hpp"
+#include "global/global.hpp"
 #include "io/tictoc.hpp"
-#include "templates.hpp"
+#include "global/templates.hpp"
 #include "io/io.hpp"
 #include "toolbox/combinatorics.hpp"
 

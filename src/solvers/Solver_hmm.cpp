@@ -1,6 +1,6 @@
-#include "global.hpp"
+#include "global/global.hpp"
 #include "toolbox/linear_algebra.hpp"
-#include "templates.hpp"
+#include "global/templates.hpp"
 #include "problem/Problem.hpp"
 #include "solvers/Solver_hmm.hpp"
 
