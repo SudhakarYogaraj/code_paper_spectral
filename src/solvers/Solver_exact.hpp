@@ -3,7 +3,7 @@
 
 #include "global/global.hpp"
 #include "problems/Problem.hpp"
-#include "problems/Analyser.hpp"
+#include "solvers/Analyser.hpp"
 #include "solvers/Solver.hpp"
 
 class Solver_exact : public Solver {

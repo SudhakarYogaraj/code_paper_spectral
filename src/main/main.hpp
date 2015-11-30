@@ -9,7 +9,7 @@
 
 // Problem and analyser
 #include "problems/Problem.hpp"
-#include "problems/Analyser.hpp"
+#include "solvers/Analyser.hpp"
 
 // Solvers
 #include "solvers/Solver_spectral.hpp"
