@@ -1,16 +1,3 @@
-// Time tracking
-#include "io/tictoc.hpp"
-#include "global/templates.hpp"
-
-// Problem and analyser
-#include "problems/Problem.hpp"
-#include "problems/Analyser.hpp"
-
-// Solvers
-#include "solvers/Solver_hmm.hpp"
-#include "solvers/Solver_exact.hpp"
-
-// Own header
 #include "tests/error_hmm.hpp"
 
 using namespace std;
@@ -68,4 +55,15 @@ namespace tests {
         }
 
     }
+}
+
+int main(int argc, char* argv[]) {
+
+    // Initialization of the problem and helper analyser
+    Problem problem;
+    problem.init();
+    Analyser analyser(&problem);
+
+    // Initialization of the default solvers
+    tests::error_hmm(problem.x0, &problem, &analyser);
 }

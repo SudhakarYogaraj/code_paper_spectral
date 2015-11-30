@@ -1,4 +1,4 @@
-#include "problems/Analyser.hpp"
+#include "solvers/Analyser.hpp"
 #include "problems/Problem.hpp"
 
 #include "global/templates.hpp"

@@ -12,7 +12,7 @@
 #include "solvers/Solver.hpp"
 #include "toolbox/Gaussian_integrator.hpp"
 #include "problems/Problem.hpp"
-#include "problems/Analyser.hpp"
+#include "solvers/Analyser.hpp"
 
 struct config_spectral {
     int n_nodes;

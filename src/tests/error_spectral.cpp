@@ -99,3 +99,14 @@ namespace tests {
          */
     }
 }
+
+int main(int argc, char* argv[]) {
+
+    // Initialization of the problem and helper analyser
+    Problem problem;
+    problem.init();
+    Analyser analyser(&problem);
+
+    // Test error_spectral
+    tests::error_spectral(problem.x0, &problem, &analyser);
+}
