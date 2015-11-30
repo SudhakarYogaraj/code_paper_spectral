@@ -1,5 +1,5 @@
 #include "toolbox/Gaussian_integrator.hpp"
-#include "templates.hpp"
+#include "global/templates.hpp"
 
 using namespace std;
 

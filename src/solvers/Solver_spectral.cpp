@@ -2,7 +2,7 @@
 
 #include "toolbox/linear_algebra.hpp"
 #include "solvers/Solver_spectral.hpp"
-#include "templates.hpp"
+#include "global/templates.hpp"
 #include "io/io.hpp"
 #include <iomanip>
 

@@ -7,7 +7,7 @@
 #include <vector>
 #include <iostream>
 
-#include "global.hpp"
+#include "global/global.hpp"
 
 class Problem {
     public:

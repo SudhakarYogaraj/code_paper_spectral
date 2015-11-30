@@ -1,6 +1,6 @@
 // Time tracking
 #include "io/tictoc.hpp"
-#include "templates.hpp"
+#include "global/templates.hpp"
 
 // Problem and analyser
 #include "problem/Problem.hpp"
