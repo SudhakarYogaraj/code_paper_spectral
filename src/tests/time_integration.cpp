@@ -40,8 +40,8 @@ namespace tests {
         x[0] = problem->x0;
 
         // Streams
-        ofstream out_time("out/time_integration/time_" + s);
-        ofstream out_sol("out/time_integration/sol_" + s);
+        ofstream out_time("time_" + s);
+        ofstream out_sol("sol_" + s);
 
         for (unsigned int i = 0; i < sizet - 1; i++) {
 

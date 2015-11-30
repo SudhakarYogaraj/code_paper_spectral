@@ -33,8 +33,7 @@ all : prebuild $(TARGET) $(TARGETS)
 
 # ---- PREBUILD: CREATE MISSING DIRECTORIES ----
 prebuild :
-	@mkdir -p out $(dir $(ALL_DEP) $(ALL_OBJ) $(TARGETS))
-	@mkdir -p $(addprefix out/,$(notdir $(basename $(wildcard src/tests/*.cpp))))
+	@mkdir -p $(dir $(ALL_DEP) $(ALL_OBJ) $(TARGETS))
 
 # ---- CREATE OBJECT FILES ----
 # Include dependencies
