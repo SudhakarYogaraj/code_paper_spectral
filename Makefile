@@ -23,23 +23,31 @@ OBJ_FILES := $(subst src,obj, $(CPP_FILES:.cpp=.o))
 # Target executable
 TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
 
-# Program to generate dependencies
-MAKEDEPEND = $(CXX) $(CXXFLAGS) -MM -o dep/$*.d $<
+# Problems and tests
+PROBLEMS := $(notdir $(basename $(wildcard src/problem/problem_*.cpp)))
+TESTS    := $(notdir $(basename $(wildcard src/tests/*.cpp)))
+
+# Executables for the tests
+TARGET_TESTS := $(addprefix tests/, $(foreach p, $(PROBLEMS), $(addprefix $(p)/, $(TESTS))))
 
 # Ensure that directories exist and build executable
 all : prebuild $(TARGET)
+	echo $(TARGET_TESTS);
+
+# ---- CREATE MISSING DIRECTORIES ----
 
 prebuild :
 	@rm -f $(TARGET)
 	@mkdir -p out cache $(dir $(DEP_FILES) $(OBJ_FILES))
 	@mkdir -p $(addprefix out/,$(notdir $(basename $(wildcard src/tests/*.cpp))))
 
-# Rule fo the target executable
-$(TARGET) : $(OBJ_FILES)
-	$(CXX) $(LIBS) $(CXXFLAGS) $^ -o $@
+# ---- CREATE OBJECT FILES ----
 
 # Include dependencies
 -include $(DEP_FILES)
+
+# Program to generate dependencies
+MAKEDEPEND = $(CXX) $(CXXFLAGS) -MM -o dep/$*.d $<
 
 # Create object files from c++ code, and generate dependencies at the same time
 obj/%.o : src/%.cpp
@@ -47,8 +55,18 @@ obj/%.o : src/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 	@sed -i "s#^\([^.]*\.o\)#obj/$*.o#g" dep/$*.d
 
+# ---- ?
+
+# Rule fo the target executable
+$(TARGET) : $(OBJ_FILES)
+	$(CXX) $(LIBS) $(CXXFLAGS) $^ -o $@
+
+# ---- CREATE PROBLEM FILES ----
+
 problem:
 	make -C python
+
+# ---- CLEAN CPP, PROBLEM, OR ALL GITIGNORE ----
 
 clean:
 	rm -rf $(TARGET) obj dep
