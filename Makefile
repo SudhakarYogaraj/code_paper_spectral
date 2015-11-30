@@ -15,9 +15,6 @@ PRB = src/problems/problem_${ARG}.cpp
 # All sources, corresponding to different problems
 ALL_SOURCES := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
 
-ALL_DIRS := $(wildcard src/*)
-LIB_DIRS := $(filter-out src/tests src/problems, $(ALL_DIRS))
-
 # For the particular problem
 CPP_FILES := $(filter-out src/problems/problem_%.cpp, $(ALL_SOURCES)) $(PRB)
 DEP_FILES := $(subst src,dep, $(CPP_FILES:.cpp=.d))
@@ -25,6 +22,13 @@ OBJ_FILES := $(subst src,obj, $(CPP_FILES:.cpp=.o))
 
 # Target executable
 TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
+
+# ---- BUILDING THE FILES FOR TESTS ----
+ALL_DIRS := $(wildcard src/*)
+LIB_DIRS := $(filter-out src/tests src/problems, $(ALL_DIRS))
+LIB_CPP  := $(foreach dir, $(LIB_DIRS), $(wildcard $(dir)/*.cpp))
+LIB_OBJ  := $(subst src,obj, $(LIB_CPP:.cpp=.o))
+LIB_DEP  := $(subst src,dep, $(LIB_CPP:.cpp=.d))
 
 # Problems and tests
 PROBLEMS := $(notdir $(basename $(wildcard src/problems/problem_*.cpp)))
@@ -34,14 +38,18 @@ TESTS    := $(notdir $(basename $(wildcard src/tests/*.cpp)))
 TARGET_TESTS := $(addprefix tests/, $(foreach p, $(PROBLEMS), $(addprefix $(p)/, $(TESTS))))
 
 # Ensure that directories exist and build executable
-all : prebuild $(TARGET)
-	echo $(LIB_DIRS);
-	echo $(TARGET_TESTS);
+all : prebuild $(TARGET) $(TARGET_TESTS)
+
+tests/% : $(LIB_OBJ)
+	$(CXX) $(LIB) $(CXXFLAGS) $(LIB_OBJ) \
+	$(addsuffix .o, $(addprefix obj/tests/, $(notdir $@))) \
+	$(addsuffix .o, $(addprefix obj/problems/, $(shell basename $(dir $@)))) \
+	-o $@
 
 # ---- CREATE MISSING DIRECTORIES ----
 prebuild :
 	@rm -f $(TARGET)
-	@mkdir -p out cache $(dir $(DEP_FILES) $(OBJ_FILES))
+	@mkdir -p out $(dir $(DEP_FILES) $(OBJ_FILES) $(TARGET_TESTS))
 	@mkdir -p $(addprefix out/,$(notdir $(basename $(wildcard src/tests/*.cpp))))
 
 # ---- CREATE OBJECT FILES ----
