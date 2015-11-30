@@ -11,8 +11,8 @@
 #include "global/global.hpp"
 #include "solvers/Solver.hpp"
 #include "toolbox/Gaussian_integrator.hpp"
-#include "problem/Problem.hpp"
-#include "problem/Analyser.hpp"
+#include "problems/Problem.hpp"
+#include "problems/Analyser.hpp"
 
 struct config_spectral {
     int n_nodes;

@@ -1,4 +1,4 @@
-#include "problem/Problem.hpp"
+#include "problems/Problem.hpp"
 #include "toolbox/Gaussian_integrator.hpp"
 #include "solvers/Solver_exact.hpp"
 

@@ -1,7 +1,7 @@
 #include "global/global.hpp"
 #include "toolbox/linear_algebra.hpp"
 #include "global/templates.hpp"
-#include "problem/Problem.hpp"
+#include "problems/Problem.hpp"
 #include "solvers/Solver_hmm.hpp"
 
 using namespace std;
