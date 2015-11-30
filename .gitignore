@@ -1,11 +1,13 @@
 ## Addition to the default .gitignore
+/dep
+/obj
+/out
+/tests
+
 problem_*.cpp
 python/outputs
 build_problem.py
 *.exec
-dep
-obj
-out
 *.o
 tmp
 *\~

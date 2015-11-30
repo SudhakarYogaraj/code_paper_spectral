@@ -4,9 +4,6 @@
 # Declare phone targets (always out of date)
 .PHONY: all clean clean-dep problems clean-problems
 
-# Target executable
-TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
-
 # ---- COMPILER AND FLAGS ----
 CXX = clang++
 CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
@@ -28,8 +25,11 @@ PROBLEMS := $(notdir $(basename $(wildcard src/problems/problem_*.cpp)))
 TESTS    := $(notdir $(basename $(wildcard src/tests/*.cpp)))
 TARGETS  := $(addprefix tests/, $(foreach p, $(PROBLEMS), $(addprefix $(p)/, $(TESTS))))
 
+# Target executable, built from main
+TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
+
 # ---- MAIN BUILD ----
-all : prebuild $(TARGETS)
+all : prebuild $(TARGET) $(TARGETS)
 
 # ---- PREBUILD: CREATE MISSING DIRECTORIES ----
 prebuild :
@@ -49,9 +49,13 @@ obj/%.o : src/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 	@sed -i "s#^\([^.]*\.o\)#obj/$*.o#g" dep/$*.d
 
+# ---- BUILDING MAIN ----
+$(TARGET) : $(LIB_OBJ) obj/main/main.o obj/problems/problem_${ARG}.o
+	$(CXX) $(LIBS) $(CXXFLAGS) $^ -o $@
+
 # ---- BUILDING TESTS ----
 tests/% : $(ALL_OBJ)
-	$(CXX) $(LIB) $(CXXFLAGS) $(LIB_OBJ) \
+	$(CXX) $(LIBS) $(CXXFLAGS) $(LIB_OBJ) \
 	$(addsuffix .o, $(addprefix obj/tests/, $(notdir $@))) \
 	$(addsuffix .o, $(addprefix obj/problems/, $(shell basename $(dir $@)))) \
 	-o $@
