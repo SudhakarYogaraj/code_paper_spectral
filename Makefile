@@ -23,7 +23,7 @@ LIB_OBJ  := $(subst src,obj, $(LIB_CPP:.cpp=.o))
 # Problems and tests
 PROBLEMS := $(notdir $(basename $(wildcard src/problems/problem_*.cpp)))
 TESTS    := $(notdir $(basename $(wildcard src/tests/*.cpp)))
-TARGETS  := $(addprefix tests/, $(foreach p, $(PROBLEMS), $(addprefix $(p)/, $(TESTS))))
+TARGETS  := $(addsuffix /test.exec, $(foreach p, $(PROBLEMS), $(addprefix tests/$(p)/, $(TESTS))))
 
 # Target executable, built from main
 TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
@@ -54,11 +54,11 @@ $(TARGET) : $(LIB_OBJ) obj/main/main.o obj/problems/problem_${ARG}.o
 	$(CXX) $(LIBS) $(CXXFLAGS) $^ -o $@
 
 # ---- BUILDING TESTS ----
+sh_dir = $(patsubst %/,%,$(dir $1))
+get_test = obj/tests/$(notdir $(call sh_dir, $1)).o
+get_problem = obj/problems/$(notdir $(call sh_dir, $(call sh_dir, $1))).o
 tests/% : $(ALL_OBJ)
-	$(CXX) $(LIBS) $(CXXFLAGS) $(LIB_OBJ) \
-	$(addsuffix .o, $(addprefix obj/tests/, $(notdir $@))) \
-	$(addsuffix .o, $(addprefix obj/problems/, $(shell basename $(dir $@)))) \
-	-o $@
+	$(CXX) $(LIBS) $(CXXFLAGS) $(LIB_OBJ) $(call get_test, $@) $(call get_problem, $@) -o $@
 
 # ---- CREATE PROBLEM FILES ----
 problems:
