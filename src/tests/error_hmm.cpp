@@ -27,8 +27,8 @@ namespace tests {
         vector<double> estimator_error(p_values.size());
 
         // Files to write to
-        ofstream out_time("out/hmm_time");
-        ofstream out_errs("out/hmm_error");
+        ofstream out_time("hmm_time");
+        ofstream out_errs("hmm_error");
 
         for (unsigned int i = 0; i < p_values.size(); ++i) {
 

@@ -35,9 +35,9 @@ namespace tests {
         vector<double> estimator_error(degrees.size());
 
         // Files to write to
-        ofstream out_degree("out/error_spectral/degree");
-        ofstream out_time("out/error_spectral/time");
-        ofstream out_errs("out/error_spectral/error");
+        ofstream out_degree("degree");
+        ofstream out_time("time");
+        ofstream out_errs("error");
 
         // Configuration for the spectral solver
         config_spectral conf_spectral; {
