@@ -25,7 +25,7 @@ TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
 
 # ---- BUILDING THE FILES FOR TESTS ----
 ALL_DIRS := $(wildcard src/*)
-LIB_DIRS := $(filter-out src/tests src/problems, $(ALL_DIRS))
+LIB_DIRS := $(filter-out src/tests src/problems src/main, $(ALL_DIRS))
 LIB_CPP  := $(foreach dir, $(LIB_DIRS), $(wildcard $(dir)/*.cpp))
 LIB_OBJ  := $(subst src,obj, $(LIB_CPP:.cpp=.o))
 LIB_DEP  := $(subst src,dep, $(LIB_CPP:.cpp=.d))
