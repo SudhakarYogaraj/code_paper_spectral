@@ -4,13 +4,15 @@
 # Declare phone targets (always out of date)
 .PHONY: all clean clean-dep problems clean-problems
 
+# Keep object files
+.PRECIOUS: %.o %.d
+
 # ---- COMPILER AND FLAGS ----
 CXX = clang++
 CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
 LIBS = -larmadillo
 
 # ---- BUILDING LIST OF TEST AND LIB FILES ----
-
 # For the particular problem
 ALL_CPP := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
 ALL_DEP := $(subst src,dep, $(ALL_CPP:.cpp=.d))
@@ -29,7 +31,7 @@ TARGETS  := $(addsuffix /test.exec, $(foreach p, $(PROBLEMS), $(addprefix tests/
 TARGET = $(notdir $(shell git rev-parse --abbrev-ref HEAD)).exec
 
 # ---- MAIN BUILD ----
-all : prebuild $(TARGET) $(TARGETS)
+all : prebuild $(TARGET)
 
 # ---- PREBUILD: CREATE MISSING DIRECTORIES ----
 prebuild :
@@ -53,6 +55,7 @@ $(TARGET) : $(LIB_OBJ) obj/main/main.o obj/problems/problem_${ARG}.o
 	$(CXX) $(LIBS) $(CXXFLAGS) $^ -o $@
 
 # ---- BUILDING TESTS ----
+tests : $(TARGETS)
 sh_dir = $(patsubst %/,%,$(dir $1))
 get_test = obj/tests/$(notdir $(call sh_dir, $1)).o
 get_problem = obj/problems/$(notdir $(call sh_dir, $(call sh_dir, $1))).o
