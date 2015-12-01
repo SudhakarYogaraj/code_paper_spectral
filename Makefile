@@ -2,7 +2,7 @@
 .SUFFIXES:
 
 # Declare phone targets (always out of date)
-.PHONY: all clean clean-dep problems clean-problems
+.PHONY: all tests clean clean-dep problems clean-problems
 
 # Keep object files
 .PRECIOUS: %.o %.d
@@ -36,6 +36,7 @@ all : prebuild $(TARGET)
 # ---- PREBUILD: CREATE MISSING DIRECTORIES ----
 prebuild :
 	@mkdir -p $(dir $(ALL_DEP) $(ALL_OBJ) $(TARGETS))
+	@rm -f $(TARGET)
 
 # ---- CREATE OBJECT FILES ----
 # Include dependencies

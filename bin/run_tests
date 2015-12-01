@@ -1,0 +1,8 @@
+#!/bin/bash
+
+root=$(git rev-parse --show-toplevel)
+cd ${root}
+for f in $(find tests -name '*.exec'); do
+    echo "Running test: $f"
+    cd $(dirname $f) && ./$(basename $f) && cd ${root} &
+done
