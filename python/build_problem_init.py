@@ -65,11 +65,6 @@ h[0] = sympy.cos(x[0]) * sympy.cos(y[0]) * sympy.cos(y[1])
 h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1])
 # end
 
-stardivh = 0
-for i in range(nf):
-    stardivh += vy[i] * h[i] - sympy.diff(h[i], y[i])
-stardivh = sympy.simplify(stardivh)
-
 # user input : potential
 v = ((y[1] + y[0]) ** 4/4 - (y[1] + y[0]) ** 2 / 2) + (y[1] - y[0]) ** 4
 # end
@@ -78,6 +73,11 @@ for i in range(nf):
     vy[i] = sympy.diff(v, y[i])
     for j in range(nf):
         vyy[i][j] = sympy.diff(vy[i], y[j])
+
+stardivh = 0
+for i in range(nf):
+    stardivh += vy[i] * h[i] - sympy.diff(h[i], y[i])
+stardivh = sympy.simplify(stardivh)
 
 # Invariant density
 rho = sympy.exp(-v)
@@ -106,17 +106,17 @@ stardivh = 0
 for i in range(nf):
     stardivh += vy[i] * h[i] - sympy.diff(h[i], y[i])
 stardivh = sympy.simplify(stardivh)
-
+print(stardivh)
 
 # Extension of the y vector
 y = [sympy.Symbol('y%d' % i) for i in range(2*nf)]
 
 # Construction of the drift
 for i in range(nf):
-    drif[i] = -S*vy[i]
+    drif[i] = -vy[i]
     drif[nf+i] = h[i]
     for j in range(nf):
-        drif[nf+i] -= S*vyy[i][j] * y[j+nf]
+        drif[nf+i] -= vyy[i][j] * y[j+nf]
 
 for i in range(nf):
     diff[i] = s
