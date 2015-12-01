@@ -1,7 +1,8 @@
 /dep
 /obj
 /out
-/tests
+/tests/problem*
+/tests/summary/summary.tex
 
 /python/tex
 /python/tmp
