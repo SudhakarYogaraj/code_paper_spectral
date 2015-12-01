@@ -1,0 +1,8 @@
+#!/bin/bash
+
+root=$(git rev-parse --show-toplevel) && cd ${root}
+for d in $(find tests -type d -name '*error_spectral'); do
+    echo "Moving to directory: $d" && cd ${d}
+    gnuplot ${root}/gnuplot/error_spectral.gnu
+    cd ${root}
+done
