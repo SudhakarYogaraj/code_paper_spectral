@@ -203,3 +203,10 @@ allocate_function_pointer("dxphi", ns, ns)
 allocate_function_pointer("drif", 2*nf)
 allocate_function_pointer("diff", 2*nf)
 output.write("}")
+
+# Latex output file
+latex_out = open(sys.argv[2], 'w')
+latex_out.write("\[\n    s = " + sympy.latex(s) + "\n\]\n")
+latex_out.write("\[\n    g = " + sympy.latex(g) + "\n\]\n")
+latex_out.write("\[\n    h = " + sympy.latex(h) + "\n\]\n")
+latex_out.write("\[\n    v = " + sympy.latex(v) + "\n\]\n")
