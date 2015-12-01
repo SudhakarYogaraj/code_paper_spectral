@@ -1,20 +1,21 @@
-## Addition to the default .gitignore
 /dep
 /obj
 /out
 /tests
 
-problem_*.cpp
-python/outputs
-build_problem.py
-*.exec
-*.o
-tmp
-*\~
-*.pyc
-.dropbox
+/python/tex
+/python/tmp
+/python/outputs
+
+/src/problems/problem_*.cpp
+
 Session.vim
 
+*.dropbox
+*.exec
+*.o
+*.pyc
+*\~
 
 *.zip
 *.pdf
