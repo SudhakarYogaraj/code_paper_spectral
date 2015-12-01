@@ -1,0 +1,10 @@
+#!/bin/bash
+
+root=$(git rev-parse --show-toplevel)
+
+((* for p in data.problems *))
+    ((* for t in p.run *))
+        cd ${root}/tests/(((p.dir)))/(((t)))
+        ./test.exec
+    ((* endfor *))
+((* endfor *))

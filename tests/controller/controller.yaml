@@ -7,7 +7,6 @@ problems:
         test_name: Test of the spectral solver
         files:
           - degree_error.tex
-          - time_error.tex
     run:
       - error_spectral
 
@@ -18,7 +17,6 @@ problems:
         test_name: Test of the spectral solver
         files:
           - degree_error.tex
-          - time_error.tex
     run:
       - error_spectral
 
@@ -29,7 +27,6 @@ problems:
         test_name: Test of the spectral solver
         files:
           - degree_error.tex
-          - time_error.tex
     run:
       - error_spectral
 
@@ -40,7 +37,6 @@ problems:
         test_name: Test of the spectral solver
         files:
           - degree_error.tex
-          - time_error.tex
     run:
       - error_spectral
 
@@ -51,6 +47,5 @@ problems:
         test_name: Test of the spectral solver
         files:
           - degree_error.tex
-          - time_error.tex
     run:
       - error_spectral
