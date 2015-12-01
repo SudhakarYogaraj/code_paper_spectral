@@ -1,0 +1,18 @@
+\documentclass{report}
+\usepackage{graphicx}
+\usepackage{float}
+\begin{document}
+    ((* for p in data.problems *))
+    \section*{(((p.name)))}
+        ((* for t in p.plot *))
+        \subsection*{(((t.test_name)))}
+            ((* for f in t.files *))
+            \begin{figure}[H]
+                \centering
+                {\graphicspath{{../problem_(((p.dir)))/(((t.test_dir)))/}}\input{../problem_(((p.dir)))/(((t.test_dir)))/(((f)))}}
+            \end{figure}
+            ((* endfor *))
+        ((* endfor *))
+    ((* endfor *))
+    \cleardoublepage
+\end{document}

@@ -1,0 +1,56 @@
+---
+problems:
+  - dir: 1D_easy
+    name: Easy one-dimensional problem
+    plot:
+      - test_dir: error_spectral
+        test_name: Test of the spectral solver
+        files:
+          - degree_error.tex
+          - time_error.tex
+    run:
+      - error_spectral
+
+  - dir: 1D_quadratic
+    name: One-dimensional problem with quadratic potential
+    plot:
+      - test_dir: error_spectral
+        test_name: Test of the spectral solver
+        files:
+          - degree_error.tex
+          - time_error.tex
+    run:
+      - error_spectral
+
+  - dir: 2D_easy
+    name: Easy two-dimensional problem
+    plot:
+      - test_dir: error_spectral
+        test_name: Test of the spectral solver
+        files:
+          - degree_error.tex
+          - time_error.tex
+    run:
+      - error_spectral
+
+  - dir: 2D_difficult
+    name: More difficult two-dimensional problem
+    plot:
+      - test_dir: error_spectral
+        test_name: Test of the spectral solver
+        files:
+          - degree_error.tex
+          - time_error.tex
+    run:
+      - error_spectral
+
+  - dir: triple_well
+    name: Two-dimensional problem with triple well
+    plot:
+      - test_dir: error_spectral
+        test_name: Test of the spectral solver
+        files:
+          - degree_error.tex
+          - time_error.tex
+    run:
+      - error_spectral
