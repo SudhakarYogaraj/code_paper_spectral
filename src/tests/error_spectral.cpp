@@ -59,44 +59,16 @@ namespace tests {
             vector< vector<double> > Ddiff = (full_c[i].diff - exact_diff);
             estimator_error[i] = fabs(Ddrif)/fabs(exact_drift) + fabs(Ddiff)/fabs(exact_diff);
 
-            // Summary of iteration
-            cout << "> Degree" << degrees[i] << ". Error: " << estimator_error[i] << endl;
-        }
-
-        cout << "Time for full solution: " << toc() << endl << endl;
-
-        for (unsigned int i = 0; i < degrees.size(); ++i) {
-
-            // Configuration for the spectral solver
-            config_spectral conf_spectral; {
-                conf_spectral.n_nodes = 100;
-                conf_spectral.degree = degrees[i];
-                conf_spectral.scaling = vector<double> (problem->nf, 0.5);
-            }
-
-            // Create new solvers
-            Solver_spectral solver_spectral(problem, analyser, &conf_spectral);
-
-            // Measure time of execution
-            tic(); SDE_coeffs c = solver_spectral.estimator(x, 0.); estimator_time[i] = toc();
-
-            // Error
-            vector<double> Ddrif = (c.drif - exact_drift);
-            vector< vector<double> > Ddiff = (c.diff - exact_diff);
-            estimator_error[i] = fabs(Ddrif)/fabs(exact_drift) + fabs(Ddiff)/fabs(exact_diff);
-
             // Write to file
             out_degree << degrees[i] << endl;
             out_time << estimator_time[i] << endl;
             out_errs << estimator_error[i] << endl;
 
             // Summary of iteration
-            cout << "> Degree" << degrees[i] << ". Time: " << estimator_time[i] << ". Error: " << estimator_error[i] << endl;
+            cout << "> Degree" << degrees[i] << ". Error: " << estimator_error[i] << endl;
         }
 
-        /* Do you notice a difference between the two solutions?
-         * This is because the analyser updates the statistics each time.
-         */
+        cout << "Time for full solution: " << toc() << endl << endl;
     }
 }
 
