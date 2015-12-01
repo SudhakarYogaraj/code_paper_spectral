@@ -10,7 +10,7 @@ TEX_DIR = tex
 
 # Files
 IN := $(wildcard $(IN_DIR)/*.py)
-OUT := $(addprefix $(OUT_DIR)/problem_,$(notdir $(IN:.py=.cpp)))
+OUT := $(addprefix $(OUT_DIR)/,$(notdir $(IN:.py=.cpp)))
 SUB := $(addprefix $(AUX_DIR)/,$(notdir $(IN:.py=.sub)))
 GEN := $(addprefix $(AUX_DIR)/,$(notdir $(IN:.py=.gen)))
 TEX := $(addprefix $(TEX_DIR)/,$(notdir $(IN:.py=.tex)))
@@ -22,7 +22,7 @@ all : prebuild $(OUT)
 prebuild:
 	mkdir -p $(AUX_DIR) $(OUT_DIR) $(TEX_DIR)
 
-$(OUT_DIR)/problem_%.cpp : problem.init $(AUX_DIR)/%.sub
+$(OUT_DIR)/%.cpp : problem.init $(AUX_DIR)/%.sub
 	cat $^ > $@
 
 $(AUX_DIR)/%.sub : $(AUX_DIR)/%.gen

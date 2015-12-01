@@ -1,6 +1,6 @@
 ---
 problems:
-  - dir: 1D_easy
+  - dir: problem_1D_easy
     name: Easy one-dimensional problem
     plot:
       - test_dir: error_spectral
@@ -10,7 +10,7 @@ problems:
     run:
       - error_spectral
 
-  - dir: 1D_quadratic
+  - dir: problem_1D_quadratic
     name: One-dimensional problem with quadratic potential
     plot:
       - test_dir: error_spectral
@@ -20,7 +20,7 @@ problems:
     run:
       - error_spectral
 
-  - dir: 2D_easy
+  - dir: problem_2D_easy
     name: Easy two-dimensional problem
     plot:
       - test_dir: error_spectral
@@ -30,7 +30,7 @@ problems:
     run:
       - error_spectral
 
-  - dir: 2D_difficult
+  - dir: problem_2D_difficult
     name: More difficult two-dimensional problem
     plot:
       - test_dir: error_spectral
@@ -40,7 +40,7 @@ problems:
     run:
       - error_spectral
 
-  - dir: triple_well
+  - dir: problem_triple_well
     name: Two-dimensional problem with triple well
     plot:
       - test_dir: error_spectral
