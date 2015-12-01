@@ -23,7 +23,7 @@ LIB_CPP  := $(foreach dir, $(LIB_DIRS), $(wildcard $(dir)/*.cpp))
 LIB_OBJ  := $(subst src,obj, $(LIB_CPP:.cpp=.o))
 
 # Problems and tests
-PROBLEMS := $(notdir $(basename $(wildcard src/problems/problem_*.cpp)))
+PROBLEMS := $(notdir $(basename $(wildcard src/problems/*.cpp)))
 TESTS    := $(notdir $(basename $(wildcard src/tests/*.cpp)))
 TARGETS  := $(addsuffix /test.exec, $(foreach p, $(PROBLEMS), $(addprefix tests/$(p)/, $(TESTS))))
 
@@ -52,11 +52,11 @@ obj/%.o : src/%.cpp
 	@sed -i "s#^\([^.]*\.o\)#obj/$*.o#g" dep/$*.d
 
 # ---- BUILDING MAIN ----
-$(TARGET) : $(LIB_OBJ) obj/main/main.o obj/problems/problem_${ARG}.o
+$(TARGET) : $(LIB_OBJ) obj/main/main.o obj/problems/${ARG}.o
 	$(CXX) $(LIBS) $(CXXFLAGS) $^ -o $@
 
 # ---- BUILDING TESTS ----
-tests : $(TARGETS)
+tests : prebuild $(TARGETS)
 sh_dir = $(patsubst %/,%,$(dir $1))
 get_test = obj/tests/$(notdir $(call sh_dir, $1)).o
 get_problem = obj/problems/$(notdir $(call sh_dir, $(call sh_dir, $1))).o

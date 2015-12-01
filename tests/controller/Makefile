@@ -1,8 +1,9 @@
 .PHONY : all clean
 
-targets := run_tests make_plots summary.pdf
+targets := run_tests make_plots
 
 all : $(targets)
+summary : summary.pdf
 
 summary.pdf : controller.yaml
 	python convert.py controller.yaml summary.tex
@@ -19,4 +20,4 @@ make_plots : controller.yaml
 	chmod +x make_plots
 
 clean : 
-	rm $(targets)
+	rm -f $(targets) summary.pdf
