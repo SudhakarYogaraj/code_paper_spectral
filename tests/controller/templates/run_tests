@@ -3,7 +3,9 @@
 root=$(git rev-parse --show-toplevel)
 
 ((* for p in data.problems *))
+    echo "Starting tests for problem (((p.dir)))..."
     ((* for t in p.run *))
+        echo "Starting test (((t)))..."
         cd ${root}/tests/(((p.dir)))/(((t)))
         ./test.exec
     ((* endfor *))
