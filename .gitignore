@@ -1,8 +1,11 @@
 /dep
 /obj
 /out
+
 /tests/problem*
-/tests/summary/summary.tex
+/tests/controller/run_tests
+/tests/controller/make_plots
+/tests/controller/summary.pdf
 
 /python/tex
 /python/tmp

@@ -4,6 +4,7 @@
 \begin{document}
     ((* for p in data.problems *))
     \section*{(((p.name)))}
+    \input{../../python/tex/(((p.dir)))}
         ((* for t in p.plot *))
         \subsection*{(((t.test_name)))}
             ((* for f in t.files *))
@@ -13,6 +14,6 @@
             \end{figure}
             ((* endfor *))
         ((* endfor *))
+    \newpage
     ((* endfor *))
-    \cleardoublepage
 \end{document}
