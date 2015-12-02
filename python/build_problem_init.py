@@ -106,20 +106,22 @@ stardivh = 0
 for i in range(nf):
     stardivh += vy[i] * h[i] - sympy.diff(h[i], y[i])
 stardivh = sympy.simplify(stardivh)
-print(stardivh)
 
 # Extension of the y vector
 y = [sympy.Symbol('y%d' % i) for i in range(2*nf)]
 
 # Construction of the drift
 for i in range(nf):
-    drif[i] = -vy[i]
+    drif[i] = -(S/2.) * vy[i]
     drif[nf+i] = h[i]
     for j in range(nf):
-        drif[nf+i] -= vyy[i][j] * y[j+nf]
+        drif[nf+i] -= (S/2.) * vyy[i][j] * y[j+nf]
 
 for i in range(nf):
     diff[i] = s
+    diff[i+nf] = sympy.Symbol('0')
+
+print(diff)
 
 # Output file
 print(sys.argv[1])
@@ -158,7 +160,7 @@ for i in range(nf):
 
 for i in range(2*nf):
     print_double(drif[i], "drif{}".format(i))
-    print_double(diff[j], "diff{}".format(i))
+    print_double(diff[i], "diff{}".format(i))
 
 
 def print_matrix(fun_base, n=0, m=0):
