@@ -1,8 +1,6 @@
 # Error Plot
 reset
 
-# Range in x
-
 # Directory of input and output
 input = "./"
 out = "./"
@@ -47,9 +45,9 @@ data = "<paste ".input."time ".input."error"
 # EPS-LATEX
 set term epslatex
 set output out."time_error.tex"
-plot data with points
+# plot data with points
 
 # PDF
 set term pdf
 set output out."_time_error.pdf"
-plot data with points
+# plot data with points

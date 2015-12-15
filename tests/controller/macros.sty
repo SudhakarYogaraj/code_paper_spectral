@@ -1,0 +1,57 @@
+% Colors
+\definecolor{darkred}{rgb}{.7,0,0}
+
+% Misc
+\newcommand{\red}[1]{\textcolor{darkred}{#1}}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+% Differential operators
+\newcommand{\op}[0]{\mathcal}
+\newcommand{\grad}[0]{\nabla}
+
+% Polynomials
+\newcommand{\hermite}[1]{\mathcal{#1}}
+\newcommand{\hermitef}[1]{#1}
+
+% Probability
+\DeclareDocumentCommand\gaussian{O{0} O{I}} {G_{(#1, #2)}}
+\newcommand{\expect}[0]{\mathbb{E}}
+
+% Operators
+\newcommand{\proj}[2]{\pi\left(#1,#2\right)}
+\newcommand{\adj}[1]{#1^*}
+\newcommand{\orth}[1]{#1^\perp}
+\DeclareMathOperator{\trace}{tr}
+\DeclareMathOperator{\support}{supp}
+
+% Sequence
+\newcommand{\seq}[4]{{\left\{#1_{#2}\right\}}_{#2=#3}^{#4}}
+
+% Integrals
+\renewcommand{\d}[0]{\,\mathrm{d}}
+
+% Spaces
+\newcommand{\Space}[1]{\mathscr{#1}}
+\newcommand{\nat}[0]{\mathbf{N}}
+\newcommand{\real}[0]{\mathbf{R}}
+\newcommand{\poly}[1]{\mathbf{P}_{#1}}
+\newcommand{\cont}[2]{C^{#1} (#2)}
+\newcommand{\contb}[2]{C_b^{#1} (#2)}
+\newcommand{\contc}[2]{C_0^{#1} (#2)}
+\newcommand{\smooth}[1]{C^\infty(#1)}
+\newcommand{\test}[1]{C^\infty_c (#1)}
+\newcommand{\schwartz}[1]{S (#1)}
+\newcommand{\lploc}[2]{L_{loc}^{#1}\left(#2\right)}
+
+% Lp and sobolev spaces
+\DeclareDocumentCommand\sobolev{m m o} {H^{#1}\left(#2 \IfNoValueF{#3}{,#3}\right)}
+\DeclareDocumentCommand\lp{m m o} {L^{#1}\left(#2 \IfNoValueF{#3}{,#3}\right)}
+
+% Norms and inner products
+\DeclareDocumentCommand\norm{m o o} {\left\|#1\right\|\IfNoValueF{#2}{_{#2 \IfNoValueF{#3}{,#3}}}}
+\DeclareDocumentCommand\seminorm{m o o} {\left|#1\right|\IfNoValueF{#2}{_{#2 \IfNoValueF{#3}{,#3}}}}
+\DeclareDocumentCommand\ip{m m o o} {\left\langle{#1,#2}\right\rangle\IfNoValueF{#3}{_{#3 \IfNoValueF{#4}{,#4}}}}
+\DeclareDocumentCommand\dup{m m o} {\left\langle{#1,#2}\right\rangle\IfNoValueF{#3}{_{#3', #3}}}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\enorm}[1]{|||#1|||}
+\newcommand{\eip}[2]{\left\langle\left\langle{#1,#2}\right\rangle\right\rangle}

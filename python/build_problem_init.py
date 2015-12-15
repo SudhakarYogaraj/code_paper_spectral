@@ -27,8 +27,8 @@ s = sympy.sqrt(2)
 S = s * s
 
 # Creation of symbolic Variables
-x = [sympy.Symbol('x%d' % i) for i in range(ns)]
-y = [sympy.Symbol('y%d' % i) for i in range(nf)]
+x = [sympy.Symbol('x%d' % i, real=True) for i in range(ns)]
+y = [sympy.Symbol('y%d' % i, real=True) for i in range(nf)]
 
 # Solution of the Poisson equation
 g = [0.]*ns
@@ -208,7 +208,16 @@ output.write("}")
 
 # Latex output file
 latex_out = open(sys.argv[2], 'w')
-latex_out.write("\[\n    s = " + sympy.latex(s) + "\n\]\n")
-latex_out.write("\[\n    g = " + sympy.latex(g) + "\n\]\n")
-latex_out.write("\[\n    h = " + sympy.latex(h) + "\n\]\n")
-latex_out.write("\[\n    v = " + sympy.latex(v) + "\n\]\n")
+latex_out.write("\\begin{equation*}\n")
+latex_out.write("    \\left\\{\\begin{aligned}\n")
+
+for i in range(ns):
+    latex_out.write("        d{} &=  -\\frac{{1}}{{\\varepsilon}}\\,\\op{{L}}\\left[{}\\right]\\,dt\\\\\n".format(sympy.latex(x[i]), sympy.latex(g[i])))
+
+for i in range(nf):
+    latex_out.write("        d{0} &=  \\frac{{1}}{{\\varepsilon^2}}\\,\\partial_{{ {0} }} V(x,y)\\,dt + \\frac{{1}}{{\\varepsilon}}\\left[{1}\\right]".format(sympy.latex(y[i]), sympy.latex(h[i])))
+    latex_out.write("+\\frac{{ {0} }}{{\\varepsilon}}\\,dW_{1}\\\\\n".format(sympy.latex(s), i))
+
+latex_out.write("    \\end{aligned}\\right.\n")
+latex_out.write("\\end{equation*}\n")
+latex_out.write("with $V(x,y) = {}$.\n".format(sympy.latex(v)))

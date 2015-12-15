@@ -1,0 +1,54 @@
+% Compilation options
+\synctex=1
+
+% Packages
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenx}
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{appendix}
+\usepackage{vmargin}
+\usepackage{setspace}
+\usepackage{mathrsfs, mathenv}
+\usepackage{amsmath, amsthm, amssymb, amsfonts, amscd}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{subfigure}
+\usepackage{color}
+\usepackage{todonotes}
+\usepackage{caption}
+\usepackage[numbers]{natbib}
+\usepackage{hyperref}
+\usepackage{xparse}
+
+% Packages options
+\hypersetup{citecolor=blue, colorlinks=true, linkcolor=black}
+
+% Layout options
+\setlength{\parskip}{6pt}
+\setlength\parindent{0pt}
+\setstretch{1.3}
+
+% Settings for the table of contents
+\setcounter{secnumdepth}{1}
+\setcounter{tocdepth}{1}
+
+% Theorems
+\theoremstyle{plain}
+\newtheorem{assumption}{Assumption}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{axiom}[theorem]{Axiom}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% Booleans
+\newif\iflong\longtrue%
+\newif\ifdraft\longfalse%
