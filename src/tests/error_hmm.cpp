@@ -7,7 +7,7 @@ namespace tests {
     void error_hmm(vector<double> x, Problem *problem, Analyser *analyser) {
 
         // Minimal and maximal values of the precision parameter
-        int p_min = 3;
+        int p_min = 4;
         int p_max = 6;
 
         vector<int> p_values(p_max - p_min + 1);

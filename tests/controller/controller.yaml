@@ -7,13 +7,8 @@ problems:
         test_name: Test of the spectral solver
         files:
           - degree_error.tex
-      - test_dir: error_hmm
-        test_name: Test of the HMM solver
-        files:
-          - degree_error.tex
     run:
       - error_spectral
-      - error_hmm
 
   - dir: problem_1D_quadratic
     name: One-dimensional problem with quadratic potential
@@ -24,7 +19,6 @@ problems:
           - degree_error.tex
     run:
       - error_spectral
-      - error_hmm
 
   - dir: problem_2D_easy
     name: Easy two-dimensional problem
@@ -35,7 +29,6 @@ problems:
           - degree_error.tex
     run:
       - error_spectral
-      - error_hmm
 
   - dir: problem_2D_difficult
     name: More difficult two-dimensional problem
@@ -46,7 +39,6 @@ problems:
           - degree_error.tex
     run:
       - error_spectral
-      - error_hmm
 
   - dir: problem_triple_well
     name: Two-dimensional problem with triple well
@@ -57,4 +49,23 @@ problems:
           - degree_error.tex
     run:
       - error_spectral
-      - error_hmm
+
+  - dir: problem_toy
+    name: Toy problem
+    plot:
+      - test_dir: error_spectral
+        test_name: Test of the spectral solver
+        files:
+          - degree_error.tex
+    run:
+      - error_spectral
+
+  - dir: problem_3D_easy
+    name: A three-dimensional problem
+    plot:
+      - test_dir: error_spectral
+        test_name: Test of the spectral solver
+        files:
+          - degree_error.tex
+    run:
+      - error_spectral

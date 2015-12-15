@@ -3,13 +3,11 @@
 targets := run_tests make_plots
 
 all : $(targets)
-summary : summary.pdf
 
-summary.pdf : controller.yaml
+summary :
 	python convert.py controller.yaml summary.tex
 	latexmk -pdf summary.tex
 	latexmk -c
-	rm summary.tex
 
 run_tests : controller.yaml
 	python convert.py controller.yaml run_tests

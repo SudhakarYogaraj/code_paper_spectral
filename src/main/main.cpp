@@ -43,8 +43,10 @@ namespace tests {
             vector<double> Ddrif = (c.drif - exact_drift);
             vector< vector<double> > Ddiff = (c.diff - exact_diff);
 
-            cout << "fabs(exact_drift)" << fabs(exact_drift) << endl;
-            cout << "fabs(exact_diff)" << fabs(exact_diff) << endl;
+            cout << "exact_drift[0]" << exact_drift[0] << endl;
+            cout << "exact_diff[0][0]" << exact_diff[0][0] << endl;
+            cout << "hmm_drift[0]" << c.drif[0] << endl;
+            cout << "hmm_diff[0][0]" << c.diff[0][0] << endl;
             cout << "fabs(Ddrif)" << fabs(Ddrif) << endl;
             cout << "fabs(Ddiff)" << fabs(Ddiff) << endl;
             estimator_error[i] = fabs(Ddrif)/fabs(exact_drift) + fabs(Ddiff)/fabs(exact_diff);
@@ -88,7 +90,7 @@ namespace tests {
         config_spectral conf_spectral; {
             conf_spectral.n_nodes = 100;
             conf_spectral.degree = degrees[degrees.size()-1];
-            conf_spectral.scaling = vector<double> (problem->nf, 0.5);
+            conf_spectral.scaling = vector<double> (problem->nf, 0.3);
         }
 
         // Create new solver
@@ -116,7 +118,7 @@ namespace tests {
             config_spectral conf_spectral; {
                 conf_spectral.n_nodes = 100;
                 conf_spectral.degree = degrees[i];
-                conf_spectral.scaling = vector<double> (problem->nf, 0.5);
+                conf_spectral.scaling = vector<double> (problem->nf, 0.4);
             }
 
             // Create new solvers
@@ -153,6 +155,6 @@ int main(int argc, char* argv[]) {
     Analyser analyser(&problem);
 
     // Test error_spectral
-    tests::error_hmm(problem.x0, &problem, &analyser);
     tests::error_spectral(problem.x0, &problem, &analyser);
+    /* tests::error_hmm(problem.x0, &problem, &analyser); */
 }

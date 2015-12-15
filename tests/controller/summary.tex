@@ -1,0 +1,97 @@
+\documentclass{report}
+\usepackage{header,macros}
+\usepackage{float}
+\begin{document}
+    
+    \section*{Easy one-dimensional problem}
+    \input{../../python/tex/problem_1D_easy}
+        
+        \subsection*{Test of the spectral solver}
+            
+            \begin{figure}[H]
+                \centering
+                {\graphicspath{{../problem_1D_easy/error_spectral/}}\input{../problem_1D_easy/error_spectral/degree_error.tex}}
+            \end{figure}
+            
+        
+    \newpage
+    
+    \section*{One-dimensional problem with quadratic potential}
+    \input{../../python/tex/problem_1D_quadratic}
+        
+        \subsection*{Test of the spectral solver}
+            
+            \begin{figure}[H]
+                \centering
+                {\graphicspath{{../problem_1D_quadratic/error_spectral/}}\input{../problem_1D_quadratic/error_spectral/degree_error.tex}}
+            \end{figure}
+            
+        
+    \newpage
+    
+    \section*{Easy two-dimensional problem}
+    \input{../../python/tex/problem_2D_easy}
+        
+        \subsection*{Test of the spectral solver}
+            
+            \begin{figure}[H]
+                \centering
+                {\graphicspath{{../problem_2D_easy/error_spectral/}}\input{../problem_2D_easy/error_spectral/degree_error.tex}}
+            \end{figure}
+            
+        
+    \newpage
+    
+    \section*{More difficult two-dimensional problem}
+    \input{../../python/tex/problem_2D_difficult}
+        
+        \subsection*{Test of the spectral solver}
+            
+            \begin{figure}[H]
+                \centering
+                {\graphicspath{{../problem_2D_difficult/error_spectral/}}\input{../problem_2D_difficult/error_spectral/degree_error.tex}}
+            \end{figure}
+            
+        
+    \newpage
+    
+    \section*{Two-dimensional problem with triple well}
+    \input{../../python/tex/problem_triple_well}
+        
+        \subsection*{Test of the spectral solver}
+            
+            \begin{figure}[H]
+                \centering
+                {\graphicspath{{../problem_triple_well/error_spectral/}}\input{../problem_triple_well/error_spectral/degree_error.tex}}
+            \end{figure}
+            
+        
+    \newpage
+    
+    \section*{Toy problem}
+    \input{../../python/tex/problem_toy}
+        
+        \subsection*{Test of the spectral solver}
+            
+            \begin{figure}[H]
+                \centering
+                {\graphicspath{{../problem_toy/error_spectral/}}\input{../problem_toy/error_spectral/degree_error.tex}}
+            \end{figure}
+            
+        
+    \newpage
+    
+    \section*{A three-dimensional problem}
+    \input{../../python/tex/problem_3D_easy}
+        
+        \subsection*{Test of the spectral solver}
+            
+            \begin{figure}[H]
+                \centering
+                {\graphicspath{{../problem_3D_easy/error_spectral/}}\input{../problem_3D_easy/error_spectral/degree_error.tex}}
+            \end{figure}
+            
+        
+    \newpage
+    
+\end{document}
