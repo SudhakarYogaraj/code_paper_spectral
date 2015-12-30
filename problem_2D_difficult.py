@@ -30,8 +30,8 @@ g[1] = sympy.sin(x[1]) * sympy.sin(y[0] + y[1]);
 # end
 
 # user input : second order drift
-h[0] = sympy.cos(x[0]) * sympy.cos(y[0])  * sympy.cos(y[1]);
-h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1]);
+h[0] = sympy.Symbol('0')
+h[1] = sympy.Symbol('0')
 # end
 
 # user input : potential
