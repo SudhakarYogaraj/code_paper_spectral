@@ -13,11 +13,11 @@
 # s : Diffusion coefficient
 #
 
-## 1D problem
+## 2D problem
 
 # user input : dimensions
-ns = 1
-nf = 1
+ns = 2
+nf = 2
 # end
 
 # user input : diffusion
@@ -25,14 +25,15 @@ s = sympy.sqrt(2)
 # end
 
 # user input : solution
-g[0] = x[0] * sympy.sin(y[0])
+g[0] = x[0] * sympy.cos(y[0])
+g[1] = x[1] * sympy.cos(y[1])
 # end
 
 # user input : second order drift
-# h[0] = sympy.cos(x[0]) * sympy.cos(0.5*y[0]);
 h[0] = sympy.Symbol('0')
+h[1] = sympy.Symbol('0')
 # end
 
 # user input : potential
-v = y[0] ** 2
+v = y[0] ** 2 + y[1] ** 2
 # end

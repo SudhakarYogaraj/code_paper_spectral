@@ -26,7 +26,7 @@ s = sympy.sqrt(2)
 
 # user input : solution
 g[0] = sympy.cos(x[0] + y[0] + y[1])
-g[1] = sympy.sin(x[1]) * sympy.sin(y[0] + y[1] + 0.5*y[2]);
+g[1] = sympy.sin(x[1]) * sympy.sin(y[0] + y[1] + 2*y[2]);
 # end
 
 # user input : second order drift
@@ -36,5 +36,5 @@ h[2] = sympy.Symbol('0');
 # end
 
 # user input : potential
-v = (y[0] ** 2 + y[1] ** 2 + y[2] ** 2) + 0.1 * (y[0] ** 2 + y[1] ** 2) ** 2
+v = y[0] ** 4 + 2 * y[1] ** 4 + 3 * y[2] ** 4
 # end

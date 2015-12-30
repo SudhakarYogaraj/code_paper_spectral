@@ -35,5 +35,5 @@ h[1] = sympy.cos(x[0]) * sympy.cos(y[0] + y[1]);
 # end
 
 # user input : potential
-v = ((y[0] - sympy.cos(0))**2 + (y[1] - sympy.sin(0))**2) * ((y[0] - sympy.cos(2 * sympy.pi / 3))**2 + (y[1] - sympy.sin(2 * sympy.pi / 3))**2) * ((y[0] - sympy.cos(4 * sympy.pi / 3))**2 + (y[1] - sympy.sin(4 * sympy.pi / 3))**2)
+v = ((y[0] - 2*sympy.cos(0))**2 + (y[1] - 2*sympy.sin(0))**2) * ((y[0] - 2*sympy.cos(2 * sympy.pi / 3))**2 + (y[1] - 2*sympy.sin(2 * sympy.pi / 3))**2) * ((y[0] - 2*sympy.cos(4 * sympy.pi / 3))**2 + (y[1] - 2*sympy.sin(4 * sympy.pi / 3))**2)
 # end

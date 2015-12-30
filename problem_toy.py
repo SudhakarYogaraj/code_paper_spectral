@@ -21,16 +21,15 @@ nf = 1
 # end
 
 # user input : diffusion
-# s = sympy.Symbol('1')
-s = sympy.sqrt(2)
+s = sympy.sqrt(2.)
 # end
 
 # user input : solution
-g[0] = x[0]*sympy.sin(y[0])
+g[0] = x[0]*sympy.sin(10*y[0])
 # end
 
 # user input : second order drift
-h[0] = sympy.Symbol('0')
+h[0] = sympy.Symbol('0');
 # end
 
 # user input : potential

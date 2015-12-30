@@ -21,7 +21,7 @@ nf = 1
 # end
 
 # user input : diffusion
-s = sympy.sqrt(2)
+s = sympy.Symbol('1')
 # end
 
 # user input : solution
@@ -34,5 +34,5 @@ h[0] = sympy.Symbol('0')
 # end
 
 # user input : potential
-v = y[0] ** 2
+v = y[0] ** 4 / 4. - y[0] ** 2 / 2.
 # end
