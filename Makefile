@@ -73,6 +73,3 @@ clean:
 
 clean-problems:
 	make clean -C python
-
-clean-all:
-	git clean -dxf
