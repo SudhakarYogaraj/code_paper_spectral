@@ -243,24 +243,24 @@ double Solver_spectral::gaussian_linear_term(vec z) {
  * This function implements the change of variables y = Cz + m.. If z is
  * distributed as G(0,I), y will be distributed as G(CC^T,m).
  */
-    vec Solver_spectral::map_to_real(vec z) {
+vec Solver_spectral::map_to_real(vec z) {
 
-        // Initialization
-        vec result(z.size(), 0.);
+    // Initialization
+    vec result(z.size(), 0.);
 
-        for (int i = 0; i < z.size(); ++i) {
+    for (int i = 0; i < z.size(); ++i) {
 
-            // Left-multiply z by covariance matrix
-            for (int j = 0; j < z.size(); ++j) {
-                result[i] += this->sqrt_cov[i][j] * z[j];
-            }
-
-            // Add bias
-            result[i] += this->bias[i];
+        // Left-multiply z by covariance matrix
+        for (int j = 0; j < z.size(); ++j) {
+            result[i] += this->sqrt_cov[i][j] * z[j];
         }
 
-        return result;
+        // Add bias
+        result[i] += this->bias[i];
     }
+
+    return result;
+}
 
 /*! Update the statistics of the Gaussian related to Hermite functions
  *
