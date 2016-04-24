@@ -72,6 +72,7 @@ namespace tests {
 
         // Update of the statistics of the invariant measure
         analyser->update_stats(x);
+
         // Computation of the exact solution
         Solver_exact solver_exact(problem, analyser);
         SDE_coeffs c_exact = solver_exact.estimator(x, 0.);
@@ -90,7 +91,7 @@ namespace tests {
         config_spectral conf_spectral; {
             conf_spectral.n_nodes = 100;
             conf_spectral.degree = degrees[degrees.size()-1];
-            conf_spectral.scaling = vector<double> (problem->nf, 0.3);
+            conf_spectral.scaling = vector<double> (problem->nf, 0.5);
         }
 
         // Create new solver
@@ -156,5 +157,5 @@ int main(int argc, char* argv[]) {
 
     // Test error_spectral
     tests::error_spectral(problem.x0, &problem, &analyser);
-    /* tests::error_hmm(problem.x0, &problem, &analyser); */
+    // tests::error_hmm(problem.x0, &problem, &analyser);
 }

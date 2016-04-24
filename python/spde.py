@@ -15,7 +15,7 @@ ns = 2
 nf = 4
 
 # Degree of the nonlinearity
-degree = 2
+degree = 4
 
 # Space variable
 x = sympy.Symbol('x')
@@ -44,7 +44,8 @@ def expa(i):
 
 # Nonlinearity.
 def nonlinearity(f):
-    return sympy.Rational(0.5) * sympy.diff(f*f, x, 1)
+    # return sympy.Rational(0.5) * sympy.diff(f*f, x, 1)
+    return sympy.Rational(0.5) * f*f * sympy.diff(f*f, x, 1)
 
 # END OF USER INPUT
 

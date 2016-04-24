@@ -52,7 +52,7 @@ obj/%.o : src/%.cpp
 	@sed -i "s#^\([^.]*\.o\)#obj/$*.o#g" dep/$*.d
 
 # ---- BUILDING MAIN ----
-$(TARGET) : $(LIB_OBJ) obj/main/main.o obj/problems/${ARG}.o
+$(TARGET) : $(LIB_OBJ) obj/main/main.o obj/problems/${arg}.o
 	$(CXX) $(LIBS) $(CXXFLAGS) $^ -o $@
 
 # ---- BUILDING TESTS ----

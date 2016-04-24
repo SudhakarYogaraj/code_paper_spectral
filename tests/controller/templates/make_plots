@@ -4,6 +4,7 @@ root=$(git rev-parse --show-toplevel)
 
 ((* for p in data.problems *))
     ((* for t in p.run *))
+        echo "Generating plots for problem (((p.dir)))"
         cd ${root}/tests/(((p.dir)))/(((t)))
         gnuplot ${root}/gnuplot/error_spectral.gnu
     ((* endfor *))
