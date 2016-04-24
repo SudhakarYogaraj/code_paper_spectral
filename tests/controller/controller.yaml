@@ -10,6 +10,16 @@ problems:
     run:
       - error_spectral
 
+  - dir: problem_1D_shifted
+    name: Easy one-dimensional problem
+    plot:
+      - test_dir: error_spectral
+        test_name: Test of the spectral solver
+        files:
+          - degree_error.tex
+    run:
+      - error_spectral
+
   - dir: problem_1D_quadratic
     name: One-dimensional problem with quadratic potential
     plot:

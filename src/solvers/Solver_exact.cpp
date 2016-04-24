@@ -14,6 +14,7 @@ SDE_coeffs Solver_exact::estimator(vector<double> x, double t) {
     SDE_coeffs sde_coeffs;
     sde_coeffs.drif = soldrif(x);
     sde_coeffs.diff = soldiff(x);
+    exit(0);
     return sde_coeffs;
 }
 

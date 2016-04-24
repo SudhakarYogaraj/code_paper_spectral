@@ -10,6 +10,7 @@ set format y "$10^{%L}$"
 
 # Style for lines and points
 # set style line 1 lt 1 lw 1.5 pt 13 ps 1.5 pi 1
+set style line 1 lc rgb '#0060ad' lt 1 lw 2 pt 7 ps 1
 
 unset key
 
@@ -28,12 +29,12 @@ data = "<paste ".input."degree ".input."error"
 # EPS-LATEX
 set term epslatex
 set output out."degree_error.tex"
-plot data with points
+plot data with linespoints ls 1
 
 # PDF
 set term pdf
 set output out."_degree_error.pdf"
-plot data with points
+plot data with linespoints ls 1
 
 ## Time - error
 set xlabel "Time of computations"
