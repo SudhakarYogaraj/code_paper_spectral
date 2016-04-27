@@ -60,7 +60,7 @@ void Analyser::update_stats(std::vec x) {
     Gaussian_integrator gauss_plus = Gaussian_integrator(100, nf);
     Gaussian_integrator gauss = Gaussian_integrator(30, nf);
 
-    int n_iterations = 5, i = 0;
+    int n_iterations = 10, i = 0;
     for (int n = 0; n < n_iterations; ++n) {
 
         // Normalization constant
@@ -77,7 +77,7 @@ void Analyser::update_stats(std::vec x) {
                 std::vec y = rescale(z);
                 return det_sqrt_cov * y[i] * (rho(x,y)/gaussian(z));
             };
-            bias[i] = gauss.quadnd(lambda);
+            bias[i] = gauss_plus.quadnd(lambda);
         }
 
         // Calculation of the covariance matrix
@@ -87,7 +87,7 @@ void Analyser::update_stats(std::vec x) {
                     std::vec y = rescale(z);
                     return det_sqrt_cov * (y[i] - bias[i]) * (y[j] - bias[j]) * (rho(x,y)/gaussian(z));
                 };
-                covariance[i][j] = gauss.quadnd(lambda);
+                covariance[i][j] = gauss_plus.quadnd(lambda);
             }
         }
 
@@ -111,20 +111,22 @@ void Analyser::update_stats(std::vec x) {
 
         // Inverse of covariance matrix
         inv_cov = to_std(to_arma(covariance).i());
-    }
 
-    if(DEBUG) {
-        cout << endl << "* Covariance matrix of the invariant density" << endl;
-        niceMat(covariance);
+        if(DEBUG) {
+            cout << endl << "--- Normalization constant: " << normalization << endl;
 
-        cout << endl << "* Inverse of the covariance matrix" << endl;
-        niceMat(inv_cov);
+            cout << endl << "* Covariance matrix of the invariant density" << endl;
+            niceMat(covariance);
 
-        cout << endl << "* Bias of the invariant density" << endl;
-        niceVec(bias);
+            /* cout << endl << "* Inverse of the covariance matrix" << endl; */
+            /* niceMat(inv_cov); */
 
-        cout << endl << "* Eigenvectors of the covariance matrix" << endl;
-        niceMat(eig_vec_cov);
+            cout << endl << "* Bias of the invariant density" << endl;
+            niceVec(bias);
+
+            /* cout << endl << "* Eigenvectors of the covariance matrix" << endl; */
+            /* niceMat(eig_vec_cov); */
+        }
     }
 }
 

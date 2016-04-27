@@ -14,7 +14,6 @@ SDE_coeffs Solver_exact::estimator(vector<double> x, double t) {
     SDE_coeffs sde_coeffs;
     sde_coeffs.drif = soldrif(x);
     sde_coeffs.diff = soldiff(x);
-    exit(0);
     return sde_coeffs;
 }
 
@@ -62,6 +61,9 @@ vector< vector<double> > Solver_exact::soldiff(vector<double> x) {
         }
         return tens_prod;
     };
+    /* vector< vector<double> > tmp = symmetric( gauss.quadnd(lambda, result) * analyser->det_sqrt_cov ); */
+    /* cout << tmp[0][0] << "," << tmp[0][1] << endl << tmp[1][0] << "," << tmp[1][1]; */
+    /* exit(0); */
     result = cholesky(symmetric( gauss.quadnd(lambda, result) * analyser->det_sqrt_cov ));
     return result;
 }

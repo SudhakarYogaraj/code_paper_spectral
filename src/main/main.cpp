@@ -72,6 +72,7 @@ namespace tests {
 
         // Update of the statistics of the invariant measure
         analyser->update_stats(x);
+        // Unstable for potential with three wells!!
 
         // Computation of the exact solution
         Solver_exact solver_exact(problem, analyser);
@@ -91,7 +92,7 @@ namespace tests {
         config_spectral conf_spectral; {
             conf_spectral.n_nodes = 100;
             conf_spectral.degree = degrees[degrees.size()-1];
-            conf_spectral.scaling = vector<double> (problem->nf, 0.5);
+            conf_spectral.scaling = vector<double> (problem->nf, 1);
         }
 
         // Create new solver
@@ -119,7 +120,7 @@ namespace tests {
             config_spectral conf_spectral; {
                 conf_spectral.n_nodes = 100;
                 conf_spectral.degree = degrees[i];
-                conf_spectral.scaling = vector<double> (problem->nf, 0.4);
+                conf_spectral.scaling = vector<double> (problem->nf, 1);
             }
 
             // Create new solvers
