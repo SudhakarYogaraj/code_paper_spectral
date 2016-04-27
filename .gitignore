@@ -9,7 +9,6 @@
 
 /python/tex
 /python/tmp
-/python/inputs
 /python/outputs
 
 /src/problems/problem_*.cpp
