@@ -1,4 +1,4 @@
 [submodule "python/inputs"]
 	path = python/inputs
-	url = git@urbainvaes.com:projects/spectral/inputs
+	url = git@urbainvaes.com:projects/spectral/inputs.git
 	branch = master
