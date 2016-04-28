@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#PBS -m abe
+#PBS -q standard
+
+cd ${HOME}/spectral/tests/${problem}/${test}
+./test.exec
