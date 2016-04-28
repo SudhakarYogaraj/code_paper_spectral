@@ -9,7 +9,7 @@ Solver_exact::Solver_exact(Problem* p, Analyser* a) {
     analyser = a;
 }
 
-SDE_coeffs Solver_exact::estimator(vector<double> x, double t) {
+SDE_coeffs Solver_exact::estimator(vec x, double t) {
     analyser->update_stats(x);
     SDE_coeffs sde_coeffs;
     sde_coeffs.drif = soldrif(x);
@@ -17,18 +17,18 @@ SDE_coeffs Solver_exact::estimator(vector<double> x, double t) {
     return sde_coeffs;
 }
 
-vector<double> Solver_exact::soldrif(vector<double> x) {
+vec Solver_exact::soldrif(vec x) {
 
     int ns = problem->ns;
     int nf = problem->nf;
 
-    vector<double> result(ns,0.);
+    vec result(ns,0.);
     Gaussian_integrator gauss = Gaussian_integrator(100,nf);
 
     // Function to integrate to obtain exact drift.
-    auto lambda = [&] (vector<double> z) -> vector<double> {
-        vector<double> y = analyser->rescale(z);
-        vector<double> tmp(ns, 0.);
+    auto lambda = [&] (vec z) -> vec {
+        vec y = analyser->rescale(z);
+        vec tmp(ns, 0.);
         for (int i = 0; i < ns; ++i) {
             tmp[i] += problem->phi[i](x,y) * problem->stardiv_h(x,y);
             for (int j = 0; j < ns; ++j) {
@@ -42,18 +42,18 @@ vector<double> Solver_exact::soldrif(vector<double> x) {
     return result;
 }
 
-vector< vector<double> > Solver_exact::soldiff(vector<double> x) {
+mat Solver_exact::soldiff(vec x) {
 
     int ns = problem->ns;
     int nf = problem->nf;
 
     Gaussian_integrator gauss = Gaussian_integrator(100,nf);
-    vector< vector<double> > result(ns,vector<double>(ns,0.));
+    mat result(ns,vec(ns,0.));
 
     // Function to integrate to obtain exact diffusion coefficient.
-    auto lambda = [&] (vector<double> z) -> vector< vector<double> > {
-        vector<double> y = analyser->rescale(z);
-        vector< vector<double> > tens_prod(ns, vector<double>(ns, 0.));
+    auto lambda = [&] (vec z) -> mat {
+        vec y = analyser->rescale(z);
+        mat tens_prod(ns, vec(ns, 0.));
         for (int i = 0; i < ns; ++i) {
             for (int j = 0; j < ns; ++j) {
                 tens_prod[i][j] = 2*problem->a[i](x,y)*problem->phi[j](x,y)*(analyser->rho(x,y)/gaussian(z));
@@ -61,7 +61,7 @@ vector< vector<double> > Solver_exact::soldiff(vector<double> x) {
         }
         return tens_prod;
     };
-    /* vector< vector<double> > tmp = symmetric( gauss.quadnd(lambda, result) * analyser->det_sqrt_cov ); */
+    /* mat tmp = symmetric( gauss.quadnd(lambda, result) * analyser->det_sqrt_cov ); */
     /* cout << tmp[0][0] << "," << tmp[0][1] << endl << tmp[1][0] << "," << tmp[1][1]; */
     /* exit(0); */
     result = cholesky(symmetric( gauss.quadnd(lambda, result) * analyser->det_sqrt_cov ));

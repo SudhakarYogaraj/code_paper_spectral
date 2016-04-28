@@ -10,12 +10,12 @@ class Solver_exact : public Solver {
 
     public:
         Solver_exact(Problem *p, Analyser *a);
-        SDE_coeffs estimator(std::vector<double> x, double t);
+        SDE_coeffs estimator(std::vec x, double t);
 
     private:
         Problem *problem;
         Analyser *analyser;
-        std::vector<double> soldrif(std::vector<double> x);
-        std::vector< std::vector<double> > soldiff(std::vector<double> x);
+        std::vec soldrif(std::vec x);
+        std::mat soldiff(std::vec x);
 };
 #endif

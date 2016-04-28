@@ -64,8 +64,8 @@ tests/% : $(ALL_OBJ)
 	$(CXX) $(LIBS) $(CXXFLAGS) $(LIB_OBJ) $(call get_test, $@) $(call get_problem, $@) -o $@
 
 # ---- SUBMIT TEST TO THE SERVER ----
-submit : $(TARGETS)
-	ssh uv113@macomp01.ma.ic.ac.uk "cd spectral; qsub -N $(geo)-$(problem) -v geo=$(geo),problem=$(problem) run"
+submit : tests/$(problem)/$(test)/test.exec
+	ssh uv113@macomp01.ma.ic.ac.uk "cd spectral; qsub -N $(problem)-$(test) -v problem=$(problem),test=$(test) run"
 
 # ---- CREATE PROBLEM FILES ----
 problems:
@@ -73,7 +73,7 @@ problems:
 
 # ---- CLEAN CPP, PROBLEMS, OR ALL GITIGNORE ----
 clean:
-	rm -rf $(TARGET) obj dep
+	rm -rf $(TARGET) obj dep tests/problem_*
 
 clean-problems:
 	make clean -C python

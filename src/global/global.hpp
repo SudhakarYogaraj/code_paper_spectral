@@ -17,8 +17,8 @@ namespace std {
 
 // Structures
 struct SDE_coeffs {
-    std::vector<double> drif;
-    std::vector< std::vector<double> > diff;
+    std::vec drif;
+    std::mat diff;
 };
 
 #endif
