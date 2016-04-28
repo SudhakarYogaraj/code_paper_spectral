@@ -10,7 +10,7 @@
 # ---- COMPILER AND FLAGS ----
 CXX = g++
 CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
-LIBS = -larmadillo4
+LIBS = -larmadillo
 
 # ---- BUILDING LIST OF TEST AND LIB FILES ----
 # For the particular problem
@@ -53,7 +53,7 @@ obj/%.o : src/%.cpp
 
 # ---- BUILDING MAIN ----
 $(TARGET) : $(LIB_OBJ) obj/main/main.o obj/problems/${arg}.o
-	$(CXX) $(LIBS) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $^ $(LIBS) -o $@
 
 # ---- BUILDING TESTS ----
 tests : $(TARGETS)
@@ -61,7 +61,7 @@ sh_dir = $(patsubst %/,%,$(dir $1))
 get_test = obj/tests/$(notdir $(call sh_dir, $1)).o
 get_problem = obj/problems/$(notdir $(call sh_dir, $(call sh_dir, $1))).o
 tests/% : $(ALL_OBJ)
-	$(CXX) $(LIBS) $(CXXFLAGS) $(LIB_OBJ) $(call get_test, $@) $(call get_problem, $@) -o $@
+	$(CXX) $(CXXFLAGS) $(LIB_OBJ) $(call get_test, $@) $(call get_problem, $@) $(LIBS) -o $@
 
 # ---- SUBMIT TEST TO THE SERVER ----
 submit : tests/$(problem)/$(test)/test.exec
