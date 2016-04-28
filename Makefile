@@ -8,9 +8,9 @@
 .PRECIOUS: %.o %.d
 
 # ---- COMPILER AND FLAGS ----
-CXX = clang++
-CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++14 -Wall
-LIBS = -larmadillo
+CXX = g++
+CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
+LIBS = -larmadillo4
 
 # ---- BUILDING LIST OF TEST AND LIB FILES ----
 # For the particular problem

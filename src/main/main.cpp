@@ -11,7 +11,7 @@ namespace tests {
         int p_max = 6;
 
         vector<int> p_values(p_max - p_min + 1);
-        for (int i = 0; i < p_values.size(); ++i)
+        for (unsigned int i = 0; i < p_values.size(); ++i)
             p_values[i] = p_min + i;
 
         // Update of the statistics of the invariant measure
@@ -67,7 +67,7 @@ namespace tests {
         int degree_max = 30;
 
         vector<int> degrees(degree_max - degree_min + 1);
-        for (int i = 0; i < degrees.size(); ++i)
+        for (unsigned int i = 0; i < degrees.size(); ++i)
             degrees[i] = i + degree_min;
 
         // Update of the statistics of the invariant measure

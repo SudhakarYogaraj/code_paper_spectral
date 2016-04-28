@@ -54,7 +54,7 @@ vector<SDE_coeffs> Solver_spectral::full_estimator(vec x, double t, vector<int> 
     // Solution of the Poisson equation
     vector<SDE_coeffs> result(degrees.size());
 
-    for (int i = 0; i < degrees.size(); ++i) {
+    for (unsigned int i = 0; i < degrees.size(); ++i) {
 
         int d = degrees[i];
 
@@ -174,7 +174,7 @@ SDE_coeffs Solver_spectral::compute_averages(const mat& functions, const mat& so
     mat A0(ns, vec(ns,0.));
 
     // Calculation of the coefficients of the effective equation
-    for (int i = 0; i < solutions[0].size(); ++i) {
+    for (unsigned int i = 0; i < solutions[0].size(); ++i) {
 
         // First part of the drift coefficient
         for (int j = 0; j < ns; ++j) {
@@ -248,10 +248,10 @@ vec Solver_spectral::map_to_real(vec z) {
     // Initialization
     vec result(z.size(), 0.);
 
-    for (int i = 0; i < z.size(); ++i) {
+    for (unsigned int i = 0; i < z.size(); ++i) {
 
         // Left-multiply z by covariance matrix
-        for (int j = 0; j < z.size(); ++j) {
+        for (unsigned int j = 0; j < z.size(); ++j) {
             result[i] += this->sqrt_cov[i][j] * z[j];
         }
 

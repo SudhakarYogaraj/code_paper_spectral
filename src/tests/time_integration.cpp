@@ -12,7 +12,7 @@ namespace tests {
 
         // Macro time-step
         double Dt = .01;
-        int sizet = (int) (problem->t_end/Dt) + 1;
+        unsigned int sizet = (int) (problem->t_end/Dt) + 1;
 
         // Vector of times of the macro-simulation
         vector<double> t(sizet,0.);

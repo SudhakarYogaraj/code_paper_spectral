@@ -136,7 +136,7 @@ void Gaussian_integrator::Smolyak(vector< vector<double> >& snodes, vector<doubl
         vector<int> this_index = enum_indices[i];
         vector<int> this_sizes(this_index.size());
 
-        for (int j = 0; j < this_index.size(); ++j)
+        for (unsigned int j = 0; j < this_index.size(); ++j)
             this_sizes[j] = sizes[this_index[j]];
 
         int sum_index = accumulate(this_index.begin(), this_index.end(), 0.);
@@ -182,26 +182,26 @@ void Gaussian_integrator::test_integrator() {
     Gaussian_integrator gauss64 = Gaussian_integrator(64, 3);
 
     vector< vector<int> > enum_indices = lower_multi_indices(n,d);
-    for (int i = 0; i < enum_indices.size(); ++i) {
+    for (unsigned int i = 0; i < enum_indices.size(); ++i) {
         vector<int> index = enum_indices[i];
         cout << "Multi-index: ";
-        for (int j = 0; j < index.size(); ++j)
+        for (unsigned int j = 0; j < index.size(); ++j)
             cout << enum_indices[i][j] << " ";
         cout << endl;
 
         double integral_s = 0.;
-        for (int j = 0; j < smolyak.nodes.size(); ++j) {
+        for (unsigned int j = 0; j < smolyak.nodes.size(); ++j) {
             double eval_monomial = 1.;
-            for (int k = 0; k < index.size(); ++k)
+            for (unsigned int k = 0; k < index.size(); ++k)
                 eval_monomial *= pow(smolyak.nodes[j][k], index[k]);
             integral_s += eval_monomial * smolyak.weights[j];
         }
         cout << "Integral Smolyak: " << integral_s << endl;
 
         double integral_g = 0.;
-        for (int j = 0; j < gauss64.nodes.size(); ++j) {
+        for (unsigned int j = 0; j < gauss64.nodes.size(); ++j) {
             double eval_monomial = 1.;
-            for (int k = 0; k < index.size(); ++k)
+            for (unsigned int k = 0; k < index.size(); ++k)
                 eval_monomial *= pow(gauss64.nodes[j][k], index[k]);
             integral_g += eval_monomial * gauss64.weights[j];
         }

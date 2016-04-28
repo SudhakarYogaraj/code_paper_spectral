@@ -45,8 +45,8 @@ Analyser::Analyser(Problem *p) {
 // Implementation of a rescaling used to approximate the invariant measure.
 std::vec Analyser::rescale(std::vec y) {
     std::vec result(y.size(), 0.);
-    for (int i = 0; i < y.size(); ++i) {
-        for (int j = 0; j < y.size(); ++j) {
+    for (unsigned int i = 0; i < y.size(); ++i) {
+        for (unsigned int j = 0; j < y.size(); ++j) {
             result[i] += sqrt_cov[i][j] * y[j];
         }
     }
