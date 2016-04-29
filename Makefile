@@ -56,7 +56,7 @@ $(TARGET) : $(LIB_OBJ) obj/main/main.o obj/problems/${arg}.o
 	$(CXX) $(CXXFLAGS) $^ $(LIBS) -o $@
 
 # ---- BUILDING TESTS ----
-tests : $(TARGETS)
+tests : prebuild $(TARGETS)
 sh_dir = $(patsubst %/,%,$(dir $1))
 get_test = obj/tests/$(notdir $(call sh_dir, $1)).o
 get_problem = obj/problems/$(notdir $(call sh_dir, $(call sh_dir, $1))).o
