@@ -4,46 +4,37 @@ using namespace std;
 
 namespace tests {
 
-    void integrate(Problem *problem, Solver *solver, int seed, string s) {
-
-        // Precision of the cout command
-        cout.precision(6);
-        cout << scientific;
+    void integrate(Problem *problem, Solver *solver, int seed, vec& time, mat& solution) {
 
         // Macro time-step
         double Dt = .01;
-        unsigned int sizet = (int) (problem->t_end/Dt) + 1;
+        int nSteps = 100;
 
-        // Vector of times of the macro-simulation
-        vector<double> t(sizet,0.);
-        for (unsigned int i = 0; i < sizet; i++) {
+        // Create vector of times
+        vec t(nSteps + 1,0.);
+        for (int i = 0; i < nSteps + 1; i++)
+        {
             t[i] = i*Dt;
         }
 
-        // Random numbers generator
+        // Create brownian motion
+        mat dWs(nSteps + 1,vec(problem->ns, 0.));
         default_random_engine generator; generator.seed(seed);
         normal_distribution<double> distribution(0.0,1.0);
 
-        // Vector of random variables used to simulate the brownian
-        // motion for the evolution of the slow variable.
-        vector< vector<double> > dWs(sizet,vector<double>(problem->ns, 0.));
-        for (unsigned int i = 0; i < sizet; i++) {
-            for (int j = 0; j < problem->ns ; j++) {
+        for (int i = 0; i < nSteps; i++)
+        {
+            for (int j = 0; j < problem->ns ; j++)
+            {
                 dWs[i][j] = distribution(generator);
             }
         }
 
-        // Approximate and exact solutions
-        vector< vector<double> > x(sizet,vector<double>(problem->ns,0.));
-
-        // Initial condition
+        // Calculate approximate solution
+        mat x(nSteps + 1, vec(problem->ns,0.));
         x[0] = problem->x0;
 
-        // Streams
-        ofstream out_time("time_" + s);
-        ofstream out_sol("sol_" + s);
-
-        for (unsigned int i = 0; i < sizet - 1; i++) {
+        for (int i = 0; i < nSteps; i++) {
 
             struct SDE_coeffs c = solver->estimator(x[i], t[i]);
             x[i+1] = x[i];
@@ -54,42 +45,73 @@ namespace tests {
                 }
                 x[i+1][i1] += Dt*c.drif[i1];
             }
-
-            out_time << t[i] << endl;
-            for (int j = 0; j < problem->ns; ++j) {
-                out_sol << x[i][j];
-                if (j != problem->ns -1) out_sol << " ";
-                else out_sol << endl;
-            }
         }
+
+        time = t;
+        solution = x;
     }
 }
 
 int main(int argc, char* argv[]) {
 
     // Initialization of the problem and helper analyser
-    Problem problem;
-    problem.init();
+    Problem problem; problem.init();
     Analyser analyser(&problem);
 
-    // Configuration for the HMM solver
-    config_hmm conf_hmm = Solver_hmm::sensible_conf(4,1);
+    // Degrees for spectral methmd
+    int degree_min = 5;
+    int degree_max = 30;
 
-    // Configuration for the spectral solver
-    config_spectral conf_spectral; {
-        conf_spectral.n_nodes = 0;
-        conf_spectral.degree = 15;
-        conf_spectral.scaling = vector<double> (problem.nf, 0.5);
-        conf_spectral.scaling = vector<double> (problem.nf, 1.);
+    vec degrees(degree_max - degree_min + 1);
+    for (unsigned int i = 0; i < degrees.size(); ++i)
+    {
+        degrees[i] = degree_min + i;
     }
 
-    // Initialization of the default solvers
-    Solver_exact solver_exact(&problem, &analyser);
-    Solver_spectral solver_spectral = Solver_spectral(&problem, &analyser, &conf_spectral);
-    Solver_hmm solver_hmm = Solver_hmm(&problem, &conf_hmm);
+    // Define variables
+    vec time;
+    mat sol_exact;
+    cube sol_spectral(degrees.size());
 
-    // Test of the solvers
-    tests::integrate(&problem, &solver_exact, 0, "exact");
-    tests::integrate(&problem, &solver_spectral, 0, "spectral");
-    tests::integrate(&problem, &solver_hmm, 0, "hmm");
+    // Integrate in time using exact and spectral solvers
+    Solver_exact solver_exact(&problem, &analyser);
+    tests::integrate(&problem, &solver_exact, 0, time, sol_exact);
+
+    for (unsigned int i = 0; i < degrees.size(); ++i)
+    {
+        config_spectral conf_spectral; {
+            conf_spectral.n_nodes = 100;
+            conf_spectral.degree = degrees[i];
+            conf_spectral.scaling = vec(problem.nf, 0.5);
+        }
+
+        Solver_spectral solver_spectral = Solver_spectral(&problem, &analyser, &conf_spectral);
+        tests::integrate(&problem, &solver_spectral, 0, time, sol_spectral[i]);
+    }
+
+    // Calculate errors
+    cube error(degrees.size());
+    mat error_abs(degrees.size(), vec(time.size()));
+    vec error_sup(degrees.size(), 0.);
+
+    for (unsigned int i = 0; i < degrees.size(); i++)
+    {
+        error[i] = sol_spectral[i] - sol_exact;
+        for (unsigned int j = 0; j < time.size(); j++)
+        {
+            error_abs[i][j] = fabs(error[i][j]);
+            if (error_abs[i][j] > error_sup[i])
+            {
+                error_sup[i] = error_abs[i][j];
+            }
+        }
+    }
+
+    ofstream out_degree("degree");
+    ofstream out_error("error");
+    for (unsigned int i = 0; i < degrees.size(); i++)
+    {
+        out_degree << degrees[i] << endl;
+        out_error << error_sup[i] << endl;
+    }
 }

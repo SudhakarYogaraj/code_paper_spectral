@@ -51,4 +51,3 @@ set output out."time_error.tex"
 # PDF
 set term pdf
 set output out."_time_error.pdf"
-# plot data with points

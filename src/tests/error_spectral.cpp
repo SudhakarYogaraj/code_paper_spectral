@@ -19,7 +19,7 @@ namespace tests {
         int degree_max = 30;
 
         vector<int> degrees(degree_max - degree_min + 1);
-        for (int i = 0; i < degrees.size(); ++i)
+        for (unsigned int i = 0; i < degrees.size(); ++i)
             degrees[i] = i + degree_min;
 
         // Update of the statistics of the invariant measure

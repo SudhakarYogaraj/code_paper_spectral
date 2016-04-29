@@ -9,7 +9,8 @@
 
 # ---- COMPILER AND FLAGS ----
 CXX = g++
-CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
+# CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
+CXXFLAGS = -Isrc -g -std=c++11 -Wall
 LIBS = -larmadillo
 
 # ---- BUILDING LIST OF TEST AND LIB FILES ----
@@ -66,6 +67,20 @@ tests/% : $(ALL_OBJ)
 # ---- SUBMIT TEST TO THE SERVER ----
 submit : tests/$(problem)/$(test)/test.exec
 	ssh uv113@macomp01.ma.ic.ac.uk "cd spectral; qsub -N $(problem)-$(test) -v problem=$(problem),test=$(test) run"
+
+run-tests :
+	make submit problem=problem_1D_easy test=time_integration
+	make submit problem=problem_1D_bistable test=time_integration
+	make submit problem=problem_1D_shifted test=time_integration
+	make submit problem=problem_2D_easy test=time_integration
+	make submit problem=problem_triple_well test=time_integration
+
+plots :
+	cd tests/problem_1D_easy/time_integration && ../../../gnuplot/time_integration.gnu
+	cd tests/problem_1D_bistable/time_integration && ../../../gnuplot/time_integration.gnu
+	cd tests/problem_1D_shifted/time_integration && ../../../gnuplot/time_integration.gnu
+	cd tests/problem_2D_easy/time_integration && ../../../gnuplot/time_integration.gnu
+	cd tests/problem_triple_well/time_integration && ../../../gnuplot/time_integration.gnu
 
 # ---- CREATE PROBLEM FILES ----
 problems:
