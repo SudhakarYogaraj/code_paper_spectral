@@ -76,11 +76,11 @@ run-tests :
 	make submit problem=problem_triple_well test=time_integration
 
 plots :
-	cd tests/problem_1D_easy/time_integration && ../../../gnuplot/time_integration.gnu
-	cd tests/problem_1D_bistable/time_integration && ../../../gnuplot/time_integration.gnu
-	cd tests/problem_1D_shifted/time_integration && ../../../gnuplot/time_integration.gnu
-	cd tests/problem_2D_easy/time_integration && ../../../gnuplot/time_integration.gnu
-	cd tests/problem_triple_well/time_integration && ../../../gnuplot/time_integration.gnu
+	cd tests/problem_1D_easy/time_integration && gnuplot ../../../gnuplot/time_integration.gnu
+	cd tests/problem_1D_bistable/time_integration && gnuplot ../../../gnuplot/time_integration.gnu
+	cd tests/problem_1D_shifted/time_integration && gnuplot ../../../gnuplot/time_integration.gnu
+	cd tests/problem_2D_easy/time_integration && gnuplot ../../../gnuplot/time_integration.gnu
+	cd tests/problem_triple_well/time_integration && gnuplot ../../../gnuplot/time_integration.gnu
 
 # ---- CREATE PROBLEM FILES ----
 problems:
