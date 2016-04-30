@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
         config_spectral conf_spectral; {
             conf_spectral.n_nodes = 100;
             conf_spectral.degree = degrees[i];
-            conf_spectral.scaling = vec(problem.nf, 0.5);
+            conf_spectral.scaling = vec(problem.nf, problem.sigma);
         }
 
         Solver_spectral solver_spectral = Solver_spectral(&problem, &analyser, &conf_spectral);

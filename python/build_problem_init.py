@@ -23,6 +23,10 @@ nf = 2
 s = sympy.sqrt(2)
 # end
 
+# user input : scaling
+sigma = 1
+# end
+
 # Coefficient appearing in generator
 S = s * s
 
@@ -188,7 +192,8 @@ output.write("void Problem::init_functions() {\n\n")
 # Declaration of the number of variables
 output.write("    ns = {};\n".format(ns))
 output.write("    nf = {};\n".format(nf))
-output.write("    s = {};\n\n".format(s))
+output.write("    s = {};\n".format(s))
+output.write("    sigma = {};\n\n".format(sigma))
 
 # Allocation of function pointers
 allocate_function_pointer("stardiv_h")

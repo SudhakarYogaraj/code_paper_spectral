@@ -24,6 +24,9 @@ class Problem {
         // Diffusion coefficient
         double s;
 
+        // Scaling parameter
+        double sigma;
+
         // Initial condition for the slow process
         std::vec x0;
 
