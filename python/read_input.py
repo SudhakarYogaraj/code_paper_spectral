@@ -2,7 +2,7 @@ import os
 import sys
 
 # Keywords to substitute
-keywords = ["solution", "second order drift", "potential", "dimensions", "diffusion"]
+keywords = ["solution", "second order drift", "potential", "dimensions", "diffusion", "scaling"]
 
 # Only 1 input file
 input_file = sys.argv[1]

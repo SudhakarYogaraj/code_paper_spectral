@@ -36,8 +36,7 @@ all : prebuild $(TARGET)
 
 # ---- PREBUILD: CREATE MISSING DIRECTORIES ----
 prebuild :
-	@mkdir -p $(dir $(ALL_DEP) $(ALL_OBJ) $(TARGETS))
-	@rm -f $(TARGET)
+	mkdir -p $(dir $(ALL_DEP) $(ALL_OBJ) $(TARGETS))
 
 # ---- CREATE OBJECT FILES ----
 # Include dependencies
@@ -61,7 +60,8 @@ tests : prebuild $(TARGETS)
 sh_dir = $(patsubst %/,%,$(dir $1))
 get_test = obj/tests/$(notdir $(call sh_dir, $1)).o
 get_problem = obj/problems/$(notdir $(call sh_dir, $(call sh_dir, $1))).o
-tests/% : $(ALL_OBJ)
+.SECONDEXPANSION :
+tests/% : $(LIB_OBJ) $$(call get_test, $$@) $$(call get_problem, $$@)
 	$(CXX) $(CXXFLAGS) $(LIB_OBJ) $(call get_test, $@) $(call get_problem, $@) $(LIBS) -o $@
 
 # ---- SUBMIT TEST TO THE SERVER ----
