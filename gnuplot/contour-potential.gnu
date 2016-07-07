@@ -20,15 +20,19 @@ set yrange [-1.4:1.4]
 unset key
 set palette rgbformulae 33,13,10
 
-set term pdf
-set output "contour-triple-well.pdf"
+# set term pdf
+# set output "contour-triple-well.pdf"
 set term epslatex
 set output "contour-triple-well.tex"
+# set term png
+# set output "contour-triple-well.png"
+# set size square
 set title "Contour lines of the triple-well potential"
-set xlabel "$y_0$"
-set ylabel "$y_1$"
 set cbrange [0:2]
-set size square
 set xtics -1.2,.4,1.2 out
 set ytics -1.2,.4,1.2 out
+set lmargin 3
+set rmargin 1
+set tmargin 2
+set bmargin 2
 plot 'test.dat' with image, 'cont.dat' w l lt -1 lw 1.5

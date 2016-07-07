@@ -68,42 +68,55 @@ int main(int argc, char* argv[]) {
         degrees[i] = degree_min + i;
     }
 
-    // Define variables
-    vec time;
-    mat sol_exact;
-    cube sol_spectral(degrees.size());
+    // Number of paths simulated
+    unsigned int nPaths = 5;
 
-    // Integrate in time using exact and spectral solvers
-    Solver_exact solver_exact(&problem, &analyser);
-    tests::integrate(&problem, &solver_exact, 0, time, sol_exact);
+    // Error measured as E sup[0,T] |x - xe|^2
+    vec error_Esup2(degrees.size(), 0.);
 
-    for (unsigned int i = 0; i < degrees.size(); ++i)
+    for (unsigned int p = 0; p < nPaths; p++)
     {
-        config_spectral conf_spectral; {
-            conf_spectral.n_nodes = 100;
-            conf_spectral.degree = degrees[i];
-            conf_spectral.scaling = vec(problem.nf, problem.sigma);
+        // Seed for Brownian motion
+        int seed = p*1e5;
+
+        // Define variables
+        vec time;
+        mat sol_exact;
+        cube sol_spectral(degrees.size());
+
+        // Integrate in time using exact and spectral solvers
+        Solver_exact solver_exact(&problem, &analyser);
+        tests::integrate(&problem, &solver_exact, seed, time, sol_exact);
+
+        for (unsigned int i = 0; i < degrees.size(); ++i)
+        {
+            config_spectral conf_spectral; {
+                conf_spectral.n_nodes = 100;
+                conf_spectral.degree = degrees[i];
+                conf_spectral.scaling = vec(problem.nf, problem.sigma);
+            }
+
+            Solver_spectral solver_spectral = Solver_spectral(&problem, &analyser, &conf_spectral);
+            tests::integrate(&problem, &solver_spectral, seed, time, sol_spectral[i]);
         }
 
-        Solver_spectral solver_spectral = Solver_spectral(&problem, &analyser, &conf_spectral);
-        tests::integrate(&problem, &solver_spectral, 0, time, sol_spectral[i]);
-    }
+        // Calculate errors
+        cube error(degrees.size());
+        mat error_abs(degrees.size(), vec(time.size()));
+        vec error_sup(degrees.size(), 0.);
 
-    // Calculate errors
-    cube error(degrees.size());
-    mat error_abs(degrees.size(), vec(time.size()));
-    vec error_sup(degrees.size(), 0.);
-
-    for (unsigned int i = 0; i < degrees.size(); i++)
-    {
-        error[i] = sol_spectral[i] - sol_exact;
-        for (unsigned int j = 0; j < time.size(); j++)
+        for (unsigned int i = 0; i < degrees.size(); i++)
         {
-            error_abs[i][j] = fabs(error[i][j]);
-            if (error_abs[i][j] > error_sup[i])
+            error[i] = sol_spectral[i] - sol_exact;
+            for (unsigned int j = 0; j < time.size(); j++)
             {
-                error_sup[i] = error_abs[i][j];
+                error_abs[i][j] = fabs(error[i][j]);
+                if (error_abs[i][j] > error_sup[i])
+                {
+                    error_sup[i] = error_abs[i][j];
+                }
             }
+            error_Esup2[i] = (error_Esup2[i]*p + error_sup[i] * error_sup[i])/(p+1);
         }
     }
 
@@ -112,6 +125,6 @@ int main(int argc, char* argv[]) {
     for (unsigned int i = 0; i < degrees.size(); i++)
     {
         out_degree << degrees[i] << endl;
-        out_error << error_sup[i] << endl;
+        out_error << error_Esup2[i] << endl;
     }
 }
