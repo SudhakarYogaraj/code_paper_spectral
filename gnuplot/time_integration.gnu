@@ -22,4 +22,4 @@ plot data using 1:(sqrt($2)) with linespoints ls 1
 
 set term epslatex
 set output out."time_error.tex"
-plot data with linespoints ls 1
+plot data using 1:(sqrt($2)) with linespoints ls 1

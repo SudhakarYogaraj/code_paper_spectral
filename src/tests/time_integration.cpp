@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Number of paths simulated
-    unsigned int nPaths = 5;
+    unsigned int nPaths = 100;
 
     // Error measured as E sup[0,T] |x - xe|^2
     vec error_Esup2(degrees.size(), 0.);
