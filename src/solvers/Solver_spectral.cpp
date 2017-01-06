@@ -205,7 +205,7 @@ SDE_coeffs Solver_spectral::compute_averages(const mat& functions, const mat& so
     }
 
     SDE_coeffs sde_coeffs;
-    sde_coeffs.diff =  cholesky(symmetric(A0));
+    sde_coeffs.diff =  square_root(symmetric(A0));
     sde_coeffs.drif = F1 + F2;
 
     return sde_coeffs;

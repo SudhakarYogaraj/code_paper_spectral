@@ -50,6 +50,17 @@ std::mat transpose(std::mat A) {
     return to_std(to_arma(A).t());
 }
 
+std::mat square_root(const std::mat A) {
+    arma::vec eigval;
+    arma::mat eigvec;
+    eig_sym(eigval, eigvec, to_arma(A));
+    arma::mat diag = arma::eye(A.size(), A.size());
+    for (unsigned int i = 0; i < A.size(); ++i) {
+        diag(i,i) = sqrt(eigval(i));
+    }
+    return to_std(eigvec*diag*eigvec.t());
+}
+
 vector<double> solve(std::mat A, std::vec b) {
     return to_std_vec(arma::solve(to_arma(A), to_arma_vec(b)));
 }

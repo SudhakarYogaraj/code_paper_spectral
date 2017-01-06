@@ -64,6 +64,6 @@ mat Solver_exact::soldiff(vec x) {
     /* mat tmp = symmetric( gauss.quadnd(lambda, result) * analyser->det_sqrt_cov ); */
     /* cout << tmp[0][0] << "," << tmp[0][1] << endl << tmp[1][0] << "," << tmp[1][1]; */
     /* exit(0); */
-    result = cholesky(symmetric( gauss.quadnd(lambda, result) * analyser->det_sqrt_cov ));
+    result = square_root(symmetric( gauss.quadnd(lambda, result) * analyser->det_sqrt_cov ));
     return result;
 }

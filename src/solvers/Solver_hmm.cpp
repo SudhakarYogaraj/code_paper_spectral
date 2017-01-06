@@ -145,7 +145,7 @@ SDE_coeffs Solver_hmm::estimator(vec xt, double t) {
     }
 
     // Approximate diffusion coefficient
-    sde_coeffs.diff = cholesky(symmetric(sde_coeffs.diff));
+    sde_coeffs.diff = square_root(symmetric(sde_coeffs.diff));
 
     // Initial condition for next iteration and storage of y
     yInit = yAux[yAux.size()-1];
