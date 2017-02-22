@@ -1,4 +1,0 @@
-[submodule "python/inputs"]
-	path = python/inputs
-	url = gitolite@urbainvaes.com:phd/code/spectral/inputs.git
-	branch = master
