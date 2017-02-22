@@ -18,7 +18,7 @@ unset key
 
 # Logarithmic scale for y
 set logscale y
-set logscale x 2
+# set logscale x 2
 
 set xlabel "Degree of approximation ($d$)"
 set title "Relative error for the homogenized coefficients"
@@ -26,15 +26,19 @@ set title "Relative error for the homogenized coefficients"
 # Data from file
 data = "<paste ".input."degree ".input."error"
 
+# Fit
+f(x) = a*x + b
+fit f(x) data using 1:(log($2)) via a,b
+
 # EPS-LATEX
 set term epslatex
 set output out."degree_error.tex"
-plot data with linespoints ls 1
+plot data with points ls 1, exp(f(x)) lw 2
 
 # PDF
 set term pdf
 set output out."_degree_error.pdf"
-plot data with linespoints ls 1
+plot data with points ls 1, exp(f(x)) lw 2
 
 ## Time - error
 set xlabel "Time of computations"

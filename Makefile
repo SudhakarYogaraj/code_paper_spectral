@@ -9,8 +9,8 @@
 
 # ---- COMPILER AND FLAGS ----
 CXX = g++
-# CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
-CXXFLAGS = -Isrc -g -std=c++11 -Wall
+CXXFLAGS = -Isrc -O3 -Ofast -ffast-math -std=c++11 -Wall
+# CXXFLAGS = -Isrc -g -std=c++11 -Wall
 LIBS = -larmadillo
 
 # ---- BUILDING LIST OF TEST AND LIB FILES ----

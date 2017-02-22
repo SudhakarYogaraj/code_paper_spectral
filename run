@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #PBS -m abe
-#PBS -q huxley_standard
 
 cd ${HOME}/spectral/tests/${problem}/${test}
 ./test.exec

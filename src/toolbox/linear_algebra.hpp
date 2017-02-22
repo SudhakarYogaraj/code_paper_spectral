@@ -15,6 +15,7 @@ std::mat symmetric(std::mat A);
 // Cholesky decomposition of a matrix.
 std::mat cholesky(std::mat A);
 std::mat transpose(std::mat A);
+std::mat square_root(const std::mat A);
 
 // Solution of linear system for SPD matrices.
 std::vector<double> solve(std::mat, std::vec);
