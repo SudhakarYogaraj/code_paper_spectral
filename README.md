@@ -6,7 +6,7 @@ Our implementation uses the C++ linear algebra library [Armadillo](http://arma.s
 
 - In the root folder, run `make tests` to generate executables that will allow running the tests on the different problems. The tests executables are stored in */tests/problem_name/test_name*.
 
-- Run the tests. In the paper, the tests we use are *time_integration*, when we compare two trajectories, and *error_spectral*, to compare the coefficients at a given point of the slow process.
+- Run the tests. In the paper, the tests we use are *time_integration*, to two trajectories, and *error_spectral*, to compare the coefficients at a given point of the slow process.
 
 - Make the figures using the scripts in */gnuplot*.
 
