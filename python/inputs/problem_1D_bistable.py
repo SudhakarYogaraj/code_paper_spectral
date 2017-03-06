@@ -22,6 +22,7 @@ nf = 1
 
 # user input : diffusion
 s = sympy.sqrt(2)
+# s = sympy.sqrt(1)
 # end
 
 # user input : solution

@@ -40,5 +40,5 @@ v = y[0] ** 4 / 4. - y[0] ** 2 / 2. - 10*y[0]
 ## Configuration of the spectral solver
 
 # user input : scaling
-sigma = 0.9
+sigma = 1
 # end
