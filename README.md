@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/33077068.svg)](https://zenodo.org/badge/latestdoi/33077068)
+
 This repository contains the code used for the numerical experiments presented in our paper entitled *Spectral methods for multiscale stochastic differential equations*.
 
 Our implementation uses the C++ linear algebra library [Armadillo](http://arma.sourceforge.net/), which is packaged for most of the popular linux distributions. To build the code, follow these steps:
